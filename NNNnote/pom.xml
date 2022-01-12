@@ -6,6 +6,7 @@
     <modules>
         <module>common</module>
         <module>service</module>
+        <module>infrastructure</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -23,7 +24,10 @@
         <nnnnnote.version>0.0.1-SNAPSHOT</nnnnnote.version>
         <cloud-alibaba.version>2.2.6.RELEASE</cloud-alibaba.version>
         <mybatis-plus.version>3.5.0</mybatis-plus.version>
-        <velocity.version>2.0</velocity.version>
+        <mybatis-plus-generator.version>3.5.1</mybatis-plus-generator.version>
+        <freemarker.version>2.3.30</freemarker.version>
+        <logback-classic.version>1.2.10</logback-classic.version>
+        <slf4j-api.version>1.7.32</slf4j-api.version>
         <swagger.version>2.9.2</swagger.version>
         <jjwt.version>0.7.0</jjwt.version>
         <commons-dbutils.version>1.7</commons-dbutils.version>
@@ -67,18 +71,47 @@
                 <scope>import</scope>
             </dependency>
 
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+                <version>${cloud-alibaba.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+                <version>${cloud-alibaba.version}</version>
+            </dependency>
+
             <!--mybatis-plus 持久层-->
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
-
-            <!-- velocity 模板引擎, Mybatis Plus 代码生成器需要 -->
+            <!--mybatis-plus代码生成器-->
             <dependency>
-                <groupId>org.apache.velocity</groupId>
-                <artifactId>velocity-engine-core</artifactId>
-                <version>${velocity.version}</version>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-generator</artifactId>
+                <version>${mybatis-plus-generator.version}</version>
+            </dependency>
+            <!-- freemarker 模板引擎，mybatis-plus 代码生成器（3.5.1 版本需要）-->
+            <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>${freemarker.version}</version>
+            </dependency>
+
+            <!-- locback -->
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback-classic.version}</version>
+            </dependency>
+            <!-- slf4j -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j-api.version}</version>
             </dependency>
 
             <!--swagger-->
@@ -225,6 +258,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.3.2.RELEASE</version>
             </plugin>
         </plugins>
     </build>
