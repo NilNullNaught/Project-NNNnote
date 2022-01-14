@@ -13,6 +13,10 @@
     <packaging>pom</packaging>
     <modules>
         <module>service-user</module>
+        <module>service-sms</module>
+        <module>service-oss</module>
+        <module>service-pay</module>
+        <module>service-note</module>
     </modules>
 
     <properties>
