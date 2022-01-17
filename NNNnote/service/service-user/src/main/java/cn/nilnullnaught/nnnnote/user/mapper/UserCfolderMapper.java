@@ -1,6 +1,6 @@
 package cn.nilnullnaught.nnnnote.user.mapper;
 
-import cn.nilnullnaught.nnnnote.entity.UserCfolder;
+import cn.nilnullnaught.nnnnote.entity.user.UserCfolder;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 

@@ -1,6 +1,6 @@
 package cn.nilnullnaught.nnnnote.user.service;
 
-import cn.nilnullnaught.nnnnote.entity.UserCfolder;
+import cn.nilnullnaught.nnnnote.entity.user.UserCfolder;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

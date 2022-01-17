@@ -1,6 +1,7 @@
 package cn.nilnullnaught.nnnnote.user.service.impl;
 
-import cn.nilnullnaught.nnnnote.entity.UserUltra;
+
+import cn.nilnullnaught.nnnnote.entity.user.UserUltra;
 import cn.nilnullnaught.nnnnote.user.mapper.UserUltraMapper;
 import cn.nilnullnaught.nnnnote.user.service.UserUltraService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

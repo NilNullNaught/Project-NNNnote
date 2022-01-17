@@ -2,4 +2,28 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.nilnullnaught.nnnnote.user.mapper.UserCheckMapper">
 
+
+    <insert id="userRegister">
+        INSERT INTO `user_check` ( id, email, password,  gmt_create, gmt_modified )
+        VALUES
+            (#{UUID},#{email},#{password},#{date},#{date});
+        INSERT INTO `user_message` ( id, nickname, gmt_create, gmt_modified )
+        VALUES
+            (#{UUID},#{nickname},#{date},#{date});
+        INSERT INTO `user_ultra` ( id, gmt_create, gmt_modified )
+        VALUES
+            (#{UUID},#{date},#{date});
+        INSERT INTO `user_cfolder` ( id, user_id, folder_name, gmt_create, gmt_modified )
+        VALUES
+            (#{UUID},#{UUID},'默认收藏夹',#{date},#{date});
+        INSERT INTO `user_nfolder` ( id, user_id, folder_name, gmt_create, gmt_modified )
+        VALUES
+            (#{UUID},#{UUID},'默认文件夹',#{date},#{date});
+    </insert>
+
+    <select id="countUser" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM `user_message`
+    </select>
+
+
 </mapper>

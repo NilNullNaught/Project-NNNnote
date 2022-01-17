@@ -1,8 +1,13 @@
 package cn.nilnullnaught.nnnnote.user.mapper;
 
-import cn.nilnullnaught.nnnnote.entity.UserCheck;
+import cn.nilnullnaught.nnnnote.entity.user.UserCheck;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import javax.xml.crypto.Data;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * <p>
@@ -15,4 +20,11 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface UserCheckMapper extends BaseMapper<UserCheck> {
 
+    void userRegister(@Param("UUID")String UUID,
+                      @Param("nickname")String nickname,
+                      @Param("email")String email,
+                      @Param("password")String password,
+                      @Param("date")LocalDateTime date);
+
+    Integer countUser();
 }

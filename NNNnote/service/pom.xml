@@ -17,6 +17,7 @@
         <module>service-oss</module>
         <module>service-pay</module>
         <module>service-note</module>
+        <module>service-vod</module>
     </modules>
 
     <properties>
@@ -25,6 +26,13 @@
     </properties>
 
     <dependencies>
+        <!--引入 api-feign 模块-->
+        <dependency>
+            <groupId>cn.nilnullnaught</groupId>
+            <artifactId>api-feign</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
 
         <!--引入 common-utils 模块-->
         <dependency>
@@ -41,6 +49,7 @@
         </dependency>
 
 
+        <!-- Spring Cloud 组件-->
         <!--ribbon-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -73,13 +82,12 @@
         </dependency>
 
 
-
+        <!--数据库组件-->
         <!--mybatis-plus-->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
-
         <!--mysql-->
         <dependency>
             <groupId>mysql</groupId>
@@ -96,6 +104,19 @@
             <artifactId>mybatis-plus-generator</artifactId>
         </dependency>
 
+        <!-- redis -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <!-- spring2.X集成redis所需common-pool2-->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+
+
         <!--swagger-->
         <dependency>
             <groupId>io.springfox</groupId>
@@ -111,12 +132,12 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
         </dependency>
 
+        <!--文件上传-->
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
@@ -143,6 +164,11 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <!-- locback -->

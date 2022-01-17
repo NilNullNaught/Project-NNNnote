@@ -1,6 +1,6 @@
 package cn.nilnullnaught.nnnnote.user.service.impl;
 
-import cn.nilnullnaught.nnnnote.entity.UserMessage;
+import cn.nilnullnaught.nnnnote.entity.user.UserMessage;
 import cn.nilnullnaught.nnnnote.user.mapper.UserMessageMapper;
 import cn.nilnullnaught.nnnnote.user.service.UserMessageService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

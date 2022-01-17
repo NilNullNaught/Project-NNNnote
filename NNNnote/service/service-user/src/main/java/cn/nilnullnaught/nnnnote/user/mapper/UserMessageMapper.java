@@ -1,6 +1,6 @@
 package cn.nilnullnaught.nnnnote.user.mapper;
 
-import cn.nilnullnaught.nnnnote.entity.UserMessage;
+import cn.nilnullnaught.nnnnote.entity.user.UserMessage;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 

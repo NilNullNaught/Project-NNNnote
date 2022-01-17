@@ -1,6 +1,8 @@
 package cn.nilnullnaught.nnnnote.user.service;
 
-import cn.nilnullnaught.nnnnote.entity.UserCheck;
+import cn.nilnullnaught.nnnnote.common.utils.R;
+import cn.nilnullnaught.nnnnote.entity.user.UserCheck;
+import cn.nilnullnaught.nnnnote.user.vo.RegisterVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -13,4 +15,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface UserCheckService extends IService<UserCheck> {
 
+    Boolean checkMobile(String mobile);
+
+    Boolean checkEmail(String email);
+
+    void userRegister(RegisterVo registerVo);
+
+    String userLogin(UserCheck userCheck);
 }
