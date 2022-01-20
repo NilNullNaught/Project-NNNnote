@@ -1,4 +1,4 @@
-package cn.nilnullnaught.nnnnote.sms;
+package cn.nilnullnaught.nnnnote.oss;
 
 
 import org.springframework.boot.SpringApplication;
@@ -10,8 +10,8 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 @ComponentScan("cn.nilnullnaught.nnnnote")
 @EnableFeignClients //开启 Feign 功能
-public class SmsApplication {
+public class OssApplication {
     public static void main(String[] args) {
-        SpringApplication.run(SmsApplication.class, args);
+        SpringApplication.run(OssApplication.class, args);
     }
 }

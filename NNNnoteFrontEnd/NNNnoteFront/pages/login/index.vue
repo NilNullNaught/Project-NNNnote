@@ -16,9 +16,14 @@
       <!-- 开始 -- 表单 --------------------------------------------------------------------------------------------------------------------------------->
 
       <el-form ref="userForm" :model="user">
-        <el-form-item prop="mobile" :rules="[{ required: true, message: '请输入手机号码', trigger: 'blur' },{validator: checkPhone, trigger: 'blur'}]">
+        <el-form-item
+          prop="mobile"
+          :rules="[
+            { validator: checkEmail, trigger: ['blur'] },
+          ]"
+        >
           <div>
-            <el-input v-model="user.email" type="text" placeholder="手机号">
+            <el-input v-model="user.email" type="text" placeholder="邮箱地址">
               <i slot="prefix" class="el-input__icon el-icon-user-solid" />
             </el-input>
           </div>
@@ -55,6 +60,9 @@
 import '~/assets/css/sign.css'
 import '~/assets/css/iconfont.css'
 // import testApi from '@/api/test'
+import jsCookie from 'js-cookie'
+import loginApi from '@/api/login'
+import userApi from '@/api/user'
 
 export default {
   name: 'LoginIndexPage',
@@ -64,20 +72,60 @@ export default {
     return {
       // 封装登录手机号和密码对象
       user: {
-        mobile: '',
+        email: '',
         password: ''
-      },
-      // 用户信息
-      loginInfo: {}
+      }
     }
   },
   methods: {
-    checkPhone (rule, value, callback) {
-      // debugger
-      if (!(/^1[34578]\d{9}$/.test(value))) {
-        return callback(new Error('手机号码格式不正确'))
+    // 验证邮箱的合法性
+    checkEmail (rule, value, callback) {
+      if (this.user.email === '') {
+        return callback(new Error('请输入邮箱地址'))
       }
-      return callback()
+      if (!(/^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/.test(this.user.email))) {
+        return callback(new Error('邮箱地址格式不正确'))
+      }
+    },
+
+    // 方式登录请求
+    submitLogin () {
+      // 判断登录信息合法性
+      if (this.user.email === '' ||
+          this.user.password === ''
+      ) {
+        this.$message({
+          type: 'warning',
+          message: '请填写邮箱地址和密码'
+        })
+        return
+      }
+
+      loginApi.login(this.user)
+        .then((response) => {
+          if (response.data.code === 20000) {
+            // 提示登录成功
+            this.$message({
+              type: 'success',
+              message: '登录成功'
+            })
+
+            // 将返回的token保存在 cookie 中
+            jsCookie.set('NNNnote_token', response.data.data.token, { domain: 'localhost' }, { expires: 1 })
+
+            // 调用接口 根据token获取用户信息，为了首页面显示
+            userApi.getUserInfo()
+              .then((response) => {
+                const userInfo = JSON.stringify(response.data.data.data)
+                jsCookie.set('NNNnote_userInfo', userInfo, { domain: 'localhost' }, { expires: 1 })
+                // 跳转主页
+                this.$router.push({ path: '/' })
+              })
+          } else {
+            // 提示登录失败
+            this.$message.error('登录失败')
+          }
+        })
     }
   }
 }

@@ -9,6 +9,7 @@ import cn.nilnullnaught.nnnnote.user.mapper.UserCheckMapper;
 import cn.nilnullnaught.nnnnote.user.service.UserCheckService;
 import cn.nilnullnaught.nnnnote.user.vo.RegisterVo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.EncryptUtils;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -129,12 +130,17 @@ public class UserCheckServiceImpl extends ServiceImpl<UserCheckMapper, UserCheck
             throw new MyCustomException(20001,"邮箱或密码为空");
         }
 
-        //查询用户 UserCheck 信息
+        //判断邮箱是否被注册
         QueryWrapper<UserCheck> wrapper = new QueryWrapper<>();
         wrapper.eq("email",email);
         UserCheck _userCheck = baseMapper.selectOne(wrapper);
-        if (_userCheck == null){
+        if (_userCheck == null){//邮箱未被注册
             throw new MyCustomException(20001,"该邮箱尚未注册");
+        }
+
+        //验证密码是否正确
+        if (!MyEncryptUtils.checkByBCrypt(password,_userCheck.getPassword())){
+            throw new MyCustomException(20001,"密码错误");
         }
 
         //查询账号是否被禁用

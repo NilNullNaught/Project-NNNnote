@@ -2,12 +2,10 @@ package cn.nilnullnaught.nnnnote.user.controller;
 
 import cn.nilnullnaught.nnnnote.client.sms.SmsEmailClient;
 import cn.nilnullnaught.nnnnote.common.utils.R;
-import cn.nilnullnaught.nnnnote.entity.user.UserMessage;
+import cn.nilnullnaught.nnnnote.entity.user.UserInfo;
 import cn.nilnullnaught.nnnnote.exceptionhandler.MyCustomException;
-import cn.nilnullnaught.nnnnote.exceptionhandler.MyGlobalExceptionHandler;
 import cn.nilnullnaught.nnnnote.user.mapper.UserCheckMapper;
-import cn.nilnullnaught.nnnnote.user.service.UserCheckService;
-import cn.nilnullnaught.nnnnote.user.service.UserMessageService;
+import cn.nilnullnaught.nnnnote.user.service.UserInfoService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
     @Autowired
-    private UserMessageService userMessageService;
+    private UserInfoService userInfoService;
 
 
     @Autowired
@@ -47,8 +45,8 @@ public class TestController {
     @ApiOperation("生成一条 UserMessage 数据")
     @GetMapping("/generate")
     public R generate()  {
-        UserMessage userMessage = new UserMessage();
-        userMessageService.save(userMessage);
+        UserInfo userInfo = new UserInfo();
+        userInfoService.save(userInfo);
         return R.ok();
     }
 

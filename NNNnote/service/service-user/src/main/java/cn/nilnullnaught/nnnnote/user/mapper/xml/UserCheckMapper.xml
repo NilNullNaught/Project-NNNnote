@@ -7,7 +7,7 @@
         INSERT INTO `user_check` ( id, email, password,  gmt_create, gmt_modified )
         VALUES
             (#{UUID},#{email},#{password},#{date},#{date});
-        INSERT INTO `user_message` ( id, nickname, gmt_create, gmt_modified )
+        INSERT INTO `user_info` ( id, nickname, gmt_create, gmt_modified )
         VALUES
             (#{UUID},#{nickname},#{date},#{date});
         INSERT INTO `user_ultra` ( id, gmt_create, gmt_modified )
@@ -22,7 +22,7 @@
     </insert>
 
     <select id="countUser" resultType="java.lang.Integer">
-        SELECT COUNT(*) FROM `user_message`
+        SELECT COUNT(*) FROM `user_info`
     </select>
 
 

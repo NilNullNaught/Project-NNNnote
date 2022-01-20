@@ -16,6 +16,7 @@ export default {
       method: 'get'
     })
   },
+  // 注册
   register (formItem) {
     return request({
       url: `${ApiName}/register`,

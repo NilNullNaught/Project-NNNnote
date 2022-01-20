@@ -116,6 +116,7 @@ export default {
     }
   },
   methods: {
+    // 验证邮箱格式与是否已经被注册
     checkEmail (rule, value, callback) {
       // debugger
       if (!(/^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/.test(value))) {
@@ -132,8 +133,8 @@ export default {
           return callback()
         })
     },
+    // 校验验证码
     checkCodeFormat (rule, value, callback) {
-      // debugger
       if (!(/^[0-9]{6}$/.test(value))) {
         return callback(new Error('验证码应为六位数字'))
       }
@@ -157,7 +158,9 @@ export default {
       registerApi.sendCode(this.params.email)
     },
 
+    // 发送注册请求
     submitRegister () {
+      // 判断注册信息合法性
       if (this.params.email === '' ||
           this.params.code === '' ||
           this.params.nickname === '' ||

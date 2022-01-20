@@ -1,126 +1,225 @@
 <template>
-  <div class="in-wrap">
-    <!-- 开始 -- 公共头 --------------------------------------------------------------------------------------------------------------------------------->
-    <header id="header" style="padding:0;background-color:#323232;">
-      <section class="container">
-        <h1 id="logo">
-          <a href="/" title="NNN 笔记">
-            <img src="~/assets/img/logo.png" width="60px" alt="NNN 笔记">
-          </a>
-        </h1>
-        <div class="h-r-nsl">
-          <ul class="nav">
-            <router-link to="/" tag="li" active-class="current" exact>
-              <a>首页</a>
-            </router-link>
-            <router-link to="/recommond" tag="li" active-class="current" exact>
-              <a>推荐</a>
-            </router-link>
-          </ul>
+  <div>
+    <el-container>
+      <el-header class="head-bg">
+        <el-row :gutter="20" align="middle" type="flex">
+          <el-col :span="4">
+            <el-image
+              :src="require('~/assets/img/logo.png')"
+              alt="NNN 笔记"
+              style="width: 50px;width: 50px;padding:10px 0px 0px 0px;"
+            />
+          </el-col>
+          <el-col :span="5">
+            <el-menu
+              :default-active="style.activeIndex"
+              mode="horizontal"
+              background-color="#323232"
+              text-color="#fff"
+              active-text-color="#7AFFA0"
+              @select="handleSelect"
+            >
+              <el-menu-item index="1">
+                主页
+              </el-menu-item>
+              <el-menu-item index="2">
+                推荐
+              </el-menu-item>
+            </el-menu>
+          </el-col>
+          <el-col :span="6">
+            <el-input placeholder="请输入内容" class="input-with-select">
+              <el-button slot="append" icon="el-icon-search" />
+            </el-input>
+          </el-col>
+          <el-col :span="5" />
+          <el-col :span="4" align="end">
+            <el-menu
+              v-if="loginInfo.id"
+              :default-active="style.activeIndex"
+              class="el-menu-demo"
+              mode="horizontal"
+              background-color="#323232"
+              text-color="#fff"
+              active-text-color="#ffd04b"
+              @select="handleSelect"
+            >
+              <el-submenu index="3">
+                <template slot="title">
+                  <el-avatar :size="size" :src="circleUrl" />
+                </template>
+                <el-menu-item index="3-1">
+                  选项1
+                </el-menu-item>
+                <el-menu-item index="3-2">
+                  选项2
+                </el-menu-item>
+                <el-menu-item index="3-3">
+                  选项3
+                </el-menu-item>
+                <el-menu-item index="3-4">
+                  退出登录
+                </el-menu-item>
+              </el-submenu>
+              <el-menu-item index="4">
+                写笔记
+              </el-menu-item>
+            </el-menu>
 
-          <ul class="h-r-login">
-            <!-- 开始 -- 未登录显示部分 --------------------------------------------------------------------------------------------------------------------------------->
-            <li v-if="!loginInfo.id" id="no-login">
-              <a href="/login" title="登录">
-                <em class="icon18 login-icon">&nbsp;</em>
-                <span class="vam ml5">登录</span>
-              </a>
-              |
-              <a href="/register" title="注册">
-                <span class="vam ml5">注册</span>
-              </a>
-            </li>
-            <!-- 结束 -- 未登录显示部分 --------------------------------------------------------------------------------------------------------------------------------->
+            <el-menu
+              v-if="!loginInfo.id"
+              :default-active="style.activeIndex"
+              class="el-menu-demo"
+              mode="horizontal"
+              background-color="#323232"
+              text-color="#fff"
+              active-text-color="#ffd04b"
+              @select="handleSelect"
+            >
+              <el-menu-item index="5">
+                登录
+              </el-menu-item>
+              <el-menu-item index="6">
+                注册
+              </el-menu-item>
+            </el-menu>
+          </el-col>
+        </el-row>
+      </el-header>
 
-            <!-- 开始 -- 登录显示部分 --------------------------------------------------------------------------------------------------------------------------------->
-            <li v-if="loginInfo.id" id="is-login-one" class="mr10">
-              <a id="headerMsgCountId" href="#" title="消息">
-                <em class="icon18 news-icon">&nbsp;</em>
-              </a>
-              <q class="red-point" style="display: none">&nbsp;</q>
-            </li>
-            <li v-if="loginInfo.id" id="is-login-two" class="h-r-user">
-              <a href="/ucenter" title>
-                <img
-                  :src="loginInfo.avatar"
-                  width="30"
-                  height="30"
-                  class="vam picImg"
-                  alt
-                >
-                <span id="userName" class="vam disIb">{{ loginInfo.nickname }}</span>
-              </a>
-              <a href="javascript:void(0);" title="退出" class="ml5" @click="logout()">退出</a>
-            </li>
-            <!-- 结束 -- 登录显示部分 --------------------------------------------------------------------------------------------------------------------------------->
-          </ul>
+      <el-main>
+        <el-row :gutter="20" align="middle" type="flex">
+          <el-col :span="4" />
+          <el-col :span="16">
+            <nuxt />
+          </el-col>
+          <el-col :span="4" />
+        </el-row>
+      </el-main>
 
-          <aside class="h-r-search">
-            <form action="#" method="post">
-              <label class="h-r-s-box">
-                <input type="text" placeholder="输入" name="queryCourse.courseName" value>
-                <button type="submit" class="s-btn">
-                  <em class="icon18">&nbsp;</em>
-                </button>
-              </label>
-            </form>
-          </aside>
-        </div>
+      <el-footer class="head-bg" height="160px">
+        <el-row :gutter="20" align="middle" justify="center" type="flex">
+          <el-col :span="4" />
 
-        <div class="clear" />
-      </section>
-    </header>
-    <!-- 结束 -- 公共头 --------------------------------------------------------------------------------------------------------------------------------->
-
-    <nuxt />
-
-    <!-- 开始 -- 公共底 --------------------------------------------------------------------------------------------------------------------------------->
-    <footer id="footer">
-      <section class="container" style="text-align:center">
-        <h4>
-          <span class="fsize18 f-fM c-999">Present by NilNullNaught</span>
-        </h4>
-        <div class="b-foot">
-          <section class="mr20">
-            <section class="b-f-link" style="text-align:center">
-              <span><a href="https://github.com/NilNullNaught/Project-NNNnote">GitHub：github.com/NilNullNaught/Project-NNNnote</a></span>
+          <el-col :span="16" align="middle" justify="center" type="flex">
+            <h3 class="h3">
+              Present by NilNullNaught
+            </h3>
+            <el-divider />
+            <div style="color:#666;">
               <span>Email：nilnullnaught@gmail.com</span>
+              <el-divider direction="vertical" />
+              <el-link :underline="false" href="https://github.com/NilNullNaught/Project-NNNnote">
+                项目地址：github.com/NilNullNaught/Project-NNNnote
+              </el-link>
+              <el-divider direction="vertical" />
               <span>联系方式：188********</span>
-            </section>
-          </section>
-        </div>
-      </section>
-      <div class="clear" />
-    </footer>
-    <!-- 结束 -- 公共底 --------------------------------------------------------------------------------------------------------------------------------->
+            </div>
+          </el-col>
+          <el-col :span="4" />
+        </el-row>
+      </el-footer>
+    </el-container>
   </div>
 </template>
 
 <script>
-import '~/assets/css/reset.css'
-import '~/assets/css/theme.css'
-import '~/assets/css/global.css'
-import '~/assets/css/web.css'
-import '~/assets/css/base.css'
-import '~/assets/css/activity_tab.css'
-import '~/assets/css/bottom_rec.css'
-import '~/assets/css/nice_select.css'
-import '~/assets/css/order.css'
-import '~/assets/css/swiper-3.3.1.min.css'
-import '~/assets/css/pages-weixinpay.css'
+import jsCookie from 'js-cookie'
+
 export default {
   data () {
     return {
-      token: '',
+      style: {
+        activeIndex: '1'
+      },
       loginInfo: {
         id: '',
+        nickname: '',
+        sex: '',
         age: '',
         avatar: '',
-        mobile: '',
-        nickname: '',
-        sex: ''
+        sign: ''
       }
     }
+  },
+  created () {
+    // 判断是否通过微信登录
+    const token = this.$route.query.token
+    if (token) { // 判断路径是否有token值
+      alert('通过微信登录')
+      // this.wxLogin()
+    }
+
+    // 判断是否通过密码登录
+    // 从cookie获取用户信息
+    const userStr = jsCookie.get('NNNnote_userInfo')
+    // 把字符串转换json对象(js对象)
+    if (userStr) {
+      this.loginInfo = JSON.parse(userStr)
+    }
+  },
+  methods: {
+
+    // 退出登录
+    signOut () {
+      if (jsCookie.get('NNNnote_token')) {
+        jsCookie.remove('NNNnote_token', { domain: 'localhost' }) // 删除成功
+        jsCookie.remove('NNNnote_userInfo', { domain: 'localhost' })
+        this.loginInfo = ''
+        this.style.activeIndex = 1
+        this.$router.push({ path: '/' })
+      }
+    },
+    handleSelect (key, keyPath) {
+      switch (key) {
+        case '1':
+          this.style.activeIndex = 1
+          this.$router.push({ path: '/' })
+          break
+        case '2':
+          this.style.activeIndex = 2
+          this.$router.push({ path: '/recommend' })
+          break
+        case '3-1':
+          this.style.activeIndex = 3
+          this.$router.push({ path: '/login' })
+          break
+        case '3-2':
+          this.style.activeIndex = 3
+          this.$router.push({ path: '/register' })
+          break
+        case '3-3':
+          this.style.activeIndex = 3
+          this.$router.push({ path: '/recommend' })
+          break
+        case '3-4':
+          this.signOut()
+          break
+        case '5':
+          this.$router.push({ path: '/login' })
+          break
+        case '6':
+          this.$router.push({ path: '/register' })
+          break
+        default:
+          this.$router.push({ path: '/' })
+      }
+    }
+
   }
+
 }
 </script>
+<style>
+*{padding:0;margin:0;box-sizing: border-box;font-size: 14px;}
+  .head-bg {
+    background-color: #323232;
+  }
+
+  .h3 {
+    color:#999;
+    padding:30px 0px 0px 0px;
+    font-size: 20px;
+    font-family: "Lucida Console", "Courier New", monospace;
+  }
+</style>
