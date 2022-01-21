@@ -23,7 +23,7 @@
           ]"
         >
           <div>
-            <el-input v-model="user.email" type="text" placeholder="邮箱地址">
+            <el-input v-model="user.email" type="text" placeholder="请输入邮箱地址">
               <i slot="prefix" class="el-input__icon el-icon-user-solid" />
             </el-input>
           </div>
@@ -31,11 +31,28 @@
 
         <el-form-item prop="password" :rules="[{ required: true, message: '请输入密码', trigger: 'blur' }]">
           <div>
-            <el-input v-model="user.password" type="password" placeholder="密码">
+            <el-input v-model="user.password" type="password" placeholder="请输入密码">
               <i slot="prefix" class="el-input__icon el-icon-lock" />
             </el-input>
           </div>
         </el-form-item>
+        <el-row justify="center">
+          <el-col :span="8">
+            <el-switch
+              v-model="rememberME"
+              style="display: block"
+              active-color="#13ce66"
+              inactive-color="#b5b5b5"
+              active-text="记住我"
+            />
+          </el-col>
+
+          <el-col :offset="10" :span="6">
+            <el-link href="login/passwordRest" type="success">
+              忘记密码?
+            </el-link>
+          </el-col>
+        </el-row>
 
         <div class="btn">
           <input type="button" class="sign-in-button" value="登录" @click="submitLogin()">
@@ -70,6 +87,7 @@ export default {
 
   data () {
     return {
+      rememberME: {},
       // 封装登录手机号和密码对象
       user: {
         email: '',

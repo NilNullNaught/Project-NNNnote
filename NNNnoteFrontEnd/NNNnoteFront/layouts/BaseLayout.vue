@@ -5,13 +5,13 @@
         <el-row :gutter="20" align="middle" type="flex">
           <el-col :span="4">
             <el-image
-              :src="require('~/assets/img/logo.png')"
-              alt="NNN 笔记"
-              style="width: 50px;width: 50px;padding:10px 0px 0px 0px;"
+              style="width: 55px; height: 55px;padding:5px 0px 0px 0px;"
+              :src="style.logo"
             />
           </el-col>
           <el-col :span="5">
             <el-menu
+
               :default-active="style.activeIndex"
               mode="horizontal"
               background-color="#323232"
@@ -28,70 +28,77 @@
             </el-menu>
           </el-col>
           <el-col :span="6">
-            <el-input placeholder="请输入内容" class="input-with-select">
-              <el-button slot="append" icon="el-icon-search" />
-            </el-input>
+            <div>
+              <el-input placeholder="请输入内容" class="input-with-select">
+                <el-button slot="append" icon="el-icon-search" />
+              </el-input>
+            </div>
           </el-col>
           <el-col :span="5" />
           <el-col :span="4" align="end">
-            <el-menu
-              v-if="loginInfo.id"
-              :default-active="style.activeIndex"
-              class="el-menu-demo"
-              mode="horizontal"
-              background-color="#323232"
-              text-color="#fff"
-              active-text-color="#ffd04b"
-              @select="handleSelect"
-            >
-              <el-submenu index="3">
-                <template slot="title">
-                  <el-avatar :size="size" :src="circleUrl" />
-                </template>
-                <el-menu-item index="3-1">
-                  选项1
-                </el-menu-item>
-                <el-menu-item index="3-2">
-                  选项2
-                </el-menu-item>
-                <el-menu-item index="3-3">
-                  选项3
-                </el-menu-item>
-                <el-menu-item index="3-4">
-                  退出登录
-                </el-menu-item>
-              </el-submenu>
-              <el-menu-item index="4">
-                写笔记
-              </el-menu-item>
-            </el-menu>
-
-            <el-menu
-              v-if="!loginInfo.id"
-              :default-active="style.activeIndex"
-              class="el-menu-demo"
-              mode="horizontal"
-              background-color="#323232"
-              text-color="#fff"
-              active-text-color="#ffd04b"
-              @select="handleSelect"
-            >
-              <el-menu-item index="5">
-                登录
-              </el-menu-item>
-              <el-menu-item index="6">
-                注册
-              </el-menu-item>
-            </el-menu>
+            <div>
+              <div v-if="loginInfo.id">
+                <el-menu
+                  :default-active="style.activeIndex"
+                  class="el-menu-demo"
+                  mode="horizontal"
+                  background-color="#323232"
+                  text-color="#fff"
+                  active-text-color="#ffd04b"
+                  @select="handleSelect"
+                >
+                  <el-submenu index="3">
+                    <template slot="title">
+                      <el-avatar />
+                    </template>
+                    <el-menu-item index="3-1">
+                      我的主页
+                    </el-menu-item>
+                    <el-menu-item index="3-2">
+                      收藏夹
+                    </el-menu-item>
+                    <el-menu-item index="3-3">
+                      设置
+                    </el-menu-item>
+                    <el-menu-item index="3-4">
+                      退出
+                    </el-menu-item>
+                  </el-submenu>
+                  <el-menu-item index="4">
+                    写笔记
+                  </el-menu-item>
+                </el-menu>
+              </div>
+              <div v-if="!loginInfo.id">
+                <el-menu
+                  :default-active="style.activeIndex"
+                  class="el-menu-demo"
+                  mode="horizontal"
+                  background-color="#323232"
+                  text-color="#fff"
+                  active-text-color="#ffd04b"
+                  @select="handleSelect"
+                >
+                  <el-menu-item index="5">
+                    登录
+                  </el-menu-item>
+                  <el-menu-item index="6">
+                    注册
+                  </el-menu-item>
+                </el-menu>
+              </div>
+            </div>
           </el-col>
         </el-row>
       </el-header>
 
-      <el-main>
+      <el-main class="main">
         <el-row :gutter="20" align="middle" type="flex">
           <el-col :span="4" />
           <el-col :span="16">
-            <nuxt />
+            <el-card class="card" shadow="always">
+              <nuxt />
+            </el-card>
           </el-col>
           <el-col :span="4" />
         </el-row>
@@ -102,18 +109,20 @@
           <el-col :span="4" />
 
           <el-col :span="16" align="middle" justify="center" type="flex">
-            <h3 class="h3">
-              Present by NilNullNaught
-            </h3>
-            <el-divider />
-            <div style="color:#666;">
-              <span>Email：nilnullnaught@gmail.com</span>
-              <el-divider direction="vertical" />
-              <el-link :underline="false" href="https://github.com/NilNullNaught/Project-NNNnote">
-                项目地址：github.com/NilNullNaught/Project-NNNnote
-              </el-link>
-              <el-divider direction="vertical" />
-              <span>联系方式：188********</span>
+            <div>
+              <h3 class="h3">
+                Present by NilNullNaught
+              </h3>
+              <el-divider />
+              <div style="color:#666;">
+                <span>Email: nilnullnaught@gmail.com</span>
+                <el-divider direction="vertical" />
+                <el-link :underline="false" href="https://github.com/NilNullNaught/Project-NNNnote">
+                  项目地址: github.com/NilNullNaught/Project-NNNnote
+                </el-link>
+                <el-divider direction="vertical" />
+                <span>联系方式: 188********</span>
+              </div>
             </div>
           </el-col>
           <el-col :span="4" />
@@ -130,7 +139,8 @@ export default {
   data () {
     return {
       style: {
-        activeIndex: '1'
+        activeIndex: '1',
+        logo: require('~/assets/img/logo.png')
       },
       loginInfo: {
         id: '',
@@ -181,16 +191,16 @@ export default {
           this.$router.push({ path: '/recommend' })
           break
         case '3-1':
-          this.style.activeIndex = 3
-          this.$router.push({ path: '/login' })
+          this.style.activeIndex = '3-1'
+          this.$router.push({ path: '/user' })
           break
         case '3-2':
-          this.style.activeIndex = 3
-          this.$router.push({ path: '/register' })
+          this.style.activeIndex = '3-2'
+          this.$router.push({ path: '/user/collection' })
           break
         case '3-3':
-          this.style.activeIndex = 3
-          this.$router.push({ path: '/recommend' })
+          this.style.activeIndex = '3-3'
+          this.$router.push({ path: '/setting' })
           break
         case '3-4':
           this.signOut()
@@ -211,15 +221,36 @@ export default {
 }
 </script>
 <style>
-*{padding:0;margin:0;box-sizing: border-box;font-size: 14px;}
+body{
+      background-color: #dddddd;
+}
+  *{
+    padding:0px;
+    margin:0px;
+    box-sizing: border-box;
+    font-size: 14px;
+  }
   .head-bg {
     background-color: #323232;
   }
 
+  .main{
+    margin: 0px;
+    padding: 10px;
+    min-height: calc(80vh);
+    overflow: auto;
+  }
   .h3 {
     color:#999;
     padding:30px 0px 0px 0px;
     font-size: 20px;
     font-family: "Lucida Console", "Courier New", monospace;
   }
+.el-menu.el-menu--horizontal {
+     border-bottom: 0px;
+}
+
+[v-cloak] {
+  display: none;
+}
 </style>
