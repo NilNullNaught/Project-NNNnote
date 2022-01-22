@@ -1,5 +1,6 @@
 package cn.nilnullnaught.nnnnote.user;
 
+import cn.nilnullnaught.nnnnote.common.utils.JwtUtils;
 import com.baomidou.mybatisplus.generator.FastAutoGenerator;
 import com.baomidou.mybatisplus.generator.config.OutputFile;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
@@ -8,7 +9,11 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 
 public class Test {
-
+    @org.junit.Test
+    public void t(){
+        String jwtToken = JwtUtils.getJwtToken("1231", true);
+        System.out.println(jwtToken);
+    }
     @org.junit.Test
     public void main1() {
         String url = "jdbc:mysql://8.131.72.52:3306/NNNnote?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true";

@@ -37,7 +37,7 @@
           <el-col :span="5" />
           <el-col :span="4" align="end">
             <div>
-              <div v-if="loginInfo.id">
+              <div v-if="userInfo.id">
                 <el-menu
                   :default-active="style.activeIndex"
                   class="el-menu-demo"
@@ -69,7 +69,7 @@
                   </el-menu-item>
                 </el-menu>
               </div>
-              <div v-if="!loginInfo.id">
+              <div v-if="!userInfo.id">
                 <el-menu
                   :default-active="style.activeIndex"
                   class="el-menu-demo"
@@ -142,7 +142,7 @@ export default {
         activeIndex: '1',
         logo: require('~/assets/img/logo.png')
       },
-      loginInfo: {
+      userInfo: {
         id: '',
         nickname: '',
         sex: '',
@@ -165,7 +165,7 @@ export default {
     const userStr = jsCookie.get('NNNnote_userInfo')
     // 把字符串转换json对象(js对象)
     if (userStr) {
-      this.loginInfo = JSON.parse(userStr)
+      this.userInfo = JSON.parse(userStr)
     }
   },
   methods: {
@@ -175,7 +175,7 @@ export default {
       if (jsCookie.get('NNNnote_token')) {
         jsCookie.remove('NNNnote_token', { domain: 'localhost' }) // 删除成功
         jsCookie.remove('NNNnote_userInfo', { domain: 'localhost' })
-        this.loginInfo = ''
+        this.userInfo = ''
         this.style.activeIndex = 1
         this.$router.push({ path: '/' })
       }

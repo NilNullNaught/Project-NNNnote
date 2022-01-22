@@ -13,7 +13,7 @@
       <el-form ref="userForm" :model="params">
         <el-form-item prop="nickname" :rules="[{ required: true, message: '请输入你的昵称', trigger: 'blur' }]">
           <div>
-            <el-input v-model="params.nickname" type="text" placeholder="你的昵称">
+            <el-input v-model="params.nickname" type="text" placeholder="你的昵称" maxlength="10" show-word-limit>
               <i slot="prefix" class="el-input__icon el-icon-user-solid" />
             </el-input>
           </div>
@@ -116,7 +116,7 @@ export default {
     }
   },
   methods: {
-    // 验证邮箱格式与是否已经被注册
+    // 验证邮箱格式与邮箱是否已经被注册
     checkEmail (rule, value, callback) {
       // debugger
       if (!(/^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/.test(value))) {
@@ -133,7 +133,7 @@ export default {
           return callback()
         })
     },
-    // 校验验证码
+    // 校验验证码格式
     checkCodeFormat (rule, value, callback) {
       if (!(/^[0-9]{6}$/.test(value))) {
         return callback(new Error('验证码应为六位数字'))
@@ -144,6 +144,7 @@ export default {
     // 发送验证码
     sendCode () {
       this.activeSendCodeBtn = true
+      registerApi.sendCode(this.params.email)
       // 设置倒计时
       const result = setInterval(() => {
         --this.second
@@ -155,7 +156,6 @@ export default {
           this.codeTest = '获取验证码'
         }
       }, 1000)
-      registerApi.sendCode(this.params.email)
     },
 
     // 发送注册请求
@@ -181,12 +181,11 @@ export default {
               type: 'success',
               message: '注册成功'
             })
-            // 进行登录
 
-            // 跳转至首页
-            this.$router.push({ path: '/' })
+            // 跳转至登录页
+            this.$router.push({ path: '/login' })
           } else {
-            // 提示注册成功
+            // 提示注册失败
             this.$message.error('注册失败')
           }
         })

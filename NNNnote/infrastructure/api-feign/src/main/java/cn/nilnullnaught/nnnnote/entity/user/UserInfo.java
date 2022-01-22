@@ -33,8 +33,8 @@ public class UserInfo implements Serializable {
     @ApiModelProperty("性别 0 男，1 女 ")
     private Integer sex;
 
-    @ApiModelProperty("年龄")
-    private Integer age;
+    @ApiModelProperty("生日")
+    private LocalDateTime birthday;
 
     @ApiModelProperty("用户头像")
     private String avatar;

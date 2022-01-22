@@ -21,17 +21,16 @@
       </el-menu>
     </el-aside>
     <el-main>
-      <el-form ref="form" :model="form" label-width="80px">
+      <el-form ref="userInfo" :model="userInfo" label-width="80px">
         <el-form-item>
           <el-col class="line" :span="5">
-            <el-avatar size="large" style="width:80px;height:80px;block:inline" />
+            <el-avatar size="large" :src="userInfo.avatar" style="width:80px;height:80px;block:inline" />
           </el-col>
           <el-col :span="8">
             <el-upload
               class="avatar-uploader"
               action="https://jsonplaceholder.typicode.com/posts/"
               :show-file-list="false"
-              :on-success="handleAvatarSuccess"
               :before-upload="beforeAvatarUpload"
             >
               <img v-if="imageUrl" :src="imageUrl" class="avatar">
@@ -40,35 +39,38 @@
           </el-col>
         </el-form-item>
 
-        <el-form-item label="昵称">
+        <el-form-item prop="nickname" label="昵称">
           <el-col class="line" :span="12">
-            <el-input v-model="form.name" maxlength="10" show-word-limit />
+            <el-input v-model="userInfo.nickname" maxlength="10" show-word-limit />
           </el-col>
         </el-form-item>
 
-        <el-form-item label="年龄">
+        <el-form-item prop="birthday" label="生日">
           <el-col class="line" :span="12">
-            <el-select v-model="form.region" placeholder="请选择年龄">
-              <el-option label="区域一" value="shanghai" />
-              <el-option label="区域二" value="beijing" />
-            </el-select>
+            <el-date-picker v-model="userInfo.birthday" type="date" placeholder="选择日期" style="width: 60%;" />
           </el-col>
         </el-form-item>
 
-        <el-form-item label="性别">
-          <el-radio-group v-model="form.type">
-            <el-radio label="男" name="type" />
-            <el-radio label="女" name="type" />
-            <el-radio label="保密" name="type" />
+        <el-form-item prop="sex" label="性别">
+          <el-radio-group v-model="userInfo.sex" @change="consoleMessage">
+            <el-radio label="0" name="type">
+              男
+            </el-radio>
+            <el-radio label="1" name="type">
+              女
+            </el-radio>
+            <el-radio label="2" name="type">
+              保密
+            </el-radio>
           </el-radio-group>
         </el-form-item>
 
-        <el-form-item label="签名">
-          <el-input v-model="form.desc" style="height:100px" type="textarea" maxlength="100" show-word-limit />
+        <el-form-item prop="sign" label="签名">
+          <el-input v-model="userInfo.sign" style="height:100px" type="textarea" maxlength="100" show-word-limit />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="onSubmit">
-            立即创建
+          <el-button type="primary" :disabled="activeSubmitBtn" @click="onSubmit">
+            保存修改
           </el-button>
         </el-form-item>
       </el-form>
@@ -77,30 +79,70 @@
 </template>
 
 <script>
+import jsCookie from 'js-cookie'
+import userApi from '@/api/user'
 export default {
+
   name: 'SettingIndexPage',
   layout: 'BaseLayout',
 
   data () {
     return {
-
+      userStr: '',
       imageUrl: '',
-      form: {
-        name: '',
-        region: '',
-        date1: '',
-        date2: '',
-        delivery: false,
-        type: [],
-        resource: '',
-        desc: ''
+      activeSubmitBtn: false,
+      userInfo: {
       }
     }
   },
-  created () {},
+  created () {
+    // 从 cookie 中获取用户信息
+    this.userStr = jsCookie.get('NNNnote_userInfo')
+    // 把字符串转换json对象(js对象)
+    if (this.userStr) {
+      this.userInfo = JSON.parse(this.userStr)
+    }
+  },
   methods: {
+    // 提交修改的用户信息
     onSubmit () {
+      const _userInfo = JSON.parse(this.userStr)
 
+      // 校验用户信息是否被修改
+      if (_userInfo.avatar === this.userInfo.avatar &&
+          _userInfo.nickname === this.userInfo.nickname &&
+          _userInfo.birthday === this.userInfo.birthday &&
+          _userInfo.sex === this.userInfo.sex &&
+          _userInfo.sign === this.userInfo.sign
+      ) {
+        // 提示修改成功
+        this.$message({
+          type: 'warning',
+          message: '请在修改后点击保存按钮'
+        })
+        return
+      }
+
+      this.activeSubmitBtn = true
+      userApi.alterUserInfo(this.userInfo)
+        .then((response) => {
+          if (response.data.code === 20000) {
+            // 提示修改成功
+            this.$message({
+              type: 'success',
+              message: '修改成功'
+            })
+            this.activeSubmitBtn = false
+            // 重新获取用户信息
+            userApi.getUserInfo()
+              .then((response) => {
+                const userInfo = JSON.stringify(response.data.data.data)
+                jsCookie.set('NNNnote_userInfo', userInfo)
+                // 刷新页面
+                this.$router.push({ path: '/setting' })
+              })
+          }
+        })
     },
     handleSelect (key, keyPath) {
       switch (key) {
@@ -118,9 +160,6 @@ export default {
       }
     },
 
-    handleAvatarSuccess (res, file) {
-      this.imageUrl = URL.createObjectURL(file.raw)
-    },
     beforeAvatarUpload (file) {
       const isJPG = file.type === 'image/jpeg'
       const isLt2M = file.size / 1024 / 1024 < 2

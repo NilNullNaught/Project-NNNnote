@@ -1,6 +1,7 @@
 package cn.nilnullnaught.nnnnote.user.controller;
 
 import cn.nilnullnaught.nnnnote.client.sms.SmsEmailClient;
+import cn.nilnullnaught.nnnnote.common.utils.JwtUtils;
 import cn.nilnullnaught.nnnnote.common.utils.R;
 import cn.nilnullnaught.nnnnote.entity.user.UserInfo;
 import cn.nilnullnaught.nnnnote.exceptionhandler.MyCustomException;
@@ -11,6 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.xml.crypto.Data;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/user/test")
@@ -54,5 +59,13 @@ public class TestController {
     @GetMapping("/count")
     public R count()  {
         return R.ok().message(userCheckMapper.countUser().toString());
+    }
+
+    @ApiOperation("检查 token 的过期时间")
+    @GetMapping("/tokenExpire")
+    public R tokenExpire(HttpServletRequest request){
+        //调用jwt工具类的方法。根据request对象获取token过期时间与 id，返回用户id
+        Date date = JwtUtils.getExpiredTimeByJwtToken(request);
+        return R.ok().data("exiration",date);
     }
 }

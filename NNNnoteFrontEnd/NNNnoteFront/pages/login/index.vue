@@ -39,7 +39,7 @@
         <el-row justify="center">
           <el-col :span="8">
             <el-switch
-              v-model="rememberME"
+              v-model="user.rememberMe"
               style="display: block"
               active-color="#13ce66"
               inactive-color="#b5b5b5"
@@ -55,7 +55,9 @@
         </el-row>
 
         <div class="btn">
-          <input type="button" class="sign-in-button" value="登录" @click="submitLogin()">
+          <el-button :disabled="activeLoginBtn" class="sign-in-button" @click="submitLogin()">
+            登录
+          </el-button>
         </div>
       </el-form>
       <!-- 结束 -- 表单 --------------------------------------------------------------------------------------------------------------------------------->
@@ -87,12 +89,13 @@ export default {
 
   data () {
     return {
-      rememberME: {},
       // 封装登录手机号和密码对象
       user: {
         email: '',
-        password: ''
-      }
+        password: '',
+        rememberMe: false
+      },
+      activeLoginBtn: false
     }
   },
   methods: {
@@ -106,7 +109,7 @@ export default {
       }
     },
 
-    // 方式登录请求
+    // 发送登录请求
     submitLogin () {
       // 判断登录信息合法性
       if (this.user.email === '' ||
@@ -118,7 +121,7 @@ export default {
         })
         return
       }
-
+      this.activeLoginBtn = true
       loginApi.login(this.user)
         .then((response) => {
           if (response.data.code === 20000) {
@@ -128,18 +131,27 @@ export default {
               message: '登录成功'
             })
 
+            let expiration
+            if (this.rememberMe) {
+              expiration = 30
+            } else {
+              expiration = 1
+            }
+
             // 将返回的token保存在 cookie 中
-            jsCookie.set('NNNnote_token', response.data.data.token, { domain: 'localhost' }, { expires: 1 })
+            jsCookie.set('NNNnote_token', response.data.data.token, { domain: 'localhost' }, { expires: expiration })
 
             // 调用接口 根据token获取用户信息，为了首页面显示
             userApi.getUserInfo()
               .then((response) => {
                 const userInfo = JSON.stringify(response.data.data.data)
-                jsCookie.set('NNNnote_userInfo', userInfo, { domain: 'localhost' }, { expires: 1 })
-                // 跳转主页
+                jsCookie.set('NNNnote_userInfo', userInfo, { domain: 'localhost' }, { expires: expiration })
+                // 跳转至登录页
                 this.$router.push({ path: '/' })
               })
           } else {
+            this.user = ''
+            this.activeLoginBtn = false
             // 提示登录失败
             this.$message.error('登录失败')
           }

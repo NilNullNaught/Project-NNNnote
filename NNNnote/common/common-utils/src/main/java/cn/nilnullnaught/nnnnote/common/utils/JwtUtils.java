@@ -19,16 +19,22 @@ public class JwtUtils {
     public static final long EXPIRE = 1000 * 60 * 60 * 24; //token过期时间
     public static final String APP_SECRET = "ukc8BDbRigUDaY6pZFfWus2jZWLPHO"; //秘钥
 
-    //生成token字符串的方法
-    public static String getJwtToken(String id){
+    //生成token字符串
+    public static String getJwtToken(String id,Boolean isLong){
+        long expire = 0;
+        if(isLong){
+            expire = EXPIRE * 30;
+        }else {
+            expire = EXPIRE;
+        }
 
         String JwtToken = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setHeaderParam("alg", "HS256")
 
-                .setSubject("guli-user")
+                .setSubject("NNNnote-user")
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRE))
+                .setExpiration(new Date(System.currentTimeMillis() + expire))
 
                 .claim("id", id)  //设置token主体部分 ，存储用户信息
 
@@ -82,5 +88,18 @@ public class JwtUtils {
         Jws<Claims> claimsJws = Jwts.parser().setSigningKey(APP_SECRET).parseClaimsJws(jwtToken);
         Claims claims = claimsJws.getBody();
         return (String)claims.get("id");
+    }
+
+    /**
+     * 根据 token 字符串获取 token 过期时间
+     * @param request
+     * @return
+     */
+    public static Date getExpiredTimeByJwtToken(HttpServletRequest request) {
+        String jwtToken = request.getHeader("token");
+        if(StringUtils.isEmpty(jwtToken)) return null;
+        Jws<Claims> claimsJws = Jwts.parser().setSigningKey(APP_SECRET).parseClaimsJws(jwtToken);
+        Claims claims = claimsJws.getBody();
+        return claims.getExpiration();
     }
 }

@@ -2,6 +2,7 @@ package cn.nilnullnaught.nnnnote.user.service;
 
 import cn.nilnullnaught.nnnnote.entity.user.UserInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * <p>
@@ -13,4 +14,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface UserInfoService extends IService<UserInfo> {
 
+    String uploadAvatar(MultipartFile file, String id);
 }

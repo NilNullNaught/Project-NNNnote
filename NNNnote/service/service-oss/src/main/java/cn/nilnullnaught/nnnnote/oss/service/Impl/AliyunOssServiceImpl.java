@@ -40,4 +40,9 @@ public class AliyunOssServiceImpl implements AliyunOssService {
         }
     }
 
+    @Override
+    public String updateFile() {
+        return null;
+    }
+
 }

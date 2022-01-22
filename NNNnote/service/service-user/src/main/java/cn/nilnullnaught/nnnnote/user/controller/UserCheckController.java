@@ -6,7 +6,9 @@ import cn.nilnullnaught.nnnnote.common.utils.R;
 import cn.nilnullnaught.nnnnote.entity.user.UserCheck;
 import cn.nilnullnaught.nnnnote.entity.user.UserMessage;
 import cn.nilnullnaught.nnnnote.user.service.UserCheckService;
+import cn.nilnullnaught.nnnnote.user.vo.LoginVo;
 import cn.nilnullnaught.nnnnote.user.vo.RegisterVo;
+import cn.nilnullnaught.nnnnote.user.vo.ResetPasswordVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -61,8 +63,16 @@ public class UserCheckController {
 
     @ApiOperation("用户登录")
     @PostMapping("login")
-    public R login(@RequestBody UserCheck userCheck){
-        String token = userCheckService.userLogin(userCheck);
+    public R login(@RequestBody LoginVo LoginVo){
+        String token = userCheckService.userLogin(LoginVo);
         return R.ok().data("token",token);
     }
+
+    @ApiOperation("用户密码重置")
+    @PostMapping("resetPassword")
+    public R restPassword(@RequestBody ResetPasswordVo resetPasswordVo){
+        userCheckService.restPassword(resetPasswordVo);
+        return R.ok();
+    }
+
 }

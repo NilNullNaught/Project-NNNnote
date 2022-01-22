@@ -9,4 +9,5 @@ public interface AliyunOssService {
     void deleteFile(String URL);
 
 
+    String updateFile();
 }

@@ -1,8 +1,8 @@
 package cn.nilnullnaught.nnnnote.user.service;
-
-import cn.nilnullnaught.nnnnote.common.utils.R;
 import cn.nilnullnaught.nnnnote.entity.user.UserCheck;
+import cn.nilnullnaught.nnnnote.user.vo.LoginVo;
 import cn.nilnullnaught.nnnnote.user.vo.RegisterVo;
+import cn.nilnullnaught.nnnnote.user.vo.ResetPasswordVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -21,5 +21,7 @@ public interface UserCheckService extends IService<UserCheck> {
 
     void userRegister(RegisterVo registerVo);
 
-    String userLogin(UserCheck userCheck);
+    String userLogin(LoginVo loginVo);
+
+    void restPassword(ResetPasswordVo resetPasswordVo);
 }

@@ -2,7 +2,7 @@
   <div class="main">
     <div class="sign-up-container">
       <div class="title">
-        <span style="font-weight:700;font-size:18px;color:green;">找回密码</span>
+        <span style="font-weight:700;font-size:18px;color:green;">重新设置密码</span>
       </div>
       <!-- 开始 -- 表单 --------------------------------------------------------------------------------------------------------------------------------->
 
@@ -48,7 +48,7 @@
           </div>
         </el-form-item>
         <div class="btn">
-          <input type="button" class="sign-in-button" value="登录" @click="submitLogin()">
+          <input type="button" class="sign-in-button" value="重置密码" @click="submitRestPassword()">
         </div>
       </el-form>
       <!-- 结束 -- 表单 --------------------------------------------------------------------------------------------------------------------------------->
@@ -61,6 +61,7 @@ import '~/assets/css/sign.css'
 import '~/assets/css/iconfont.css'
 // import testApi from '@/api/test'
 import registerApi from '@/api/register'
+import loginApi from '@/api/login'
 
 export default {
   name: 'PasswordRestPage',
@@ -75,6 +76,7 @@ export default {
         password: ''
       },
       checkPasswordVal: '',
+      second: 60, // 倒计时长度
       codeTest: '获取验证码'
     }
   },
@@ -98,7 +100,7 @@ export default {
       }
     },
 
-    // 校验验证码
+    // 校验验证码格式
     checkCodeFormat (rule, value, callback) {
       if (!(/^[0-9]{6}$/.test(value))) {
         return callback(new Error('验证码应为六位数字'))
@@ -109,6 +111,8 @@ export default {
     // 发送验证码
     sendCode () {
       this.activeSendCodeBtn = true
+      registerApi.sendCode(this.params.email)
+
       // 设置倒计时
       const result = setInterval(() => {
         --this.second
@@ -120,7 +124,39 @@ export default {
           this.codeTest = '获取验证码'
         }
       }, 1000)
-      registerApi.sendCode(this.params.email)
+    },
+
+    // 发送重置密码请求
+    submitRestPassword () {
+      // 校验表单数据
+      if (this.params.email === '' ||
+       this.params.password === '' ||
+       this.params.code === '' ||
+       this.checkPasswordVal === ''
+      ) {
+        this.$message({
+          type: 'warning',
+          message: '请填写邮箱地址、密码与验证码'
+        })
+        return
+      }
+
+      loginApi.resetPassword(this.params)
+        .then((response) => {
+          if (response.data.code === 20000) {
+            // 提示密码修改成功
+            this.$message({
+              type: 'success',
+              message: '密码修改成功'
+            })
+
+            // 跳转至登录页
+            this.$router.push({ path: '/login' })
+          } else {
+            // 提示密码修改
+            this.$message.error('密码修改失败')
+          }
+        })
     }
   }
 }

@@ -7,7 +7,9 @@ import cn.nilnullnaught.nnnnote.entity.user.UserCheck;
 import cn.nilnullnaught.nnnnote.exceptionhandler.MyCustomException;
 import cn.nilnullnaught.nnnnote.user.mapper.UserCheckMapper;
 import cn.nilnullnaught.nnnnote.user.service.UserCheckService;
+import cn.nilnullnaught.nnnnote.user.vo.LoginVo;
 import cn.nilnullnaught.nnnnote.user.vo.RegisterVo;
+import cn.nilnullnaught.nnnnote.user.vo.ResetPasswordVo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.EncryptUtils;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
@@ -74,19 +76,19 @@ public class UserCheckServiceImpl extends ServiceImpl<UserCheckMapper, UserCheck
     }
 
     /**
-     * 注册校验、密码加密，最后将数据写入数据库
+     * 校验注册信息、密码加密，最后将数据写入数据库
      * @param registerVo
      */
     @Override
     @Transactional
     public void userRegister(RegisterVo registerVo)  {
-        //获取注册信息，进行校验
+        //获取注册信息
         String nickname = registerVo.getNickname();
         String email = registerVo.getEmail();
         String password = registerVo.getPassword();
         String code = registerVo.getCode();
 
-        //校验参数
+        //校验注册信息
         if (StringUtils.isEmpty(nickname) ||
                 StringUtils.isEmpty(email) ||
                 StringUtils.isEmpty(password) ||
@@ -95,7 +97,6 @@ public class UserCheckServiceImpl extends ServiceImpl<UserCheckMapper, UserCheck
         }
 
         //校验验证码
-        log.info("email = "+email);
         if(!code.equals(redisTemplate.opsForValue().get(email))){
             throw new MyCustomException(20001,"验证码错误");
         }
@@ -117,14 +118,14 @@ public class UserCheckServiceImpl extends ServiceImpl<UserCheckMapper, UserCheck
 
     /**
      * 根据用户邮箱和密码进行登录校验，并生成 token
-     * @param userCheck
+     * @param loginVo
      */
     @Override
-    public String userLogin(UserCheck userCheck) {
+    public String userLogin(LoginVo loginVo) {
         //获取登录邮箱和密码
-        String email = userCheck.getEmail();
-        String password = userCheck.getPassword();
-
+        String email = loginVo.getEmail();
+        String password = loginVo.getPassword();
+        Boolean rememberMe = loginVo.getRememberMe();
         //邮箱和密码非空判断
         if(StringUtils.isEmpty(email) || StringUtils.isEmpty(password)) {
             throw new MyCustomException(20001,"邮箱或密码为空");
@@ -133,14 +134,58 @@ public class UserCheckServiceImpl extends ServiceImpl<UserCheckMapper, UserCheck
         //判断邮箱是否被注册
         QueryWrapper<UserCheck> wrapper = new QueryWrapper<>();
         wrapper.eq("email",email);
-        UserCheck _userCheck = baseMapper.selectOne(wrapper);
-        if (_userCheck == null){//邮箱未被注册
+        UserCheck userCheck = baseMapper.selectOne(wrapper);
+        if (userCheck == null){
+            //邮箱未被注册
             throw new MyCustomException(20001,"该邮箱尚未注册");
         }
 
         //验证密码是否正确
-        if (!MyEncryptUtils.checkByBCrypt(password,_userCheck.getPassword())){
+        if (!MyEncryptUtils.checkByBCrypt(password,userCheck.getPassword())){
             throw new MyCustomException(20001,"密码错误");
+        }
+
+        //查询账号是否被禁用
+        if(userCheck.getIsDisabled()){
+            throw new MyCustomException(20001,"该用户被禁用");
+        }
+
+        //登录成功，生成token字符串
+        String jwtToken = JwtUtils.getJwtToken(userCheck.getId(),rememberMe);
+        return jwtToken;
+    }
+
+    /**
+     * 重置用户密码
+     * @param resetPasswordVo
+     */
+    @Override
+    @Transactional
+    public void restPassword(ResetPasswordVo resetPasswordVo) {
+        //获取用户注册信息
+        String email=resetPasswordVo.getEmail();
+        String password=resetPasswordVo.getPassword();
+        String code = resetPasswordVo.getCode();
+
+        //参数校验
+        if(StringUtils.isEmpty(email)
+                || StringUtils.isEmpty(password)
+                || StringUtils.isEmpty(code)
+        ){
+            throw new MyCustomException(20001,"参数校验失败");
+        }
+
+         //校验验证码
+        if(!code.equals(redisTemplate.opsForValue().get(email))){
+            throw new MyCustomException(20001,"验证码错误");
+        }
+
+        //判断邮箱是否被注册
+        QueryWrapper<UserCheck> wrapper = new QueryWrapper<>();
+        wrapper.eq("email",email);
+        UserCheck _userCheck = baseMapper.selectOne(wrapper);
+        if (_userCheck == null){
+            throw new MyCustomException(20001,"该邮箱尚未注册");
         }
 
         //查询账号是否被禁用
@@ -148,9 +193,14 @@ public class UserCheckServiceImpl extends ServiceImpl<UserCheckMapper, UserCheck
             throw new MyCustomException(20001,"该用户被禁用");
         }
 
-        //登录成功，生成token字符串
-        String jwtToken = JwtUtils.getJwtToken(_userCheck.getId());
-        return jwtToken;
+        //为新密码进行加密
+        String passwordEncrypt = MyEncryptUtils.encodeByBCrypt(password);
+
+        //修改密码
+        _userCheck.setPassword(passwordEncrypt);
+        if (baseMapper.updateById(_userCheck) != 1){
+            throw new MyCustomException(20001,"密码修改失败");
+        }
     }
 
 }
