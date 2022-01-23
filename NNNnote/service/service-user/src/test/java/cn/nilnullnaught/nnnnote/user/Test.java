@@ -4,6 +4,7 @@ import cn.nilnullnaught.nnnnote.common.utils.JwtUtils;
 import com.baomidou.mybatisplus.generator.FastAutoGenerator;
 import com.baomidou.mybatisplus.generator.config.OutputFile;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -61,5 +62,17 @@ public class Test {
                 })
                 .templateEngine(new FreemarkerTemplateEngine()) // 使用Freemarker引擎模板(需要导包)，默认的是Velocity引擎模板
                 .execute();
+    }
+
+
+    @org.junit.Test
+    public void t2(){
+        String oldUrl =
+                "https://nilnullnaught-nnnnote-01.oss-cn-shanghai.aliyuncs.com/temporary/2022/01/23/67b5ab7f7b754416921bc8501969bfee.jpeg";
+
+            String newUrl = oldUrl.replace("/temporary","");
+
+        System.out.println("oldUrl = " + oldUrl);
+        System.out.println("newUrl = " + newUrl);
     }
 }

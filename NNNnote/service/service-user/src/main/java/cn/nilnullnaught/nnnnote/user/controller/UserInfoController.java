@@ -38,17 +38,9 @@ public class UserInfoController {
     @ApiOperation("修改用户信息")
     @PostMapping("/alterUserInfo")
     public R alterUserInfo(@RequestBody UserInfo userInfo) {
-        if (userInfoService.updateById(userInfo)) {
-            return R.ok();
-        } else {
-            return R.error().message("修改失败");
-        }
+        userInfoService.updateUserInfo(userInfo);
+        return R.ok();
     }
 
-    @ApiOperation("上传用户头像")
-    @PostMapping("/uploadAvatar")
-    public R uploadAvatar(HttpServletRequest request,MultipartFile file){
-        String url = userInfoService.uploadAvatar(file,request.getHeader("url"));
-        return R.ok().data("data",url);
-    }
+
 }

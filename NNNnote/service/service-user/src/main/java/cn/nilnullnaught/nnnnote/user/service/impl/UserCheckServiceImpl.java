@@ -11,6 +11,7 @@ import cn.nilnullnaught.nnnnote.user.vo.LoginVo;
 import cn.nilnullnaught.nnnnote.user.vo.RegisterVo;
 import cn.nilnullnaught.nnnnote.user.vo.ResetPasswordVo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.EncryptUtils;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -201,6 +202,29 @@ public class UserCheckServiceImpl extends ServiceImpl<UserCheckMapper, UserCheck
         if (baseMapper.updateById(_userCheck) != 1){
             throw new MyCustomException(20001,"密码修改失败");
         }
+    }
+
+    @Override
+    public void alterUserEmail(String id, String email,String code) {
+
+        if(!code.equals(redisTemplate.opsForValue().get(email))){
+            throw new MyCustomException(20001,"验证码错误");
+        }
+
+        String oldEmail = baseMapper.selectById(id).getEmail();
+
+        UpdateWrapper updateWrapper = new UpdateWrapper<UserCheck>();
+        updateWrapper.eq("id",id);
+
+        if (email.equals(oldEmail)){
+            // 解除绑定
+            updateWrapper.set("email",null);
+        }else{
+            //绑定新邮箱
+            updateWrapper.set("email",email);
+        }
+
+        baseMapper.update(null,updateWrapper);
     }
 
 }

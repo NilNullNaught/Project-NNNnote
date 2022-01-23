@@ -29,7 +29,8 @@
           <el-col :span="8">
             <el-upload
               class="avatar-uploader"
-              action="https://jsonplaceholder.typicode.com/posts/"
+              action="fakeaction"
+              :http-request="uploadAvatar"
               :show-file-list="false"
               :before-upload="beforeAvatarUpload"
             >
@@ -52,14 +53,14 @@
         </el-form-item>
 
         <el-form-item prop="sex" label="性别">
-          <el-radio-group v-model="userInfo.sex" @change="consoleMessage">
-            <el-radio label="0" name="type">
+          <el-radio-group v-model="userInfo.sex">
+            <el-radio :label="0" name="0">
               男
             </el-radio>
-            <el-radio label="1" name="type">
+            <el-radio :label="1" name="1">
               女
             </el-radio>
-            <el-radio label="2" name="type">
+            <el-radio :label="2" name="2">
               保密
             </el-radio>
           </el-radio-group>
@@ -81,17 +82,41 @@
 <script>
 import jsCookie from 'js-cookie'
 import userApi from '@/api/user'
+import ossApi from '@/api/oss'
 export default {
-
   name: 'SettingIndexPage',
-  layout: 'BaseLayout',
+  // vue路由的钩子函数 , 可以放在mouted的同级
+  beforeRouteLeave (to, from, next) {
+    if (this.userInfoCheck.nickname !== this.userInfo.nickname ||
+          this.userInfoCheck.birthday !== this.userInfo.birthday ||
+          this.userInfoCheck.sex !== this.userInfo.sex ||
+          this.userInfoCheck.sign !== this.userInfo.sign ||
+          this.imageUrl !== '') {
+      this.$confirm('离开页面 , 数据将不做保存, 请确认已经保存', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          next()
+        })
+        .catch(() => {
+          // alert("router")
+        })
+    } else {
+      next()
+    }
+  },
 
+  layout: 'BaseLayout',
   data () {
     return {
-      userStr: '',
       imageUrl: '',
       activeSubmitBtn: false,
       userInfo: {
+      },
+      userInfoCheck: {
+
       }
     }
   },
@@ -101,21 +126,41 @@ export default {
     // 把字符串转换json对象(js对象)
     if (this.userStr) {
       this.userInfo = JSON.parse(this.userStr)
+      this.userInfoCheck = JSON.parse(this.userStr)
+    }
+  },
+  beforeDestroy () {
+    // 校验用户信息是否被修改
+    if (
+      this.userInfoCheck.nickname !== this.userInfo.nickname ||
+          this.userInfoCheck.birthday !== this.userInfo.birthday ||
+          this.userInfoCheck.sex !== this.userInfo.sex ||
+          this.userInfoCheck.sign !== this.userInfo.sign ||
+          this.imageUrl !== ''
+    ) {
+      window.onbeforeunload = function (e) { // 刷新与关闭时弹出提示
+        e = e || window.event
+        // 兼容IE8和Firefox 4之前的版本
+        if (e) {
+          e.returnValue = '关闭提示'
+        }
+        // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
+        return '关闭提示'
+      }
     }
   },
   methods: {
     // 提交修改的用户信息
     onSubmit () {
-      const _userInfo = JSON.parse(this.userStr)
-
       // 校验用户信息是否被修改
-      if (_userInfo.avatar === this.userInfo.avatar &&
-          _userInfo.nickname === this.userInfo.nickname &&
-          _userInfo.birthday === this.userInfo.birthday &&
-          _userInfo.sex === this.userInfo.sex &&
-          _userInfo.sign === this.userInfo.sign
+      if (
+        this.userInfoCheck.nickname === this.userInfo.nickname &&
+          this.userInfoCheck.birthday === this.userInfo.birthday &&
+          this.userInfoCheck.sex === this.userInfo.sex &&
+          this.userInfoCheck.sign === this.userInfo.sign &&
+          this.imageUrl === ''
       ) {
-        // 提示修改成功
+        // 提示修改失败
         this.$message({
           type: 'warning',
           message: '请在修改后点击保存按钮'
@@ -124,6 +169,14 @@ export default {
       }
 
       this.activeSubmitBtn = true
+
+      if (this.imageUrl !== '') {
+        // 如果头像被改变，则提交修改
+        this.userInfo.avatar = this.imageUrl
+      } else {
+        this.userInfo.avatar = ''
+      }
+
       userApi.alterUserInfo(this.userInfo)
         .then((response) => {
           if (response.data.code === 20000) {
@@ -138,12 +191,13 @@ export default {
               .then((response) => {
                 const userInfo = JSON.stringify(response.data.data.data)
                 jsCookie.set('NNNnote_userInfo', userInfo)
-                // 刷新页面
-                this.$router.push({ path: '/setting' })
+                // 使用 window.logcation.href 跳转页面,可以刷新所有组件状态
+                window.location.href = '/setting'
               })
           }
         })
     },
+    // 处理页面跳转
     handleSelect (key, keyPath) {
       switch (key) {
         case '1':
@@ -159,11 +213,11 @@ export default {
           this.$router.push({ path: '/setting' })
       }
     },
-
+    // 检查头像文件格式与大小
     beforeAvatarUpload (file) {
       const isJPG = file.type === 'image/jpeg'
       const isLt2M = file.size / 1024 / 1024 < 2
-
+      this.file = file
       if (!isJPG) {
         this.$message.error('上传头像图片只能是 JPG 格式!')
       }
@@ -171,9 +225,28 @@ export default {
         this.$message.error('上传头像图片大小不能超过 2MB!')
       }
       return isJPG && isLt2M
+    },
+    // 上传头像
+    uploadAvatar (params) {
+      const data = new FormData()
+      // 创建一个表单数据
+      data.append('file', params.file)
+      ossApi.uploadFileTemporary(data).then((response) => {
+        if (response.data.code === 20000) {
+          // 提示修改成功
+          this.$message({
+            type: 'success',
+            message: '头像上传成功'
+          })
+          this.imageUrl = response.data.data.url
+        } else {
+          this.$message.error('头像上传失败')
+        }
+      })
     }
   }
 }
+
 </script>
 <style>
 .el-container {

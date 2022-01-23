@@ -14,5 +14,5 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public interface UserInfoService extends IService<UserInfo> {
 
-    String uploadAvatar(MultipartFile file, String id);
+    void updateUserInfo(UserInfo userInfo);
 }

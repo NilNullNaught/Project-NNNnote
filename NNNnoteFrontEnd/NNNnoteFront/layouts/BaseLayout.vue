@@ -49,7 +49,7 @@
                 >
                   <el-submenu index="3">
                     <template slot="title">
-                      <el-avatar />
+                      <el-avatar :src="userInfo.avatar" />
                     </template>
                     <el-menu-item index="3-1">
                       我的主页

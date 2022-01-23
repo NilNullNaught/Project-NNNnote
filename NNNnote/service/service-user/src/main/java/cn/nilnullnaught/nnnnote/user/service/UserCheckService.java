@@ -24,4 +24,6 @@ public interface UserCheckService extends IService<UserCheck> {
     String userLogin(LoginVo loginVo);
 
     void restPassword(ResetPasswordVo resetPasswordVo);
+
+    void alterUserEmail(String id, String email,String code);
 }

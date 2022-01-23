@@ -2,6 +2,7 @@ package cn.nilnullnaught.nnnnote.user.controller;
 
 
 import cn.nilnullnaught.nnnnote.client.sms.SmsEmailClient;
+import cn.nilnullnaught.nnnnote.common.utils.JwtUtils;
 import cn.nilnullnaught.nnnnote.common.utils.R;
 import cn.nilnullnaught.nnnnote.entity.user.UserCheck;
 import cn.nilnullnaught.nnnnote.entity.user.UserMessage;
@@ -9,9 +10,16 @@ import cn.nilnullnaught.nnnnote.user.service.UserCheckService;
 import cn.nilnullnaught.nnnnote.user.vo.LoginVo;
 import cn.nilnullnaught.nnnnote.user.vo.RegisterVo;
 import cn.nilnullnaught.nnnnote.user.vo.ResetPasswordVo;
+import cn.nilnullnaught.nnnnote.user.vo.SettingSafeVo;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import io.swagger.annotations.ApiOperation;
+import org.apache.catalina.User;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * <p>
@@ -69,9 +77,30 @@ public class UserCheckController {
     }
 
     @ApiOperation("用户密码重置")
-    @PostMapping("resetPassword")
+    @PostMapping("/resetPassword")
     public R restPassword(@RequestBody ResetPasswordVo resetPasswordVo){
         userCheckService.restPassword(resetPasswordVo);
+        return R.ok();
+    }
+
+    @ApiOperation("获取用户安全设置相关数据")
+    @GetMapping("/alterUserSafeInfo")
+    public R alterUserSafeInfo(HttpServletRequest request){
+        String ID = JwtUtils.getMemberIdByJwtToken(request);
+        UserCheck userCheck = userCheckService.getById(ID);
+        SettingSafeVo settingSafeVo = new SettingSafeVo();
+        BeanUtils.copyProperties(userCheck,settingSafeVo);
+        return  R.ok().data("data",settingSafeVo);
+    }
+
+    @ApiOperation("用户邮箱绑定与解除绑定")
+    @PostMapping("/alterUserEmail")
+    public R alterUserEmail(
+            HttpServletRequest request,
+            @RequestParam(name = "email")String email,
+            @RequestParam(name = "code")String code){
+        String ID = JwtUtils.getMemberIdByJwtToken(request);
+        userCheckService.alterUserEmail(ID,email,code);
         return R.ok();
     }
 

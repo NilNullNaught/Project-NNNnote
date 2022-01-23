@@ -19,25 +19,32 @@ public class AliyunOssController {
     @ApiOperation("上传文件")
     @PostMapping("/uploadFile")
     public R uploadFile(MultipartFile file) {
-
         //返回上传到oss的路径
         String url = aliyunOssService.uploadFile(file);
         return R.ok().data("url",url);
     }
 
+    @ApiOperation("暂存文件")
+    @PostMapping("/uploadFileTemporary")
+    public R uploadFileTemporary(MultipartFile file){
+        //返回上传到oss的路径
+        String url = aliyunOssService.uploadFileTemporary(file);
+        return R.ok().data("url",url);
+    }
 
-    @ApiOperation("删除文件（注意：路径被封装在请求头的 url 属性中！）")
+    @ApiOperation("修改文件存储位置")
+    @PostMapping("/alterFileLocation")
+    public R alterFileLocation(@RequestHeader("tempUrl")String tempUrl,@RequestHeader("newUrl")String newUrl,@RequestHeader("oldUrl")String oldUrl){
+        //返回上传到oss的路径
+        aliyunOssService.alterFileLocation(tempUrl,newUrl,oldUrl);
+        return R.ok();
+    }
+
+    @ApiOperation("删除单个文件（注意：路径被封装在请求头的 url 属性中！）")
     @PostMapping("/deleteFile")
     public R deleteFile(@RequestHeader("url")String url) {
         aliyunOssService.deleteFile(url);
         return R.ok().message("删除成功");
     }
 
-    @ApiOperation("更新文件")
-    @PostMapping("/upDateFile")
-    public R upDateFile(@RequestHeader("url")String url,@RequestPart("file")MultipartFile file) {
-
-        //String url = aliyunOssService.updateFile(url,file);
-        return R.ok().message(file.getOriginalFilename()).data("url",url);
-    }
 }

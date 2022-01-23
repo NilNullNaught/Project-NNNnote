@@ -1,8 +1,7 @@
 package cn.nilnullnaught.nnnnote.entity.user;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import io.swagger.annotations.ApiModel;
@@ -36,8 +35,15 @@ public class UserCheck implements Serializable {
     @ApiModelProperty("邮箱地址")
     private String email;
 
-    @ApiModelProperty("微信openid")
+    @ApiModelProperty("微信 openid")
     private String openidWx;
+
+    @ApiModelProperty("QQ openid")
+    private String openidQq;
+
+    @ApiModelProperty("微博 openid")
+    private String openidWb;
+
 
     @ApiModelProperty("密码")
     private String password;

@@ -26,15 +26,30 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     @Autowired
     private AliyunOssClient aliyunOssClient;
 
+
+    /**
+     * 更新用户信息
+     *
+     * @param userInfo
+     */
     @Override
-    public String uploadAvatar(MultipartFile file, String id) {
+    public void updateUserInfo(UserInfo userInfo) {
 
-        UserInfo userInfo = baseMapper.selectById(id);
-        R r = aliyunOssClient.upDateFile(id, file);
+        String tempUrl = userInfo.getAvatar();
+        String newUrl = tempUrl.replace("/temporary", "");
+        String oldUrl = baseMapper.selectById(userInfo.getId()).getAvatar();
 
-        String s = r.getData().get("url").toString();
+        if(oldUrl != newUrl && StringUtils.isEmpty(newUrl)){
+            // 请求体参数不能为空需要设置值
+            if(StringUtils.isEmpty(oldUrl)){
+                oldUrl = "EmptyUrl";
+            }
+            aliyunOssClient.alterFileLocation(tempUrl, newUrl, oldUrl);
+            userInfo.setAvatar(newUrl);
+        }else {
+            userInfo.setAvatar(oldUrl);
+        }
 
-
-        return s;
+        baseMapper.updateById(userInfo);
     }
 }
