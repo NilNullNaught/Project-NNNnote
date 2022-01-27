@@ -20,9 +20,79 @@
         </el-menu-item>
       </el-menu>
     </el-aside>
-    <el-main>
-      账号管理
+    <el-main id="my-main">
+      <el-row>
+        <el-col :span="24" align="middle">
+          <h1>警告</h1>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="4">
+          <br>
+        </el-col>
+        <el-col :span="20">
+          1. 该操作执行完成不可撤销。
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="4">
+          <br>
+        </el-col>
+        <el-col :span="20">
+          2. 注销后，将会删除您账号下的所有数据，且不可恢复。
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="4">
+          <br>
+        </el-col>
+        <el-col :span="20">
+          3. 注销前，需要通过邮箱进行验证，如果没有绑定，请先绑定。
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="24" align="middle">
+          <el-button type="danger" round @click="dialogVisible = true">
+            确认注销
+          </el-button>
+        </el-col>
+      </el-row>
     </el-main>
+
+    <el-dialog
+      title="请先通过验证"
+      :visible.sync="dialogVisible"
+      width="30%"
+    >
+      <el-input type="text" placeholder="向绑定的邮箱发送验证码">
+        <el-button slot="append" style="width:120px">
+          发送验证码
+        </el-button>
+      </el-input>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="dialogVisible = false">取 消</el-button>
+        <el-button type="danger" @click="innerVisible = true">确 定</el-button>
+      </span>
+
+      <el-dialog
+        width="20%"
+        title="警告，该操作不可撤销"
+        :visible.sync="innerVisible"
+        append-to-body
+        center
+      >
+        <el-row>
+          <el-col :span="24" align="middle">
+            <el-button type="primary" @click="innerVisible = false">
+              取 消
+            </el-button>
+            <el-button type="danger" @click="innerVisible = false">
+              确 定
+            </el-button>
+          </el-col>
+        </el-row>
+      </el-dialog>
+    </el-dialog>
   </el-container>
 </template>
 
@@ -33,6 +103,8 @@ export default {
 
   data () {
     return {
+      dialogVisible: false,
+      innerVisible: false
     }
   },
   created () {},
@@ -64,5 +136,9 @@ export default {
 }
 .el-menu{
   border: 0px;
+}
+
+#my-main .el-row{
+  margin: 20px;
 }
 </style>

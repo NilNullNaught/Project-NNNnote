@@ -16,8 +16,11 @@
     "core-js": "^3.19.3",
     "element-ui": "^2.15.6",
     "js-cookie": "^3.0.1",
+    "markdown-it": "^12.3.2",
+    "mavon-editor": "^2.10.4",
     "nuxt": "^2.15.8",
     "vue": "^2.6.14",
+    "vue-dompurify-html": "^2.5.0",
     "vue-server-renderer": "^2.6.14",
     "vue-template-compiler": "^2.6.14",
     "webpack": "^4.46.0"

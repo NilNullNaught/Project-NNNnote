@@ -30,7 +30,7 @@ public class UserInfoController {
     @ApiOperation("根据 token 获取用户信息")
     @GetMapping("/getUserInfo")
     public R getUserInfo(HttpServletRequest request) {
-        String ID = JwtUtils.getMemberIdByJwtToken(request);
+        String ID = JwtUtils.getIdByJwtToken(request);
         UserInfo userInfo = userInfoService.getById(ID);
         return R.ok().data("data", userInfo);
     }
@@ -41,6 +41,7 @@ public class UserInfoController {
         userInfoService.updateUserInfo(userInfo);
         return R.ok();
     }
+
 
 
 }

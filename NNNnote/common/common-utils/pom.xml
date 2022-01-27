@@ -17,6 +17,13 @@
     </properties>
 
     <dependencies>
+        <!--对工具类进行测试-->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!--以下依赖均为 JJWT 所使用的依赖，因为 JJWT 不支持 JDK11 版本所以需要引入-->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -43,8 +50,6 @@
             <artifactId>activation</artifactId>
             <version>1.1.1</version>
         </dependency>
-
-
 
     </dependencies>
 </project>

@@ -85,6 +85,9 @@
                   <el-menu-item index="6">
                     注册
                   </el-menu-item>
+                  <el-menu-item index="4">
+                    写笔记
+                  </el-menu-item>
                 </el-menu>
               </div>
             </div>
@@ -188,7 +191,7 @@ export default {
           break
         case '2':
           this.style.activeIndex = 2
-          this.$router.push({ path: '/recommend' })
+          this.$router.push({ path: '/note' })
           break
         case '3-1':
           this.style.activeIndex = '3-1'
@@ -212,7 +215,7 @@ export default {
           this.$router.push({ path: '/register' })
           break
         default:
-          this.$router.push({ path: '/' })
+          this.$router.push({ path: '/editor' })
       }
     }
 

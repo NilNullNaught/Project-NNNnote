@@ -23,6 +23,16 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
+        <!-- 如果不加上该依赖，将无法通过编译
+            因为过滤器中使用的 JWT 工具类需要 javax.servlet.http.HttpServletRequest
+         -->
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <version>8.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!--gateway-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>

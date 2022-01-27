@@ -86,7 +86,7 @@ public class UserCheckController {
     @ApiOperation("获取用户安全设置相关数据")
     @GetMapping("/alterUserSafeInfo")
     public R alterUserSafeInfo(HttpServletRequest request){
-        String ID = JwtUtils.getMemberIdByJwtToken(request);
+        String ID = JwtUtils.getIdByJwtToken(request);
         UserCheck userCheck = userCheckService.getById(ID);
         SettingSafeVo settingSafeVo = new SettingSafeVo();
         BeanUtils.copyProperties(userCheck,settingSafeVo);
@@ -99,7 +99,7 @@ public class UserCheckController {
             HttpServletRequest request,
             @RequestParam(name = "email")String email,
             @RequestParam(name = "code")String code){
-        String ID = JwtUtils.getMemberIdByJwtToken(request);
+        String ID = JwtUtils.getIdByJwtToken(request);
         userCheckService.alterUserEmail(ID,email,code);
         return R.ok();
     }
