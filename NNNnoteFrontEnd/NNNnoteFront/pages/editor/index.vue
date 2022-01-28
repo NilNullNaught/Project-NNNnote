@@ -5,9 +5,10 @@
         ref="md"
         v-model="handbook"
         :toolbars="markdownOption"
-        @imgAdd="addImg"
-        @imgDel="delImg"
-        @save="save"
+        @imgAdd="$addImg"
+        @imgDel="$delImg"
+        @save="$save"
+        @change="$change"
       />
     </no-ssr>
 
@@ -90,6 +91,7 @@ export default {
         }
 
       ],
+      isSave: false,
       handbook: '#### how to use mavonEditor in nuxt.js',
       imgs: [],
       saveDialog: {
@@ -134,13 +136,20 @@ export default {
     }
   },
   methods: {
-    save () {
-      this.saveDialog.visible = true
+    $save (value, render) {
+      alert(value)
+      this.isSave = true
+
+      // alert(render)
     },
-    addImg (pos, file) {
-      this.$refs.md.$img2Url(pos, file.name)
+    $change (value, render) {
+      this.isSave = false
+      alert(this.isSave)
     },
-    delImg (pos) {
+    $addImg (pos, file) {
+      this.$refs.md.$img2Url(pos, 'https:www.baidu.com')
+    },
+    $delImg (pos) {
       alert(pos)
     }
   }

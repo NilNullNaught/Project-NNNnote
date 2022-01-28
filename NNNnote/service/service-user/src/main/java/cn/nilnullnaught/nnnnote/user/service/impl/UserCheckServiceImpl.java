@@ -204,6 +204,12 @@ public class UserCheckServiceImpl extends ServiceImpl<UserCheckMapper, UserCheck
         }
     }
 
+    /**
+     * 绑定或解除绑定用户邮箱
+     * @param id
+     * @param email
+     * @param code
+     */
     @Override
     public void alterUserEmail(String id, String email,String code) {
 

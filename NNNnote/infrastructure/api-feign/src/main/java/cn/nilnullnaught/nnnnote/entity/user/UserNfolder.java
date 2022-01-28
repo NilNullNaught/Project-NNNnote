@@ -1,6 +1,7 @@
 package cn.nilnullnaught.nnnnote.entity.user;
 
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import io.swagger.annotations.ApiModel;
@@ -25,6 +26,7 @@ public class UserNfolder implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty("文件夹id")
+    @TableId(value = "id", type = IdType.ASSIGN_UUID)
     private String id;
 
     @ApiModelProperty("用户id")
@@ -46,9 +48,11 @@ public class UserNfolder implements Serializable {
     private Boolean isDeleted;
 
     @ApiModelProperty("创建时间")
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime gmtCreate;
 
     @ApiModelProperty("更新时间")
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime gmtModified;
 
 
