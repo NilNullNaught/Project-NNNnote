@@ -1,9 +1,11 @@
 package cn.nilnullnaught.nnnnote.oss.service;
 
-import org.springframework.web.bind.annotation.RequestHeader;
+import cn.nilnullnaught.nnnnote.entity.oss.AliyunOssResource;
+import cn.nilnullnaught.nnnnote.entity.oss.vo.ResourceManagerVo;
+import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.web.multipart.MultipartFile;
 
-public interface AliyunOssService {
+public interface AliyunOssService extends IService<AliyunOssResource> {
 
     String uploadFile(MultipartFile file);
 
@@ -13,5 +15,5 @@ public interface AliyunOssService {
 
     void deleteFile(String URL);
 
-
+    void manageResource(ResourceManagerVo resourceManagerVo);
 }

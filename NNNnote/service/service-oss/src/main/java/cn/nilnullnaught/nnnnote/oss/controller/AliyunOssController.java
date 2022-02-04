@@ -1,13 +1,18 @@
 package cn.nilnullnaught.nnnnote.oss.controller;
 
 import cn.nilnullnaught.nnnnote.common.utils.R;
+import cn.nilnullnaught.nnnnote.entity.oss.AliyunOssResource;
+import cn.nilnullnaught.nnnnote.entity.oss.vo.ResourceManagerVo;
 import cn.nilnullnaught.nnnnote.oss.service.AliyunOssService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/oss/aliyun-oss")
@@ -22,6 +27,31 @@ public class AliyunOssController {
         //返回上传到oss的路径
         String url = aliyunOssService.uploadFile(file);
         return R.ok().data("url",url);
+    }
+
+    @ApiOperation("文件状态管理")
+    @PostMapping("/managerResource")
+    public R manageResource(@RequestBody ResourceManagerVo resourceManagerVo){
+        aliyunOssService.manageResource(resourceManagerVo);
+        return R.ok();
+    }
+
+    @ApiOperation("获取该使用者正在使用的所有文件URL")
+    @GetMapping("/getResourceByBelongId/{belongId}/{type}")
+    public R getResourceByBelongId(@PathVariable("belongId") String belongId,@PathVariable("type") Integer type){
+
+        QueryWrapper<AliyunOssResource> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("belong_id",belongId);
+        queryWrapper.eq("type",type);
+        queryWrapper.eq("in_use",true);
+        queryWrapper.select("src");
+
+        List<String> list =new ArrayList<>();
+
+        for(AliyunOssResource it : aliyunOssService.list(queryWrapper)){
+            list.add(it.getSrc());
+        }
+        return R.ok().data("data",list);
     }
 
     @ApiOperation("暂存文件")

@@ -17,10 +17,6 @@ import java.time.LocalDateTime;
  */
 @Mapper
 public interface NoteInfoMapper extends BaseMapper<NoteInfo> {
-    void initializeNote(@Param("ID") String ID,
-                        @Param("userID") String userID,
-                        @Param("title") String title,
-                        @Param("text") String text,
-                        @Param("date") LocalDateTime date);
+
 
 }

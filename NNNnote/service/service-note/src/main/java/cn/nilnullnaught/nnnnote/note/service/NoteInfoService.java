@@ -1,7 +1,11 @@
 package cn.nilnullnaught.nnnnote.note.service;
 
 import cn.nilnullnaught.nnnnote.entity.note.NoteInfo;
+import cn.nilnullnaught.nnnnote.note.vo.SaveNoteVo;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -13,5 +17,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface NoteInfoService extends IService<NoteInfo> {
 
-    NoteInfo initializeNote(String id);
+    String initializeNote(String userID);
+
+    void saveNote(SaveNoteVo saveNoteVo);
+
+    Map noteInfo(String noteId);
 }

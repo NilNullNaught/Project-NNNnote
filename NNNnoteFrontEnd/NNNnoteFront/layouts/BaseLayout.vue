@@ -85,9 +85,6 @@
                   <el-menu-item index="6">
                     注册
                   </el-menu-item>
-                  <el-menu-item index="4">
-                    写笔记
-                  </el-menu-item>
                 </el-menu>
               </div>
             </div>
@@ -137,6 +134,7 @@
 
 <script>
 import jsCookie from 'js-cookie'
+import noteApi from '@/api/note'
 
 export default {
   data () {
@@ -183,6 +181,7 @@ export default {
         this.$router.push({ path: '/' })
       }
     },
+    // 管理路由跳转
     handleSelect (key, keyPath) {
       switch (key) {
         case '1':
@@ -208,6 +207,9 @@ export default {
         case '3-4':
           this.signOut()
           break
+        case '4':
+          this.toEditor()
+          break
         case '5':
           this.$router.push({ path: '/login' })
           break
@@ -217,8 +219,18 @@ export default {
         default:
           this.$router.push({ path: '/editor' })
       }
+    },
+    // 跳转到编辑页面前，对笔记进行初始化
+    toEditor () {
+      noteApi.initializeNote()
+        .then((response) => {
+          if (response.data.code === 20000) {
+            this.$router.push({ path: `/editor/${response.data.data.data}` })
+          } else {
+            this.$message.error(response.data.message)
+          }
+        })
     }
-
   }
 
 }

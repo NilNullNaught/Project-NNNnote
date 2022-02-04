@@ -129,7 +129,7 @@ export default {
       this.userInfoCheck = JSON.parse(this.userStr)
     }
   },
-  beforeDestroy () {
+  mounted () {
     // 校验用户信息是否被修改
     if (
       this.userInfoCheck.nickname !== this.userInfo.nickname ||
