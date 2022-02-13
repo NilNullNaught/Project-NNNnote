@@ -22,4 +22,6 @@ public interface NoteInfoService extends IService<NoteInfo> {
     void saveNote(SaveNoteVo saveNoteVo);
 
     Map noteInfo(String noteId);
+
+    Map<String, Object> getNotes(String id, long page, long limit, String condition);
 }

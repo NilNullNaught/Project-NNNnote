@@ -6,11 +6,13 @@ import cn.nilnullnaught.nnnnote.common.utils.R;
 import cn.nilnullnaught.nnnnote.entity.note.NoteInfo;
 import cn.nilnullnaught.nnnnote.note.service.NoteInfoService;
 import cn.nilnullnaught.nnnnote.note.vo.SaveNoteVo;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +30,7 @@ public class NoteInfoController {
 
     @Autowired
     private NoteInfoService noteInfoService;
+
 
     @ApiOperation("笔记初始化")
     @PostMapping("/initializeNote")
@@ -51,4 +54,16 @@ public class NoteInfoController {
         noteInfoService.saveNote(saveNoteVo);
         return R.ok();
     }
+
+    @ApiOperation(value = "分页条件查询笔记")
+    @GetMapping("getNotes/{page}/{limit}/{condition}")
+    public R getNotes(@RequestHeader("token") String token,
+                               @PathVariable long page,
+                               @PathVariable long limit,
+                               @PathVariable String condition) {
+        String ID = JwtUtils.getIdByJwtToken(token);
+        Map<String, Object> map = noteInfoService.getNotes(ID, page, limit,condition);
+        return  R.ok().data(map);
+    }
+
 }

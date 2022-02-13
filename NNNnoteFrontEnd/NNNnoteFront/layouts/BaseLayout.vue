@@ -104,11 +104,20 @@
         </el-row>
       </el-main>
 
-      <el-footer class="head-bg" height="160px">
-        <el-row :gutter="20" align="middle" justify="center" type="flex">
-          <el-col :span="4" />
-
-          <el-col :span="16" align="middle" justify="center" type="flex">
+      <el-footer class="head-bg" height="120px">
+        <el-row justify="center" type="flex">
+          <el-col :span="16" align="center" justify="center" type="flex">
+            <!-- <el-descriptions id="BaseLayout_el_descriptions_backgroundcolor" title="Present by NilNullNaught">
+              <el-descriptions-item :span="1" label="Email">
+                nilnullnaught@gmail.com
+              </el-descriptions-item>
+              <el-descriptions-item label="项目地址">
+                github.com/NilNullNaught/Project-NNNnote
+              </el-descriptions-item>
+              <el-descriptions-item :span="1" label="联系方式">
+                188********
+              </el-descriptions-item>
+            </el-descriptions> -->
             <div>
               <h3 class="h3">
                 Present by NilNullNaught
@@ -125,7 +134,6 @@
               </div>
             </div>
           </el-col>
-          <el-col :span="4" />
         </el-row>
       </el-footer>
     </el-container>
@@ -194,7 +202,7 @@ export default {
           break
         case '3-1':
           this.style.activeIndex = '3-1'
-          this.$router.push({ path: '/user' })
+          this.$router.push({ path: '/user/nfolder' })
           break
         case '3-2':
           this.style.activeIndex = '3-2'
@@ -256,16 +264,24 @@ body{
     overflow: auto;
   }
   .h3 {
-    color:#999;
+          color:#999;
     padding:30px 0px 0px 0px;
     font-size: 20px;
     font-family: "Lucida Console", "Courier New", monospace;
   }
+
 .el-menu.el-menu--horizontal {
      border-bottom: 0px;
 }
 
-[v-cloak] {
-  display: none;
+#BaseLayout_el_descriptions_backgroundcolor .el-descriptions__title{
+          color:#999;
+    padding:30px 0px 0px 0px;
+    font-size: 20px;
+    font-family: "Lucida Console", "Courier New", monospace;
+}
+
+#BaseLayout_el_descriptions_backgroundcolor .el-descriptions__body{
+      background-color: #323232;
 }
 </style>

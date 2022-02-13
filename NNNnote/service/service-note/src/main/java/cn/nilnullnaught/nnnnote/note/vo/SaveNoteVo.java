@@ -7,13 +7,16 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-@ApiModel(value="笔记文件夹", description="用于获取笔记文件夹信息")
+@ApiModel(value="笔记信息", description="用于保存笔记文件夹信息")
 public class SaveNoteVo {
     @ApiModelProperty("笔记 id")
     private String  id;
 
     @ApiModelProperty("笔记标题")
     private String  title;
+
+    @ApiModelProperty("文件夹ID")
+    private String noteFolderId;
 
     @ApiModelProperty("0 草稿状态，1 完成状态，2 发布状态")
     private byte status;

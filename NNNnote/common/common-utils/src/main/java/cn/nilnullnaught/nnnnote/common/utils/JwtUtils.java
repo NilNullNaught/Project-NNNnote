@@ -91,6 +91,18 @@ public class JwtUtils {
     }
 
     /**
+     * 根据token字符串获取会员id
+     * @param request
+     * @return
+     */
+    public static String getIdByJwtToken(String jwtToken) {
+        if(StringUtils.isEmpty(jwtToken)) return "";
+        Jws<Claims> claimsJws = Jwts.parser().setSigningKey(APP_SECRET).parseClaimsJws(jwtToken);
+        Claims claims = claimsJws.getBody();
+        return (String)claims.get("id");
+    }
+
+    /**
      * 根据 token 字符串获取 token 过期时间
      * @param request
      * @return
