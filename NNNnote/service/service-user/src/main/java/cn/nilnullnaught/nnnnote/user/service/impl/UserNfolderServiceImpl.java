@@ -71,7 +71,7 @@ public class UserNfolderServiceImpl extends ServiceImpl<UserNfolderMapper, UserN
         QueryWrapper<UserNfolder> queryWrapper = new QueryWrapper<>();
         queryWrapper.orderByDesc("gmt_modified");
         queryWrapper.eq("user_id", id);
-        queryWrapper.like("title",condition);
+        queryWrapper.like("folder_name",condition);
         // 每页的查询数据中，既包括文件夹又包括笔记，所以需要除二
         Page<UserNfolder> pageUserNfolder = new Page<>(page, limit/2);
         baseMapper.selectPage(pageUserNfolder, queryWrapper);

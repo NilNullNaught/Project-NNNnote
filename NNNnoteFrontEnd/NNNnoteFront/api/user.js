@@ -43,11 +43,41 @@ export default {
       data: formdata
     })
   },
+  // 修改笔记文件夹信息
+  alterUserNfolder (formdata) {
+    return request({
+      url: `${ApiName3}/alterUserNfolder`,
+      method: 'post',
+      data: formdata
+    })
+  },
   // 获取笔记文件夹列表
   getUserNfolder () {
     return request({
       url: `${ApiName3}/getUserNfolder`,
       method: 'get'
+    })
+  },
+  // 分页查询 笔记文件夹列表
+  getUserNfolderPage (page, limit) {
+    return request({
+      url: `${ApiName3}/getUserNfolder/${page}/${limit}`,
+      method: 'get'
+    })
+  },
+  // 分页条件查询 笔记与笔记文件夹
+  getNfolderANDNote (page, limit, condition) {
+    return request({
+      url: `${ApiName3}/getNfolderANDNote/${page}/${limit}/${condition}`,
+      method: 'get'
+    })
+  },
+  // 批量删除
+  deleteUserNFolder (list) {
+    return request({
+      url: `${ApiName3}/deleteUserNFolder`,
+      method: 'delete',
+      data: list
     })
   }
 }

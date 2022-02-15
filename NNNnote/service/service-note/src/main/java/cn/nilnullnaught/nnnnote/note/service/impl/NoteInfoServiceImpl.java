@@ -84,7 +84,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
         // <- 更新图片信息
         // 如果不包含图片，直接跳过这一步
-        if (!saveNoteVo.getResourceUrlList().isEmpty()) {
+        if (saveNoteVo.getResourceUrlList() != null ) {
             ResourceManagerVo resourceManagerVo = new ResourceManagerVo();
             resourceManagerVo.setBelongId(saveNoteVo.getId());
             resourceManagerVo.setResourceUrlList(saveNoteVo.getResourceUrlList());
@@ -109,13 +109,16 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
             Long oldNoteFolderCount = baseMapper.selectCount(queryWrapper1);
 
             QueryWrapper<NoteInfo> queryWrapper2 = new QueryWrapper<NoteInfo>();
-            queryWrapper2.eq("note_folder_id",noteInfo.getNoteFolderId());
+            queryWrapper2.eq("note_folder_id",saveNoteVo.getNoteFolderId());
             Long newNoteFolderCount = baseMapper.selectCount(queryWrapper2);
 
             HashMap<String, Long> map = new HashMap<>();
             map.put(noteInfo.getNoteFolderId(),oldNoteFolderCount - 1);
             map.put(saveNoteVo.getNoteFolderId(),newNoteFolderCount +1);
-            userNfolderClient.alterUserNfolderNoteCount(map);
+            R result = userNfolderClient.alterUserNfolderNoteCount(map);
+            if (result.getCode()!= 20000){
+                throw new MyCustomException(20001,"更新失败");
+            }
             noteInfo.setNoteFolderId(saveNoteVo.getNoteFolderId());
         }
         baseMapper.updateById(noteInfo);

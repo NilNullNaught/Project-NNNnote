@@ -78,10 +78,10 @@ public class UserNfolderController {
     }
 
     @ApiOperation("根据文件夹 ID 修改笔记文件夹信息")
-    @PostMapping("/alterUserNfolder/{nfolderID}/{folderName}/{description}/")
-    public R alterUserNfolder(@PathVariable String nfolderID,
-                              @PathVariable String folderName,
-                              @PathVariable String description) {
+    @PostMapping("/alterUserNfolder")
+    public R alterUserNfolder(@RequestParam("nfolderID") String nfolderID,
+                              @RequestParam("folderName") String folderName,
+                              @RequestParam("description") String description) {
         UpdateWrapper<UserNfolder> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("id", nfolderID);
         updateWrapper.set("folder_name", folderName);
@@ -103,7 +103,7 @@ public class UserNfolderController {
 
     @ApiOperation(value = "删除用户文件夹", notes = "删除文件夹，可以进行批量删除。")
     @DeleteMapping("/deleteUserNFolder")
-    public R deleteUserNFolder(@RequestParam("nFolderList") List<String> nFolderList) {
+    public R deleteUserNFolder(@RequestBody List<String> nFolderList) {
 
         // <- 查询需要被删除的用户文件夹
         QueryWrapper<UserNfolder> queryWrapper = new QueryWrapper<>();
@@ -128,12 +128,15 @@ public class UserNfolderController {
 
     @ApiOperation(value = "修改用户文件夹的 note_count ", notes = "通过传入的键值对修改多个文件夹的 note_count 字段")
     @PostMapping("alterUserNfolderNoteCount")
-    public R alterUserNfolderNoteCount(@RequestParam("map") Map<String, Long> map) {
+    public R alterUserNfolderNoteCount(@RequestBody Map<String, Long> map) {
+
+        System.out.println("?");
 
         for (Map.Entry<String, Long> entry : map.entrySet()) {
             UpdateWrapper<UserNfolder> updateWrapper = new UpdateWrapper<>();
             updateWrapper.eq("id", entry.getKey());
             updateWrapper.set("note_count", entry.getValue());
+            userNfolderService.update(updateWrapper);
         }
 
         return R.ok();
