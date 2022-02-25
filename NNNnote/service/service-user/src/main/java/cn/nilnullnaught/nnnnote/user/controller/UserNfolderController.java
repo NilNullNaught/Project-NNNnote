@@ -91,6 +91,13 @@ public class UserNfolderController {
         return R.ok();
     }
 
+    @ApiOperation("根据文件夹 ID 修改笔记文件夹信息")
+    @GetMapping("/getNotefolderBynFolderId/{noteFolderID}")
+    public R getNotefolderByFolderId(@PathVariable String noteFolderID) {
+        UserNfolder userNfolder=  userNfolderService.getById(noteFolderID);
+        return R.ok().data("data",userNfolder);
+    }
+
     @ApiOperation(value = "根据用户 id 获取笔记文件夹列表并分页", notes = "分页查询文件夹列表，返回数据封装为 mapper")
     @GetMapping("/getUserNfolder/{page}/{limit}")
     public R getUserNfolder(@RequestHeader("token") String token,

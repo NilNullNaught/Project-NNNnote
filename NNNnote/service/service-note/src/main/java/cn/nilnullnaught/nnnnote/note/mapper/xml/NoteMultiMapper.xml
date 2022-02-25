@@ -4,7 +4,7 @@
     <insert id="initializeNote">
         INSERT INTO `note_info` ( id, user_id, note_folder_id, title, gmt_create, gmt_modified )
         VALUES
-            (#{ID},#{userID},#{userID},#{title},#{date},#{date});
+            (#{ID},#{userID},#{noteFolderId},#{title},#{date},#{date});
         INSERT INTO `note_text` ( id, text, gmt_create, gmt_modified )
         VALUES
             (#{ID},#{text},#{date},#{date});

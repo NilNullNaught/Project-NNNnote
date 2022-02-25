@@ -1,31 +1,35 @@
 <template>
   <el-container>
+    <!-- 侧边栏 ----------------------------------------------------------------------------------------------------------------------------------------->
     <el-aside>
       <el-menu
-        default-active="1"
+        default-active="/setting"
         class="el-menu-vertical-demo"
-        @select="handleSelect"
+        router
       >
-        <el-menu-item index="1">
+        <el-menu-item index="/setting">
           <i class="el-icon-user-solid" />
           <span slot="title">个人资料</span>
         </el-menu-item>
-        <el-menu-item index="2">
+        <el-menu-item index="/setting/safe">
           <i class="el-icon-lock" />
           <span slot="title">安全设置</span>
         </el-menu-item>
-        <el-menu-item index="3">
+        <el-menu-item index="/setting/writeOff">
           <i class="el-icon-error" />
           <span slot="title">账号注销</span>
         </el-menu-item>
       </el-menu>
     </el-aside>
+    <!------------------------------------------------------------------------------------------------------------------------------------------->
+
     <el-main>
       <el-form ref="userInfo" :model="userInfo" label-width="80px">
         <el-form-item>
           <el-col class="line" :span="5">
             <el-avatar size="large" :src="userInfo.avatar" style="width:80px;height:80px;block:inline" />
           </el-col>
+          <!-- 头像上传 ----------------------------------------------------------------------------------------------------------------------------------------->
           <el-col :span="8">
             <el-upload
               class="avatar-uploader"
@@ -38,6 +42,7 @@
               <i v-else class="el-icon-plus avatar-uploader-icon" />
             </el-upload>
           </el-col>
+          <!------------------------------------------------------------------------------------------------------------------------------------------->
         </el-form-item>
 
         <el-form-item prop="nickname" label="昵称">
@@ -48,26 +53,40 @@
 
         <el-form-item prop="birthday" label="生日">
           <el-col class="line" :span="12">
-            <el-date-picker v-model="userInfo.birthday" type="date" placeholder="选择日期" style="width: 60%;" />
+            <el-date-picker
+              v-model="userInfo.birthday"
+              type="date"
+              placeholder="选择日期"
+              style="width: 60%;"
+              value-format="yyyy-MM-ddThh:mm:ss.sssZ"
+            />
           </el-col>
         </el-form-item>
 
         <el-form-item prop="sex" label="性别">
-          <el-radio-group v-model="userInfo.sex">
-            <el-radio :label="0" name="0">
+          <el-radio-group :key="userInfo.sex" v-model="userInfo.sex">
+            <el-radio :label="0">
               男
             </el-radio>
-            <el-radio :label="1" name="1">
+            <el-radio :label="1">
               女
             </el-radio>
-            <el-radio :label="2" name="2">
+            <el-radio :label="2">
               保密
             </el-radio>
           </el-radio-group>
         </el-form-item>
 
         <el-form-item prop="sign" label="签名">
-          <el-input v-model="userInfo.sign" style="height:100px" type="textarea" maxlength="100" show-word-limit />
+          <el-col class="line" :span="18">
+            <el-input
+              v-model="userInfo.sign"
+              type="textarea"
+              rows="6"
+              maxlength="100"
+              show-word-limit
+            />
+          </el-col>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" :disabled="activeSubmitBtn" @click="onSubmit">
@@ -85,13 +104,10 @@ import userApi from '@/api/user'
 import ossApi from '@/api/oss'
 export default {
   name: 'SettingIndexPage',
-  // vue路由的钩子函数 , 可以放在mouted的同级
+  // vue路由的钩子函数
   beforeRouteLeave (to, from, next) {
-    if (this.userInfoCheck.nickname !== this.userInfo.nickname ||
-          this.userInfoCheck.birthday !== this.userInfo.birthday ||
-          this.userInfoCheck.sex !== this.userInfo.sex ||
-          this.userInfoCheck.sign !== this.userInfo.sign ||
-          this.imageUrl !== '') {
+    if (JSON.stringify(this.userInfoCheck) !==
+      JSON.stringify(this.userInfo)) {
       this.$confirm('离开页面 , 数据将不做保存, 请确认已经保存', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -107,16 +123,26 @@ export default {
       next()
     }
   },
-
   layout: 'BaseLayout',
   data () {
     return {
       imageUrl: '',
       activeSubmitBtn: false,
       userInfo: {
+        id: '',
+        nickname: '',
+        sex: null,
+        birthday: '',
+        avatar: '',
+        sign: ''
       },
       userInfoCheck: {
-
+        id: '',
+        nickname: '',
+        sex: null,
+        birthday: '',
+        avatar: '',
+        sign: ''
       }
     }
   },
@@ -131,11 +157,8 @@ export default {
   },
   mounted () {
     // 校验用户信息是否被修改
-    if (
-      this.userInfoCheck.nickname !== this.userInfo.nickname ||
-          this.userInfoCheck.birthday !== this.userInfo.birthday ||
-          this.userInfoCheck.sex !== this.userInfo.sex ||
-          this.userInfoCheck.sign !== this.userInfo.sign ||
+    if (JSON.stringify(this.userInfoCheck) !==
+      JSON.stringify(this.userInfo) ||
           this.imageUrl !== ''
     ) {
       window.onbeforeunload = function (e) { // 刷新与关闭时弹出提示
@@ -152,14 +175,15 @@ export default {
   methods: {
     // 提交修改的用户信息
     onSubmit () {
-      // 校验用户信息是否被修改
-      if (
-        this.userInfoCheck.nickname === this.userInfo.nickname &&
-          this.userInfoCheck.birthday === this.userInfo.birthday &&
-          this.userInfoCheck.sex === this.userInfo.sex &&
-          this.userInfoCheck.sign === this.userInfo.sign &&
-          this.imageUrl === ''
-      ) {
+      // <-校验用户信息是否被修改
+      // 是否上传了新的头像
+      if (this.imageUrl !== '') {
+        // 如果头像被改变，则提交修改
+        this.userInfo.avatar = this.imageUrl
+      }
+      // 检测用户信息是否进行了修改
+      if (JSON.stringify(this.userInfoCheck) ===
+        JSON.stringify(this.userInfo)) {
         // 提示修改失败
         this.$message({
           type: 'warning',
@@ -167,15 +191,9 @@ export default {
         })
         return
       }
+      // ->
 
       this.activeSubmitBtn = true
-
-      if (this.imageUrl !== '') {
-        // 如果头像被改变，则提交修改
-        this.userInfo.avatar = this.imageUrl
-      } else {
-        this.userInfo.avatar = ''
-      }
 
       userApi.alterUserInfo(this.userInfo)
         .then((response) => {
@@ -197,22 +215,7 @@ export default {
           }
         })
     },
-    // 处理页面跳转
-    handleSelect (key, keyPath) {
-      switch (key) {
-        case '1':
-          this.$router.push({ path: '/setting' })
-          break
-        case '2':
-          this.$router.push({ path: '/setting/safe' })
-          break
-        case '3':
-          this.$router.push({ path: '/setting/writeOff' })
-          break
-        default:
-          this.$router.push({ path: '/setting' })
-      }
-    },
+
     // 检查头像文件格式与大小
     beforeAvatarUpload (file) {
       const isJPG = file.type === 'image/jpeg'
@@ -231,7 +234,7 @@ export default {
       const data = new FormData()
       // 创建一个表单数据
       data.append('file', params.file)
-      ossApi.uploadFileTemporary(data).then((response) => {
+      ossApi.uploadFile(data).then((response) => {
         if (response.data.code === 20000) {
           // 提示修改成功
           this.$message({

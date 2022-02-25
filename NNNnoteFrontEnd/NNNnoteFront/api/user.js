@@ -43,6 +43,13 @@ export default {
       data: formdata
     })
   },
+  // 根据文件夹 ID 查询获取笔记文件夹
+  getNotefolderBynFolderId (noteFolderID) {
+    return request({
+      url: `${ApiName3}/getNotefolderBynFolderId/${noteFolderID}`,
+      method: 'get'
+    })
+  },
   // 修改笔记文件夹信息
   alterUserNfolder (formdata) {
     return request({

@@ -1,25 +1,28 @@
 <template>
   <el-container>
+    <!-- 侧边栏 ----------------------------------------------------------------------------------------------------------------------------------------->
     <el-aside>
       <el-menu
-        default-active="3"
+        default-active="/setting/writeOff"
         class="el-menu-vertical-demo"
-        @select="handleSelect"
+        router
       >
-        <el-menu-item index="1">
+        <el-menu-item index="/setting">
           <i class="el-icon-user-solid" />
           <span slot="title">个人资料</span>
         </el-menu-item>
-        <el-menu-item index="2">
+        <el-menu-item index="/setting/safe">
           <i class="el-icon-lock" />
           <span slot="title">安全设置</span>
         </el-menu-item>
-        <el-menu-item index="3">
+        <el-menu-item index="/setting/writeOff">
           <i class="el-icon-error" />
           <span slot="title">账号注销</span>
         </el-menu-item>
       </el-menu>
     </el-aside>
+    <!------------------------------------------------------------------------------------------------------------------------------------------->
+
     <el-main id="my-main">
       <el-row>
         <el-col :span="24" align="middle">
@@ -27,26 +30,17 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="4">
-          <br>
-        </el-col>
-        <el-col :span="20">
+        <el-col :span="18" :offset="6">
           1. 该操作执行完成不可撤销。
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="4">
-          <br>
-        </el-col>
-        <el-col :span="20">
+        <el-col :span="18" :offset="6">
           2. 注销后，将会删除您账号下的所有数据，且不可恢复。
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="4">
-          <br>
-        </el-col>
-        <el-col :span="20">
+        <el-col :span="18" :offset="6">
           3. 注销前，需要通过邮箱进行验证，如果没有绑定，请先绑定。
         </el-col>
       </el-row>

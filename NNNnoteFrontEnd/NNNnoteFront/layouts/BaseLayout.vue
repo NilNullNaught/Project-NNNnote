@@ -11,18 +11,17 @@
           </el-col>
           <el-col :span="5">
             <el-menu
-
               :default-active="style.activeIndex"
               mode="horizontal"
               background-color="#323232"
               text-color="#fff"
               active-text-color="#7AFFA0"
-              @select="handleSelect"
+              router
             >
-              <el-menu-item index="1">
+              <el-menu-item index="/">
                 主页
               </el-menu-item>
-              <el-menu-item index="2">
+              <el-menu-item index="/note">
                 推荐
               </el-menu-item>
             </el-menu>
@@ -45,26 +44,32 @@
                   background-color="#323232"
                   text-color="#fff"
                   active-text-color="#ffd04b"
-                  @select="handleSelect"
+                  router
                 >
                   <el-submenu index="3">
                     <template slot="title">
                       <el-avatar :src="userInfo.avatar" />
                     </template>
-                    <el-menu-item index="3-1">
+                    <el-menu-item index="/user/nfolder">
                       我的主页
                     </el-menu-item>
-                    <el-menu-item index="3-2">
+                    <el-menu-item index="/user/collection">
                       收藏夹
                     </el-menu-item>
-                    <el-menu-item index="3-3">
+                    <el-menu-item index="/user/draft">
+                      草稿箱
+                    </el-menu-item>
+                    <el-menu-item index="/user/recyclebin">
+                      回收站
+                    </el-menu-item>
+                    <el-menu-item index="/setting">
                       设置
                     </el-menu-item>
-                    <el-menu-item index="3-4">
+                    <el-menu-item @click="signOut">
                       退出
                     </el-menu-item>
                   </el-submenu>
-                  <el-menu-item index="4">
+                  <el-menu-item @click="toEditor">
                     写笔记
                   </el-menu-item>
                 </el-menu>
@@ -77,12 +82,12 @@
                   background-color="#323232"
                   text-color="#fff"
                   active-text-color="#ffd04b"
-                  @select="handleSelect"
+                  router
                 >
-                  <el-menu-item index="5">
+                  <el-menu-item index="/login">
                     登录
                   </el-menu-item>
-                  <el-menu-item index="6">
+                  <el-menu-item index="/register">
                     注册
                   </el-menu-item>
                 </el-menu>
@@ -189,55 +194,16 @@ export default {
         this.$router.push({ path: '/' })
       }
     },
-    // 管理路由跳转
-    handleSelect (key, keyPath) {
-      switch (key) {
-        case '1':
-          this.style.activeIndex = 1
-          this.$router.push({ path: '/' })
-          break
-        case '2':
-          this.style.activeIndex = 2
-          this.$router.push({ path: '/note' })
-          break
-        case '3-1':
-          this.style.activeIndex = '3-1'
-          this.$router.push({ path: '/user/nfolder' })
-          break
-        case '3-2':
-          this.style.activeIndex = '3-2'
-          this.$router.push({ path: '/user/collection' })
-          break
-        case '3-3':
-          this.style.activeIndex = '3-3'
-          this.$router.push({ path: '/setting' })
-          break
-        case '3-4':
-          this.signOut()
-          break
-        case '4':
-          this.toEditor()
-          break
-        case '5':
-          this.$router.push({ path: '/login' })
-          break
-        case '6':
-          this.$router.push({ path: '/register' })
-          break
-        default:
-          this.$router.push({ path: '/editor' })
-      }
-    },
+
     // 跳转到编辑页面前，对笔记进行初始化
     toEditor () {
-      noteApi.initializeNote()
-        .then((response) => {
-          if (response.data.code === 20000) {
-            this.$router.push({ path: `/editor/${response.data.data.data}` })
-          } else {
-            this.$message.error(response.data.message)
-          }
-        })
+      noteApi.initializeNote(this.userInfo.id).then((response) => {
+        if (response.data.code === 20000) {
+          this.$router.push({ path: `/editor/${response.data.data.data}` })
+        } else {
+          this.$message.error(response.data.message)
+        }
+      })
     }
   }
 

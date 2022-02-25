@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-container class="userindex-height">
+    <el-container class="NoteFolderIndex-height">
       <el-main>
         <!-- 操作栏 ----------------------------------------------------------------------------------------------------------------------------------------->
         <el-row>
@@ -56,7 +56,7 @@
         <!-- 用户文件夹列表 ----------------------------------------------------------------------------------------------------------------------------------------->
         <el-row v-if="!search.isSearching">
           <el-col v-for="(o) in list" :key="o.id" :span="4">
-            <el-card :id="'ID-'+o.id" class="userindex-el-card" shadow="hover" style="position: relative;">
+            <el-card :id="'ID-'+o.id" class="NoteFolderIndex-el-card" shadow="hover" style="position: relative;">
               <input
                 v-if="o.id !== o.userId"
                 v-model="o.ischecked"
@@ -69,7 +69,14 @@
                   <img src="~/assets/img/mine/folder.png" alt>
                 </div>
                 <div style="display: flex;justify-content:center;">
-                  <span>{{ o.folderName }}</span>
+                  <span
+                    style="
+                        display: -webkit-box;
+                        -webkit-box-orient: vertical;
+                        -webkit-line-clamp: 1;
+                        overflow: hidden;
+                        word-break: break-all;"
+                  >{{ o.folderName }}</span>
                 </div>
               </div>
             </el-card>
@@ -80,7 +87,7 @@
         <!-- 搜索结果列表 ----------------------------------------------------------------------------------------------------------------------------------------->
         <el-row v-if="search.isSearching">
           <el-col v-for="(so) in search.searchResult" :key="so.id" :span="4">
-            <el-card :id="'SID-'+so.id" class="userindex-el-card" shadow="hover" style="position: relative;">
+            <el-card :id="'SID-'+so.id" class="NoteFolderIndex-el-card" shadow="hover" style="position: relative;">
               <input
                 v-if="so.id !== so.userId"
                 v-model="so.ischecked"
@@ -119,6 +126,7 @@
             :current-page="pagination2.current"
             :page-size="pagination2.limit"
             :total="pagination2.total"
+            @current-change="searchNfolderANDNote"
           />
         </el-row>
       </el-footer>
@@ -172,7 +180,6 @@
       title="提示"
       :visible.sync="deleteDialog.visible"
       width="30%"
-      :before-close="handleClose"
     >
       <span>确认删除{{ select.checkedList.length }}个文件夹？</span>
       <span slot="footer" class="dialog-footer">
@@ -189,7 +196,7 @@ import qs from 'qs'
 import userApi from '@/api/user'
 
 export default {
-  name: 'UserIndexPage',
+  name: 'UserNfolderIndexPage',
   layout: 'BaseLayout',
 
   data () {
@@ -204,12 +211,12 @@ export default {
       pagination1: {
         current: 1,
         limit: 24,
-        total: ''
+        total: null
       },
       pagination2: {
         current: 1,
         limit: 24,
-        total: ''
+        total: null
       },
       NfolderDialog: {
         visible: false,
@@ -242,11 +249,15 @@ export default {
         this.list = response.data.data.items
         this.pagination1.total = response.data.data.total
 
-        this.list.forEach((item) => {
-          item.shapes.forEach((tem) => {
-            tem.ischecked = false
+        if (this.list) {
+          this.list.forEach((item) => {
+            if (item.shapes) {
+              item.shapes.forEach((tem) => {
+                tem.ischecked = false
+              })
+            }
           })
-        })
+        }
       })
     },
 
@@ -313,10 +324,10 @@ export default {
         element = document.getElementById(ID)
       }
       if (checked) {
-        element.classList.add('userindex-el-card--select')
+        element.classList.add('NoteFolderIndex-el-card--select')
         // input[0].style.visibility = 'visible'
       } else {
-        element.classList.remove('userindex-el-card--select')
+        element.classList.remove('NoteFolderIndex-el-card--select')
         // input[0].style.visibility = 'hidden'
       }
     },
@@ -437,25 +448,25 @@ export default {
 }
 </script>
 <style>
-.userindex-height{
+.NoteFolderIndex-height{
   min-height: calc(75vh);
 }
-.userindex-el-button{
+.NoteFolderIndex-el-button{
   margin-bottom: 10px;
 }
-.userindex-el-card{
+.NoteFolderIndex-el-card{
   margin:10px;
 }
-.userindex-el-card:hover{
-  background-color: #f1f5fa;
+.NoteFolderIndex-el-card:hover{
+  background-color: #d0f0f0;
 }
-.userindex-el-card input {
+.NoteFolderIndex-el-card input {
   visibility: hidden;
 }
-.userindex-el-card:hover input {
+.NoteFolderIndex-el-card:hover input {
   visibility: visible;
 }
-.userindex-el-card--select{
+.NoteFolderIndex-el-card--select{
   border: 1px solid #90d8ff;
   background-color: #f1f5fa;
 }

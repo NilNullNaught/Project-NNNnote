@@ -11,7 +11,7 @@
           v-model="saveNote.title"
 
           placeholder="请输入标题"
-          maxlength="30"
+          maxlength="20"
           show-word-limit
           clearable
         >
@@ -109,11 +109,10 @@ import ossApi from '@/api/oss'
 import userApi from '@/api/user'
 
 export default {
-  name: 'EditorIndexPage',
+  name: 'EditorIdPage',
   data () {
     return {
       folders: '',
-
       saveNote: {
         id: '',
         noteFolderId: '',
@@ -123,7 +122,6 @@ export default {
         status: 0,
         resourceUrlList: []
       },
-
       saveDialog: {
         visible: false,
         // 笔记默认以私密状态保存
@@ -170,11 +168,12 @@ export default {
         /* 2.2.1 */
         subfield: true, // 单双栏模式
         preview: true // 预览
-      }
+      },
+      stopTimerInEditorIdPage: true
     }
   },
   created () {
-    noteApi.getNoteInfo(this.$route.params.id).then((response) => {
+    noteApi.getNoteInfoToEdit(this.$route.params.id).then((response) => {
       if (response.data.code === 20000) {
         this.saveNote.id = response.data.data.data.noteInfo.id
         this.saveNote.noteFolderId = response.data.data.data.noteInfo.noteFolderId
@@ -190,6 +189,23 @@ export default {
         this.saveNote.resourceUrlList = this.saveNote.text.match(/\]\(https:\/\/nilnullnaught(.*?)\)/g)
       }
     })
+
+    // 设置自动保存
+    const autoSave = setInterval(() => {
+      if (this.stopTimerInEditorIdPage) {
+        clearInterval(autoSave)
+      }
+      noteApi.autoSaveNote(this.saveNote).then((response) => {
+        if (response.data.code === 20000) {
+          this.$message({
+            type: 'success',
+            message: '保存成功'
+          })
+        } else {
+          this.$message.error(response.data.message)
+        }
+      })
+    }, 30000)
   },
   mounted () {
     window.onbeforeunload = function (e) { // 刷新与关闭时弹出提示
@@ -242,6 +258,7 @@ export default {
           }
         })
     },
+
     // 创建新的笔记文件夹
     submitNfolder () {
       userApi.addUserNfolder(qs.stringify(this.addNfolderDialog.form)).then((response) => {

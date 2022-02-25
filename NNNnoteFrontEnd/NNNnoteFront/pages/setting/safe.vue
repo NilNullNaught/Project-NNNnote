@@ -1,27 +1,27 @@
 <template>
   <el-container>
-    <!-- 开始 -- 侧边栏 --------------------------------------------------------------------------------------------------------------------------------->
+    <!-- 侧边栏 ----------------------------------------------------------------------------------------------------------------------------------------->
     <el-aside>
       <el-menu
-        default-active="2"
+        default-active="/setting/safe"
         class="el-menu-vertical-demo"
-        @select="handleSelect"
+        router
       >
-        <el-menu-item index="1">
+        <el-menu-item index="/setting">
           <i class="el-icon-user-solid" />
           <span slot="title">个人资料</span>
         </el-menu-item>
-        <el-menu-item index="2">
+        <el-menu-item index="/setting/safe">
           <i class="el-icon-lock" />
           <span slot="title">安全设置</span>
         </el-menu-item>
-        <el-menu-item index="3">
+        <el-menu-item index="/setting/writeOff">
           <i class="el-icon-error" />
           <span slot="title">账号注销</span>
         </el-menu-item>
       </el-menu>
     </el-aside>
-    <!-- 结束 -- 侧边栏 --------------------------------------------------------------------------------------------------------------------------------->
+    <!------------------------------------------------------------------------------------------------------------------------------------------->
 
     <!-- 开始 -- 主要部分 --------------------------------------------------------------------------------------------------------------------------------->
     <el-main>
@@ -62,10 +62,7 @@
         <el-divider />
         <el-form-item label="社交账号">
           <el-row>
-            <el-col :span="1">
-              &nbsp;
-            </el-col>
-            <el-col :span="2">
+            <el-col :span="2" :offset="1">
               <i class="iconfont icon-weixin" style="color: #00bb29;font-size: 28px;" />
             </el-col>
             <el-col :span="10">
@@ -80,16 +77,13 @@
 
               <div v-if="!userSafeInfo.openidWx">
                 <el-button size="mini" type="primary" round disabled>
-                  绑定微博账号
+                  绑定微信账号
                 </el-button>
               </div>
             </el-col>
           </el-row>
           <el-row>
-            <el-col :span="1">
-              &nbsp;
-            </el-col>
-            <el-col :span="2">
+            <el-col :span="2" :offset="1">
               <i class="iconfont icon-qq" style="color: #498ad5;font-size: 28px;" />
             </el-col>
             <el-col :span="10">
@@ -109,11 +103,9 @@
               </div>
             </el-col>
           </el-row>
+          <!--
           <el-row>
-            <el-col :span="1">
-              &nbsp;
-            </el-col>
-            <el-col :span="2">
+            <el-col :span="2" :offset="1">
               <i class="iconfont icon-wb" style="color: #498ad5;font-size: 28px;" />
             </el-col>
             <el-col :span="10">
@@ -132,7 +124,7 @@
                 </el-button>
               </div>
             </el-col>
-          </el-row>
+          </el-row> -->
         </el-form-item>
       </el-form>
       <el-row>

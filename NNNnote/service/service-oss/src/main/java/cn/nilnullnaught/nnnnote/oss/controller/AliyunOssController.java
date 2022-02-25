@@ -36,7 +36,7 @@ public class AliyunOssController {
         return R.ok();
     }
 
-    @ApiOperation("获取该使用者正在使用的所有文件URL")
+    @ApiOperation(value = "获取该使用者正在使用的所有文件URL",notes = "使用者，可以是用户（文件此时是用户的头像），也可以是笔记（文件此时是笔记中的所有图片）")
     @GetMapping("/getResourceByBelongId/{belongId}/{type}")
     public R getResourceByBelongId(@PathVariable("belongId") String belongId,@PathVariable("type") Integer type){
 

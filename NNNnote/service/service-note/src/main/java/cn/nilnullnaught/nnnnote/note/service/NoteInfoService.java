@@ -17,11 +17,17 @@ import java.util.Map;
  */
 public interface NoteInfoService extends IService<NoteInfo> {
 
-    String initializeNote(String userID);
+    String initializeNote(String userID,String nFolderId);
 
     void saveNote(SaveNoteVo saveNoteVo);
 
-    Map noteInfo(String noteId);
+    Map getNoteInfoToEdit(String noteId);
 
-    Map<String, Object> getNotes(String id, long page, long limit, String condition);
+    Map getNoteInfoToRead(String noteId);
+
+    Map<String, Object> getNotes(String userId,String noteFolderId, long page, long limit, String condition);
+
+    void deleteNotes(List<String> nFolderList);
+
+    void autoSaveNote(SaveNoteVo saveNoteVo);
 }

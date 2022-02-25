@@ -19,6 +19,7 @@ public interface NoteMultiMapper {
      */
     void initializeNote(@Param("ID") String ID,
                         @Param("userID") String userID,
+                        @Param("noteFolderId") String noteFolderId,
                         @Param("title") String title,
                         @Param("text") String text,
                         @Param("date") LocalDateTime date);

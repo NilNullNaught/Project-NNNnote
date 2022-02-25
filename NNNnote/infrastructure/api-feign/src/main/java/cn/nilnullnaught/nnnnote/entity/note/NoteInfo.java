@@ -2,6 +2,7 @@ package cn.nilnullnaught.nnnnote.entity.note;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -54,6 +55,7 @@ public class NoteInfo implements Serializable {
     private Long version;
 
     @ApiModelProperty("逻辑删除 1（true）已删除， 0（false）未删除")
+    @TableLogic
     private Boolean isDeleted;
 
     @ApiModelProperty("创建时间")

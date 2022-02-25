@@ -1,25 +1,378 @@
 <template>
   <div>
-    <br><br><br><br><br><br><span style="font-size:50px">
-      笔记夹
-    </span><br><br><br><br><br><br><br>
-    <br><br><br><br><br><br><h1>中间</h1><br><br><br><br><br><br><br>
+    <el-container class="NoteFolderId-height">
+      <el-main>
+        <!-- 操作栏 ----------------------------------------------------------------------------------------------------------------------------------------->
+        <el-row align="middle" justify="center" type="flex">
+          <el-col :span="10">
+            <el-button
+              type="primary"
+              @click="CreateNoteDialog.visible = true"
+            >
+              写笔记
+            </el-button>
+
+            <el-button-group
+              v-show="select.checkedList.length !== 0"
+            >
+              <el-button type="danger" @click="deleteDialog.visible = true">
+                <i class="el-icon-delete el-icon--left" />
+                删除笔记
+              </el-button>
+
+              <el-button
+                v-if="select.checkedList.length < 2"
+                type="primary"
+                @click="editNote"
+              >
+                <i class="el-icon-edit el-icon--left" />
+                编辑笔记
+              </el-button>
+            </el-button-group>
+          </el-col>
+          <el-col :span="4" align="center" justify="center" type="flex">
+            <h1>&nbsp;{{ folderInfo.folderName }} &nbsp;</h1>
+          </el-col>
+          <el-col :span="6" :offset="4">
+            <el-input
+              v-model="list.keyword"
+              placeholder="请输入内容"
+              clearable
+              @change="getList"
+            />
+          </el-col>
+        </el-row>
+        <!----------------------------------------------------------------------------------------------------------------------------------------->
+
+        <!-- 全选框 ----------------------------------------------------------------------------------------------------------------------------------------->
+        <div style="margin: 10px;">
+          <el-checkbox
+            v-model="select.selectAll"
+            :indeterminate="select.isIndeterminate"
+            :label="select.selectSum"
+            @change="handleCheckAll"
+          />
+        </div>
+        <!----------------------------------------------------------------------------------------------------------------------------------------->
+
+        <el-divider />
+
+        <!-- 笔记列表 ----------------------------------------------------------------------------------------------------------------------------------------->
+        <el-row>
+          <el-col v-for="(o) in list.result" :key="o.id" :span="4">
+            <el-card
+              :id="'ID-'+o.id"
+              class="NoteFolderId-el-card"
+              shadow="hover"
+              :body-style="{ padding: '10px' }"
+            >
+              <input
+                v-if="o.id !== o.userId"
+                v-model="o.ischecked"
+                style="position:absolute;top: 10px;left: 10px;"
+                type="checkbox"
+                @change="handleChecked(o)"
+              >
+              <el-tooltip
+                v-if="o.status === 0"
+                style="position:absolute;top: 10px;right: 10px;"
+                content="尚未保存，草稿状态"
+                placement="top"
+              >
+                <i class="el-icon-warning" />
+              </el-tooltip>
+
+              <div @click="route(o.id)">
+                <div style="display: flex;justify-content:center;">
+                  <img src="~/assets/img/mine/note.png" alt>
+                </div>
+                <div style="display: flex;justify-content:center;">
+                  <span
+                    style="
+                        display: -webkit-box;
+                        -webkit-box-orient: vertical;
+                        -webkit-line-clamp: 1;
+                        overflow: hidden;
+                        word-break: break-all;"
+                  >
+                    {{ o.title }}
+                  </span>
+                </div>
+              </div>
+            </el-card>
+          </el-col>
+        </el-row>
+        <!----------------------------------------------------------------------------------------------------------------------------------------->
+      </el-main>
+
+      <!-- 分页 ----------------------------------------------------------------------------------------------------------------------------------->
+      <el-footer height="30px">
+        <el-row justify="center" type="flex">
+          <el-pagination
+            layout="prev, pager, next"
+            :current-page="list.current"
+            :page-size="list.limit"
+            :total="list.total"
+          />
+        </el-row>
+      </el-footer>
+    <!------------------------------------------------------------------------------------------------------------------------------------------------->
+    </el-container>
+
+    <!-- 添加笔记对话框 ----------------------------------------------------------------------------------------------------------------------------------------->
+    <el-dialog
+      title="提示"
+      :visible.sync="CreateNoteDialog.visible"
+      width="30%"
+    >
+      <span>确认在当前文件夹中添加新的笔记？</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="CreateNoteDialog.visible = false">取 消</el-button>
+        <el-button type="primary" @click="createNoteFun">确 定</el-button>
+      </span>
+    </el-dialog>
+    <!------------------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- 删除确认对话框 ----------------------------------------------------------------------------------------------------------------------------------------->
+    <el-dialog
+      title="提示"
+      :visible.sync="deleteDialog.visible"
+      width="30%"
+    >
+      <span>确认删除{{ select.checkedList.length }}篇笔记？</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="deleteDialog.visible = false">取 消</el-button>
+        <el-button type="primary" @click="deleteNotes">确 定</el-button>
+      </span>
+    </el-dialog>
+    <!------------------------------------------------------------------------------------------------------------------------------------------------->
   </div>
 </template>
 
 <script>
+import qs from 'qs'
+import noteApi from '@/api/note'
+import userApi from '@/api/user'
+
 export default {
-  name: 'UserCollectionPage',
+  name: 'UserNfolderIDPage',
   layout: 'BaseLayout',
 
   data () {
     return {
-
+      folderInfo: '',
+      list: {
+        keyword: '',
+        current: 1,
+        limit: 24,
+        total: null,
+        result: []
+      },
+      select: {
+        checkedList: [],
+        selectAll: false,
+        isIndeterminate: false,
+        selectSum: '全选'
+      },
+      CreateNoteDialog: {
+        visible: false,
+        folderID: ''
+      },
+      deleteDialog: {
+        visible: false
+      }
     }
   },
-  created () {}
+  created () {
+    this.CreateNoteDialog.folderID = this.$route.params.id
+    userApi.getNotefolderBynFolderId(this.CreateNoteDialog.folderID).then((response) => {
+      this.folderInfo = response.data.data.data
+    })
+    this.getList()
+  },
+  mounted () {
+  },
+  methods: {
+    // 获取文件夹数据
+    getList () {
+      // <- 清除选中
+      if (this.list.result) {
+        this.list.result.forEach((o) => {
+          this.addOrRemoveStyle(o.id, false)
+        })
+      }
+      this.select = {
+        checkedList: [],
+        selectAll: false,
+        isIndeterminate: false,
+        selectSum: '全选'
+      }
+      // ->
+
+      // 封装数据
+      const data = {
+        page: this.list.current,
+        limit: this.list.limit,
+        noteFolderId: this.CreateNoteDialog.folderID,
+        condition: null
+      }
+      if (this.list.keyword !== '') {
+        data.condition = this.list.keyword
+      }
+
+      noteApi.getNotes(qs.stringify(data)).then((response) => {
+        if (response.data.code === 20000) {
+          this.list.result = response.data.data.items
+          this.list.total = response.data.data.total
+
+          if (this.list.result) {
+            this.list.result.forEach((item) => {
+              if (item.shapes) {
+                item.shapes.forEach((tem) => {
+                  tem.ischecked = false
+                })
+              }
+            })
+          }
+        } else {
+          this.$message.error('查询出错')
+        }
+      })
+    },
+
+    // <- 选中与全选
+    // 选取全部
+    handleCheckAll () {
+      this.select.isIndeterminate = false
+
+      if (this.select.selectAll) {
+        this.select.checkedList = [...this.list.result]
+        this.select.selectSum = '已选中' + this.select.checkedList.length + '篇笔记'
+      } else {
+        this.select.checkedList = []
+        this.select.selectSum = '全选'
+      }
+
+      if (this.list.result) {
+        this.list.result.forEach((o) => {
+          o.ischecked = this.select.selectAll
+          this.addOrRemoveStyle(o.id, this.select.selectAll)
+        })
+      }
+    },
+    // 选取单个
+    handleChecked (o) {
+      this.addOrRemoveStyle(o.id, o.ischecked)
+      const include = this.select.checkedList.findIndex(O => O.id === o.id)
+      if (include !== -1) {
+        this.select.checkedList.splice(include, 1)
+      } else {
+        this.select.checkedList.push(o)
+      }
+      if (this.select.checkedList.length === 0) {
+        this.select.selectAll = false
+        this.select.isIndeterminate = false
+        this.select.selectSum = '全选'
+      } else {
+        this.select.isIndeterminate = true
+        this.select.selectSum = '已选中' + this.select.checkedList.length + '个文件夹'
+      }
+    },
+    // 选中后修改样式以及取消选中后去除样式
+    // 问题：通过 JS 设置 visibility 后，再通过 css 设置 visibility 会失效
+    addOrRemoveStyle (id, checked) {
+      const ID = `ID-${id}`
+      const element = document.getElementById(ID)
+
+      if (checked) {
+        element.classList.add('NoteFolderId-el-card--select')
+      } else {
+        element.classList.remove('NoteFolderId-el-card--select')
+      }
+    },
+    // ->
+
+    route (id) {
+      // 如果没有被选中的笔记，则进行跳转
+      if (this.select.checkedList.length === 0) {
+        this.$router.push({ path: '/note/' + id })
+      }
+    },
+
+    // 在当前文件夹下新建笔记
+    createNoteFun () {
+      noteApi.initializeNote(this.CreateNoteDialog.folderID).then((response) => {
+        if (response.data.code === 20000) {
+          this.$router.push({ path: `/editor/${response.data.data.data}` })
+        } else {
+          this.$message.error(response.data.message)
+        }
+      })
+      this.CreateNoteDialog.visible = false
+    },
+
+    // 编辑笔记跳转
+    editNote () {
+      // 跳转到选中笔记的编辑页面
+      if (this.select.checkedList.length === 1) {
+        this.$router.push({ path: '/editor/' + this.select.checkedList[0].id })
+      }
+    },
+
+    // 批量删除
+    deleteNotes () {
+      const deleteIdList = []
+      this.select.checkedList.forEach((o) => {
+        deleteIdList.push(o.id)
+      })
+
+      noteApi.deleteNotes(deleteIdList).then((response) => {
+        if (response.data.code === 20000) {
+          this.$message('删除成功')
+          this.getList()
+          this.select.checkedList = []
+          this.select.selectAll = false
+          this.select.isIndeterminate = false
+          this.select.selectSum = '全选'
+        } else {
+          this.$message.error(response.data.message)
+        }
+      })
+      this.deleteDialog.visible = false
+    }
+
+  }
 }
 </script>
 <style>
+.NoteFolderId-height{
+  min-height: calc(75vh);
+}
 
+.NoteFolderId-el-button{
+  margin-bottom: 10px;
+}
+
+.NoteFolderId-el-card{
+  padding: 0px;
+  margin:10px;
+  position: relative;
+}
+
+.NoteFolderId-el-card:hover{
+  background-color: #d0f0f0;
+}
+.NoteFolderId-el-card input {
+  visibility: hidden;
+}
+.NoteFolderId-el-card:hover input {
+  visibility: visible;
+}
+.NoteFolderId-el-card--select{
+  border: 1px solid #90d8ff;
+  background-color: #f1f5fa;
+}
+.el-divider--horizontal{
+   margin:10px;
+}
 </style>
