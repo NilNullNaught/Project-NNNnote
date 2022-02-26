@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public interface UserNfolderService extends IService<UserNfolder> {
 
-    Map<String, Object> getUserNfolderPage(String id, long page, long limit);
+    Map<String, Object> getUserNfolderPage(String userId, long page, long limit);
 
-    Map<String, Object> getNfolderANDNote(String id, long page, long limit, String condition);
+    Map<String, Object> getNfolderANDNote(String userId, long page, long limit, String condition);
 }

@@ -1,100 +1,114 @@
 <template>
-  <div class="UserDraftIndex-height">
-    <el-row>
-      <el-col :offset="9" :span="6" align="center">
-        <span style="font-size: 20px;font-weight:bolder;">草稿箱</span>
-      </el-col>
-    </el-row>
+  <div>
+    <el-container class="UserDraftIndex-height">
+      <el-main style="padding:0px">
+        <el-row>
+          <el-col :offset="9" :span="6" align="center">
+            <div style="margin:10px">
+              <el-tooltip class="item" effect="dark" content="存放没有保存的笔记" placement="right-start">
+                <el-badge is-dot class="item">
+                  <span style="font-size: 20px;font-weight:bolder;padding:0px 3px">草稿箱</span>
+                </el-badge>
+              </el-tooltip>
+            </div>
+          </el-col>
+        </el-row>
 
-    <div style="margin-bottom: 10px">
-      <el-button type="primary" plain @click="toggleSelection()">
-        取消选择
-      </el-button>
-      <el-button type="danger" plain>
-        删除选中
-      </el-button>
-    </div>
-    <el-table
-      ref="multipleTable"
-      :data="list.result"
-      tooltip-effect="dark"
-      style="width: 100%"
-      stripe
-      @selection-change="handleSelectionChange"
-    >
-      <el-table-column
-        type="selection"
-        width="55"
-      />
-      <el-table-column
-        label="标题"
-        width="160"
-      >
-        <template slot-scope="scope">
-          {{ scope.row.name }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="预览"
-        width="320"
-      >
-        <template slot-scope="scope">
-          {{ scope.row.preview }}
-        </template>
-      </el-table-column>
+        <div style="margin-bottom: 10px">
+          <el-button type="primary" plain @click="toggleSelection()">
+            取消选择
+          </el-button>
+          <el-button type="danger" plain @click="deleteSelection()">
+            删除选中
+          </el-button>
+        </div>
+        <el-table
+          ref="multipleTable"
+          :data="list.result"
+          tooltip-effect="dark"
+          style="width: 100%"
+          stripe
+          @selection-change="handleSelectionChange"
+        >
+          <el-table-column
+            type="selection"
+            width="55"
+            fixed
+          />
+          <el-table-column
+            label="标题"
+            width="160"
+            fixed
+          >
+            <template slot-scope="scope">
+              {{ scope.row.title }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="预览"
+            width="320"
+          >
+            <template slot-scope="scope">
+              {{ scope.row.preview }}
+            </template>
+          </el-table-column>
 
-      <el-table-column
-        prop="address"
-        label="所属文件夹"
-        width="160"
-      />
-      <el-table-column
-        label="创建日期"
-        width="160"
-      >
-        <template slot-scope="scope">
-          {{ scope.row.date }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="最后修改日期"
-        width="160"
-      >
-        <template slot-scope="scope">
-          {{ scope.row.date }}
-        </template>
-      </el-table-column>
+          <el-table-column
+            prop="noteFolderId"
+            label="所属文件夹"
+            width="160"
+          />
+          <el-table-column
+            prop="gmtCreate"
+            label="创建日期"
+            width="170"
+          />
+          <el-table-column
+            prop="gmtModified"
+            label="最后修改日期"
+            width="170"
+          />
 
-      <el-table-column
-        fixed="right"
-        label="操作"
-        width="150"
-      >
-        <template slot-scope="scope">
-          <el-button type="text" size="small" @click="handleClick(scope.row)">
-            查看
-          </el-button>
-          <el-button type="text" size="small" @click="handleClick(scope.row)">
-            编辑
-          </el-button>
-          <el-button type="text" size="small">
-            删除
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <el-row justify="center" type="flex">
-      <el-pagination
-        layout="prev, pager, next"
-        :current-page="list.current"
-        :page-size="list.limit"
-        :total="list.total"
-      />
-    </el-row>
+          <el-table-column
+            fixed="right"
+            label="操作"
+            width="150"
+          >
+            <template slot-scope="scope">
+              <el-button type="text" size="small" @click="readNote(scope.row.id)">
+                查看
+              </el-button>
+              <el-button type="text" size="small" @click="editNote(scope.row.id)">
+                编辑
+              </el-button>
+              <el-button type="text" size="small" @click="deleteSingle(scope.row.id)">
+                删除
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-main>
+
+      <el-footer height="30px">
+        <el-row justify="center" type="flex">
+          <el-pagination
+            layout="prev, pager, next"
+            :current-page="list.current"
+            :page-size="list.limit"
+            :total="list.total"
+            @current-change="getList"
+          />
+        </el-row>
+      </el-footer>
+    </el-container>
   </div>
 </template>
 
 <script>
+import qs from 'qs'
+import noteApi from '@/api/note'
+import userApi from '@/api/user'
+
 export default {
   name: 'UserDraftIndexPage',
   layout: 'BaseLayout',
@@ -105,92 +119,95 @@ export default {
         current: 1,
         limit: 10,
         total: null,
-        result: [
-          {
-            date: '2016-05-03 16:30',
-            name: '一',
-            preview: '一',
-            address: '一'
-          },
-          {
-            date: '2016-05-03 16:30',
-            name: '一',
-            preview: '一',
-            address: '一'
-          }, {
-            date: '2016-05-03 16:30',
-            name: '一',
-            preview: '一',
-            address: '一'
-          }, {
-            date: '2016-05-03 16:30',
-            name: '一',
-            preview: '一',
-            address: '一'
-          }, {
-            date: '2016-05-03 16:30',
-            name: '一',
-            preview: '一',
-            address: '一'
-          }, {
-            date: '2016-05-03 16:30',
-            name: '一',
-            preview: '一',
-            address: '一'
-          }, {
-            date: '2016-05-03 16:30',
-            name: '一',
-            preview: '一',
-            address: '一'
-          }, {
-            date: '2016-05-03 16:30',
-            name: '一',
-            preview: '一',
-            address: '一'
-          }, {
-            date: '2016-05-03 16:30',
-            name: '一',
-            preview: '一',
-            address: '一'
-          }, {
-            date: '2016-05-03 16:30',
-            name: '一',
-            preview: '一',
-            address: '一'
-          },
-          {
-            date: '2016-05-03 16:30',
-            name: '一二三四五六七八九十一二三四五六七八九十',
-            preview: '一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十',
-            address: '一二三四五六七八九十'
-          }, {
-            date: '2016-05-03 16:30',
-            name: '一二三四五六七八九十一二三四五六七八九十',
-            preview: '一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十',
-            address: '一二三四五六七八九十'
-          }, {
-            date: '2016-05-03 16:30',
-            name: '一二三四五六七八九十一二三四五六七八九十',
-            preview: '一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十',
-            address: '一二三四五六七八九十'
-          }, {
-            date: '2016-05-03 16:30',
-            name: '一二三四五六七八九十一二三四五六七八九十',
-            preview: '一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十',
-            address: '一二三四五六七八九十'
-          }, {
-            date: '2016-05-03 16:30',
-            name: '一二三四五六七八九十一二三四五六七八九十',
-            preview: '一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十',
-            address: '一二三四五六七八九十'
-          }
-        ]
+        result: []
       },
-      multipleSelection: []
+      folderNameList: [],
+      multipleSelection: [],
+      flag: 0
     }
+  },
+  created () {
+    this.getList()
   },
 
   methods: {
+    // 查询数据
+    getList (page = 1) {
+      this.list.current = page
+      // 封装数据
+      const data = {
+        page: this.list.current,
+        limit: this.list.limit
+      }
+      noteApi.getDraftList(qs.stringify(data)).then((response) => {
+        if (response.data.code === 20000) {
+          const result = response.data.data.items
+          this.list.total = response.data.data.total
+
+          const folderIdList = []
+          if (result) {
+            result.forEach((o) => {
+              if (!folderIdList.includes(o.noteFolderId)) { folderIdList.push(o.noteFolderId) }
+            })
+          }
+
+          userApi.getNoteFolderNameByFolderId(folderIdList).then((response) => {
+            if (response.data.code === 20000) {
+              this.folderNameList = response.data.data.data
+              if (result) {
+                result.forEach((o) => {
+                  o.noteFolderId = this.formatFolderName(o.noteFolderId)
+                  o.gmtCreate = this.formatDate(o.gmtCreate)
+                  o.gmtModified = this.formatDate(o.gmtModified)
+                })
+              }
+
+              this.list.result = result
+            }
+          })
+        }
+      })
+    },
+    // 格式化日期显示
+    formatDate (data) {
+      // 设置时间格式
+      const format = 'YY年MM月DD日 hh:mm'
+      // 获取单元格数据
+      if (data == null) {
+        return null
+      }
+      const date = new Date(data)
+
+      // 创建数组，如果数字小于 10，则在十位上填充 0
+      const preArr = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09']
+
+      const year = date.getFullYear()
+      const month = date.getMonth() + 1 // 月份是从0开始的
+      const day = date.getDate()
+      const hour = date.getHours()
+      const min = date.getMinutes()
+      const sec = date.getSeconds()
+
+      const newTime = format.replace(/YY/g, year)
+        .replace(/MM/g, preArr[month] || month)
+        .replace(/DD/g, preArr[day] || day)
+        .replace(/hh/g, preArr[hour] || hour)
+        .replace(/mm/g, preArr[min] || min)
+        .replace(/ss/g, preArr[sec] || sec)
+
+      return newTime
+    },
+    // 格式化文件夹名
+    formatFolderName (data) { // 设置时间格式
+      if (data == null) {
+        return null
+      }
+      // eslint-disable-next-line no-console
+      console.log(this.folderNameList[`${data}`])
+      return this.folderNameList[`${data}`]
+    },
+
+    // 取消选择
     toggleSelection (rows) {
       if (rows) {
         rows.forEach((row) => {
@@ -200,9 +217,40 @@ export default {
         this.$refs.multipleTable.clearSelection()
       }
     },
+    // 全选与取消全选
     handleSelectionChange (val) {
       this.multipleSelection = val
+    },
+
+    // 编辑笔记跳转
+    editNote (id) {
+      this.$router.push({ path: '/editor/' + id })
+    },
+    // 查看笔记跳转
+    readNote (id) {
+      this.$router.push({ path: '/note/' + id })
+    },
+
+    // 删除单个
+    deleteSingle (id) {
+      const idList = [`${id}`]
+
+      alert(JSON.stringify(idList))
+    },
+
+    // 删除选中
+    deleteSelection () {
+      const idList = []
+
+      if (this.multipleSelection) {
+        this.multipleSelection.forEach((o) => {
+          idList.push(o.id)
+        })
+      }
+
+      alert(JSON.stringify(idList))
     }
+
   }
 }
 </script>

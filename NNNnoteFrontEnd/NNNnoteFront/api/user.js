@@ -86,5 +86,13 @@ export default {
       method: 'delete',
       data: list
     })
+  },
+  // 根据文件夹 Id 获取笔记文件夹标题
+  getNoteFolderNameByFolderId (list) {
+    return request({
+      url: `${ApiName3}/getNoteFolderNameByFolderId`,
+      method: 'post',
+      data: list
+    })
   }
 }

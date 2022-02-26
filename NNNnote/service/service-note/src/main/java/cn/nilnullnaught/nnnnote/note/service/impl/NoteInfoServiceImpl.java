@@ -25,9 +25,7 @@ import org.springframework.util.StringUtils;
 
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>
@@ -54,6 +52,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
     /**
      * 初始化笔记，创建草稿
+     *
      * @param userID
      * @param nFolderId
      * @return
@@ -65,17 +64,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         noteMultiMapper.initializeNote(noteID, userID, nFolderId, "", "", LocalDateTime.now());
 
         if (baseMapper.selectById(noteID) != null) {
-            // 更新用户文件夹中的笔记数量
-            QueryWrapper<NoteInfo> queryWrapper = new QueryWrapper<NoteInfo>();
-            queryWrapper.eq("note_folder_id", nFolderId);
-            Long count = baseMapper.selectCount(queryWrapper);
-            HashMap<String, Long> map = new HashMap<>();
-            map.put(nFolderId, count);
-            R result = userNfolderClient.alterUserNfolderNoteCount(map);
-            if (result.getCode() != 20000) {
-                throw new MyCustomException(20001, "更新笔记数量失败");
-            }
-
+            this.updateNoteCountInNoteFolder(Arrays.asList(nFolderId));
             return noteID;
         } else {
             throw new MyCustomException(20001, "创建失败");
@@ -108,31 +97,20 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
         // <- 更新 note_info
         NoteInfo noteInfo = baseMapper.selectById(saveNoteVo.getId());
+        String oldFolder = noteInfo.getNoteFolderId();
+        String newFolder = saveNoteVo.getNoteFolderId();
         noteInfo.setTitle(saveNoteVo.getTitle());
+        noteInfo.setPreview(saveNoteVo.getPreview());
         noteInfo.setStatus(saveNoteVo.getStatus());
-
-        // 更新用户文件夹中的笔记数量
-        if (noteInfo.getNoteFolderId() != saveNoteVo.getNoteFolderId()) {
-
-            QueryWrapper<NoteInfo> queryWrapper1 = new QueryWrapper<NoteInfo>();
-            queryWrapper1.eq("note_folder_id", noteInfo.getNoteFolderId());
-            Long oldNoteFolderCount = baseMapper.selectCount(queryWrapper1);
-
-            QueryWrapper<NoteInfo> queryWrapper2 = new QueryWrapper<NoteInfo>();
-            queryWrapper2.eq("note_folder_id", saveNoteVo.getNoteFolderId());
-            Long newNoteFolderCount = baseMapper.selectCount(queryWrapper2);
-
-            HashMap<String, Long> map = new HashMap<>();
-            map.put(noteInfo.getNoteFolderId(), oldNoteFolderCount - 1);
-            map.put(saveNoteVo.getNoteFolderId(), newNoteFolderCount + 1);
-            R result = userNfolderClient.alterUserNfolderNoteCount(map);
-            if (result.getCode() != 20000) {
-                throw new MyCustomException(20001, "更新失败");
-            }
-            noteInfo.setNoteFolderId(saveNoteVo.getNoteFolderId());
-        }
+        noteInfo.setNoteFolderId(newFolder);
         baseMapper.updateById(noteInfo);
         // ->
+
+        // 更新用户文件夹中的笔记数量, （前提条件，笔记的文件夹发生了变更）
+        if (oldFolder != newFolder) {
+            this.updateNoteCountInNoteFolder(Arrays.asList(oldFolder, newFolder));
+        }
+
 
         // <- 更新 note_text
         UpdateWrapper noteTextUW = new UpdateWrapper<NoteText>();
@@ -144,6 +122,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
     /**
      * 自动保存笔记
+     *
      * @param saveNoteVo
      */
     @Override
@@ -164,6 +143,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         // <- 更新 note_info
         NoteInfo noteInfo = baseMapper.selectById(saveNoteVo.getId());
         noteInfo.setTitle(saveNoteVo.getTitle());
+        noteInfo.setPreview(saveNoteVo.getPreview());
         baseMapper.updateById(noteInfo);
         // ->
 
@@ -174,6 +154,48 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         noteTextMapper.update(new NoteText(), noteTextUW);
         // ->
     }
+
+    /**
+     * 分页查询草稿列表
+     *
+     * @param userId
+     * @param page
+     * @param limit
+     * @return
+     */
+    @Override
+    public Map<String, Object> getDraftList(String userId, long page, long limit) {
+        QueryWrapper<NoteInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
+        queryWrapper.eq("status", 0);
+
+        Page<NoteInfo> noteInfoPage = new Page<>(page, limit);
+        baseMapper.selectPage(noteInfoPage, queryWrapper);
+
+        //把分页数据提取出来，放到map集合
+        Map<String, Object> map = new HashMap<>();
+        map.put("items", noteInfoPage.getRecords());
+        map.put("current", noteInfoPage.getCurrent());
+        map.put("pages", noteInfoPage.getPages());
+        map.put("size", noteInfoPage.getSize());
+        map.put("total", noteInfoPage.getTotal());
+        map.put("hasNext", noteInfoPage.hasNext());
+        map.put("hasPrevious", noteInfoPage.hasPrevious());
+
+        return map;
+    }
+
+    /**
+     * 彻底删除草稿
+     *
+     * @param nFolderList
+     */
+    @Override
+    public void deleteDrafts(List<String> nFolderList) {
+
+    }
+
+
     /**
      * 获取笔记信息（编辑）
      *
@@ -216,8 +238,10 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
 
     //TODO 使用 elasticsearch 实现
+
     /**
      * 分页条件查询笔记
+     *
      * @param userId
      * @param noteFolderId
      * @param page
@@ -226,19 +250,19 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
      * @return
      */
     @Override
-    public Map<String, Object> getNotes(String userId,String noteFolderId, long page, long limit, String condition) {
+    public Map<String, Object> getNotes(String userId, String noteFolderId, long page, long limit, String condition) {
 
         QueryWrapper<NoteInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.orderByDesc("gmt_modified");
         queryWrapper.eq("user_id", userId);
 
         // 查询指定文件夹中的笔记
-        if (!StringUtils.isEmpty(noteFolderId)){
-            queryWrapper.eq("note_folder_id",noteFolderId);
+        if (!StringUtils.isEmpty(noteFolderId)) {
+            queryWrapper.eq("note_folder_id", noteFolderId);
         }
 
         // 附加查询条件
-        if (!StringUtils.isEmpty(condition)){
+        if (!StringUtils.isEmpty(condition)) {
             queryWrapper.like("title", condition);
         }
         Page<NoteInfo> noteInfoPage = new Page<>(page, limit);
@@ -258,14 +282,52 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
     /**
      * 批量删除
-     * @param nFolderList
+     *
+     * @param userId
+     * @param idList
      */
     @Override
-    public void deleteNotes(List<String> nFolderList) {
+    public void deleteNotes(String userId, List<String> idList) {
+        QueryWrapper<NoteInfo> qwFolderId = new QueryWrapper();
+        qwFolderId.eq("user_id", userId);
+        qwFolderId.in("id", idList);
+        qwFolderId.select("note_folder_id");
+        List<NoteInfo> noteFolderList = baseMapper.selectList(qwFolderId);
 
+        QueryWrapper<NoteInfo> qwDelete = new QueryWrapper();
+        qwDelete.eq("user_id", userId);
+        qwDelete.in("id", idList);
+        baseMapper.delete(qwDelete);
+
+        // <- 更新用户文件夹中的笔记数量
+        List<String> noteFolderIdList = new ArrayList<>();
+        for (NoteInfo noteInfo : noteFolderList) {
+            noteFolderIdList.add(noteInfo.getNoteFolderId());
+        }
+        this.updateNoteCountInNoteFolder(noteFolderIdList);
+        // ->
     }
 
+    /**
+     * 公共方法 —— 更新用户文件夹中的笔记数量
+     * @param noteFolderIdList
+     */
+    public void updateNoteCountInNoteFolder(List<String> noteFolderIdList) {
+        HashMap<String, Long> map = new HashMap<>();
 
+        for (String noteFolderId : noteFolderIdList) {
+            QueryWrapper<NoteInfo> qw = new QueryWrapper<NoteInfo>();
+            qw.eq("note_folder_id", noteFolderId);
+            qw.eq("is_deleted", 0);
+            qw.select("id");
+            Long count = baseMapper.selectCount(qw);
+            map.put(noteFolderId, count);
+        }
 
+        R result = userNfolderClient.alterUserNfolderNoteCount(map);
+        if (result.getCode() != 20000) {
+            throw new MyCustomException(20001, "更新笔记数量失败");
+        }
+    }
 
 }

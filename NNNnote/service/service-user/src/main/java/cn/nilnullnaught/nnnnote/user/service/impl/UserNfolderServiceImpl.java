@@ -27,17 +27,17 @@ public class UserNfolderServiceImpl extends ServiceImpl<UserNfolderMapper, UserN
     //TODO 使用 elasticsearch 实现
     /**
      * 分页查询用户文件夹列表
-     * @param id
+     * @param userId
      * @param page
      * @param limit
      * @return
      */
     @Override
-    public Map<String, Object> getUserNfolderPage(String id, long page, long limit) {
+    public Map<String, Object> getUserNfolderPage(String userId, long page, long limit) {
 
         QueryWrapper<UserNfolder> queryWrapper = new QueryWrapper<>();
         queryWrapper.orderByDesc("gmt_modified");
-        queryWrapper.eq("user_id", id);
+        queryWrapper.eq("user_id", userId);
         Page<UserNfolder> pageUserNfolder = new Page<>(page, limit);
 
         //把分页数据封装到 page 对象
@@ -58,19 +58,19 @@ public class UserNfolderServiceImpl extends ServiceImpl<UserNfolderMapper, UserN
     //TODO 使用 elasticsearch 实现
     /**
      * 分页条件查询用户文件夹与笔记
-     * @param id
+     * @param userId
      * @param page
      * @param limit
      * @param condition
      * @return
      */
     @Override
-    public Map<String, Object> getNfolderANDNote(String id, long page, long limit, String condition) {
+    public Map<String, Object> getNfolderANDNote(String userId, long page, long limit, String condition) {
 
         // <- 查询用户文件夹
         QueryWrapper<UserNfolder> queryWrapper = new QueryWrapper<>();
         queryWrapper.orderByDesc("gmt_modified");
-        queryWrapper.eq("user_id", id);
+        queryWrapper.eq("user_id", userId);
         queryWrapper.like("folder_name",condition);
         // 每页的查询数据中，既包括文件夹又包括笔记，所以需要除二
         Page<UserNfolder> pageUserNfolder = new Page<>(page, limit/2);

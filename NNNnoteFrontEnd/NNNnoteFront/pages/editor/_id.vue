@@ -110,6 +110,21 @@ import userApi from '@/api/user'
 
 export default {
   name: 'EditorIdPage',
+  beforeRouteLeave (to, from, next) {
+    this.$confirm('离开前,请确认已经保存', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+      .then(() => {
+        clearTimeout(this.timer)
+        window.onbeforeunload = null
+        next()
+      })
+      .catch(() => {
+        // alert("router")
+      })
+  },
   data () {
     return {
       folders: '',
@@ -117,6 +132,7 @@ export default {
         id: '',
         noteFolderId: '',
         title: '',
+        preview: '',
         text: '',
         // 笔记状态 0 代表用户没有主动保存过，1 代表以私密状态保存，2 代表以公开状态保存
         status: 0,
@@ -169,7 +185,7 @@ export default {
         subfield: true, // 单双栏模式
         preview: true // 预览
       },
-      stopTimerInEditorIdPage: true
+      timer: null
     }
   },
   created () {
@@ -191,10 +207,15 @@ export default {
     })
 
     // 设置自动保存
-    const autoSave = setInterval(() => {
-      if (this.stopTimerInEditorIdPage) {
-        clearInterval(autoSave)
+    this.timer = setInterval(() => {
+      // <- 生成笔记预览
+      if (this.saveNote.text.length >= 60) {
+        this.saveNote.preview = this.saveNote.text.substring(0, 60) + '…'
+      } else {
+        this.saveNote.preview = this.saveNote.text
       }
+      // ->
+
       noteApi.autoSaveNote(this.saveNote).then((response) => {
         if (response.data.code === 20000) {
           this.$message({
@@ -208,7 +229,7 @@ export default {
     }, 30000)
   },
   mounted () {
-    window.onbeforeunload = function (e) { // 刷新与关闭时弹出提示
+    window.onbeforeunload = function (e) { // 刷新与关闭前弹出提示
       e = e || window.event
       // 兼容IE8和Firefox 4之前的版本
       if (e) {
@@ -222,8 +243,6 @@ export default {
     $save (value, render) {
       this.saveDialog.visible = true
     },
-    $change (value, render) {
-    },
     $addImg (pos, file) {
       // 封装 file
       const fileData = new FormData()
@@ -236,15 +255,23 @@ export default {
           this.saveNote.resourceUrlList.push(url)
         })
     },
-    $delImg (pos) {
-    },
     submitSave () {
+      // <- 修改笔记状态
       if (this.saveDialog.isPrivate) {
         this.saveNote.status = 1
       } else {
         this.saveNote.status = 2
       }
       this.saveDialog.visible = false
+      // ->
+
+      // <- 生成笔记预览
+      if (this.saveNote.text.length >= 60) {
+        this.saveNote.preview = this.saveNote.text.substring(0, 60) + '…'
+      } else {
+        this.saveNote.preview = this.saveNote.text
+      }
+      // ->
 
       noteApi.saveNote(this.saveNote)
         .then((response) => {

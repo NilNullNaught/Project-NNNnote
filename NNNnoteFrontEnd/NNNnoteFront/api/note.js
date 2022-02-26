@@ -54,5 +54,13 @@ export default {
       method: 'delete',
       data: list
     })
+  },
+  // 分页查询草稿
+  getDraftList (formdata) {
+    return request({
+      url: `${ApiName}/getDraftList`,
+      method: 'post',
+      data: formdata
+    })
   }
 }

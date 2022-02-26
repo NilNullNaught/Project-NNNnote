@@ -1,14 +1,29 @@
 <template>
   <div>
     <el-container class="NoteFolderId-height">
-      <el-main>
+      <el-main style="padding:0px">
+        <el-row align="middle" justify="center" type="flex">
+          <el-col :span="4" align="center" justify="center" type="flex">
+            <span style="font-size:20px;font-weight:bold;">{{ folderInfo.folderName }} </span>
+          </el-col>
+        </el-row>
+
+        <div style="padding:5px" />
+
         <!-- 操作栏 ----------------------------------------------------------------------------------------------------------------------------------------->
         <el-row align="middle" justify="center" type="flex">
-          <el-col :span="10">
+          <el-col :span="14">
+            <el-button
+              @click="$router.push({ path: '/user/nfolder'})"
+            >
+              返回主页
+            </el-button>
+
             <el-button
               type="primary"
               @click="CreateNoteDialog.visible = true"
             >
+              <i class="el-icon-edit el-icon--left" />
               写笔记
             </el-button>
 
@@ -22,7 +37,7 @@
 
               <el-button
                 v-if="select.checkedList.length < 2"
-                type="primary"
+                type="success"
                 @click="editNote"
               >
                 <i class="el-icon-edit el-icon--left" />
@@ -30,9 +45,7 @@
               </el-button>
             </el-button-group>
           </el-col>
-          <el-col :span="4" align="center" justify="center" type="flex">
-            <h1>&nbsp;{{ folderInfo.folderName }} &nbsp;</h1>
-          </el-col>
+
           <el-col :span="6" :offset="4">
             <el-input
               v-model="list.keyword"
@@ -42,7 +55,6 @@
             />
           </el-col>
         </el-row>
-        <!----------------------------------------------------------------------------------------------------------------------------------------->
 
         <!-- 全选框 ----------------------------------------------------------------------------------------------------------------------------------------->
         <div style="margin: 10px;">
@@ -55,7 +67,11 @@
         </div>
         <!----------------------------------------------------------------------------------------------------------------------------------------->
 
-        <el-divider />
+        <!----------------------------------------------------------------------------------------------------------------------------------------->
+
+        <div style="margin:10px 0px">
+          <el-divider />
+        </div>
 
         <!-- 笔记列表 ----------------------------------------------------------------------------------------------------------------------------------------->
         <el-row>
@@ -69,34 +85,55 @@
               <input
                 v-if="o.id !== o.userId"
                 v-model="o.ischecked"
-                style="position:absolute;top: 10px;left: 10px;"
+                style="position:absolute;top: 5px;left: 5px;"
                 type="checkbox"
                 @change="handleChecked(o)"
               >
               <el-tooltip
                 v-if="o.status === 0"
-                style="position:absolute;top: 10px;right: 10px;"
+                style="position:absolute;top: 5px;right: 5px;"
                 content="尚未保存，草稿状态"
                 placement="top"
               >
                 <i class="el-icon-warning" />
               </el-tooltip>
 
-              <div @click="route(o.id)">
+              <div style="margin:10px 10px 0px 10px;height:120px" @click="route(o.id)">
                 <div style="display: flex;justify-content:center;">
-                  <img src="~/assets/img/mine/note.png" alt>
-                </div>
-                <div style="display: flex;justify-content:center;">
-                  <span
+                  <p
                     style="
                         display: -webkit-box;
                         -webkit-box-orient: vertical;
                         -webkit-line-clamp: 1;
                         overflow: hidden;
-                        word-break: break-all;"
+                        word-break: break-all;
+                        font-size:10px;
+                        height:15px;"
                   >
                     {{ o.title }}
-                  </span>
+                  </p>
+                </div>
+                <div style="margin:5px 0px">
+                  <el-divider />
+                </div>
+                <div
+                  style="
+                    font-size:10px;
+                    display: flex;
+                    justify-content:center;"
+                >
+                  <p
+                    style="
+                        display: -webkit-box;
+                        -webkit-box-orient: vertical;
+                        -webkit-line-clamp: 6;
+                        overflow: hidden;
+                        word-break: break-all;
+                        font-size:10px;
+                        font-size:10px"
+                  >
+                    {{ o.preview }}
+                  </p>
                 </div>
               </div>
             </el-card>
@@ -113,6 +150,7 @@
             :current-page="list.current"
             :page-size="list.limit"
             :total="list.total"
+            @current-change="getList"
           />
         </el-row>
       </el-footer>
@@ -135,11 +173,11 @@
 
     <!-- 删除确认对话框 ----------------------------------------------------------------------------------------------------------------------------------------->
     <el-dialog
-      title="提示"
+      title="确认删除"
       :visible.sync="deleteDialog.visible"
       width="30%"
     >
-      <span>确认删除{{ select.checkedList.length }}篇笔记？</span>
+      <span>请注意，删除的笔记将会在回收站保存 7 天，7 天后将彻底删除，无法找回。</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="deleteDialog.visible = false">取 消</el-button>
         <el-button type="primary" @click="deleteNotes">确 定</el-button>
@@ -194,7 +232,8 @@ export default {
   },
   methods: {
     // 获取文件夹数据
-    getList () {
+    getList (page = 1) {
+      this.list.current = page
       // <- 清除选中
       if (this.list.result) {
         this.list.result.forEach((o) => {
@@ -330,10 +369,6 @@ export default {
         if (response.data.code === 20000) {
           this.$message('删除成功')
           this.getList()
-          this.select.checkedList = []
-          this.select.selectAll = false
-          this.select.isIndeterminate = false
-          this.select.selectSum = '全选'
         } else {
           this.$message.error(response.data.message)
         }
@@ -355,7 +390,7 @@ export default {
 
 .NoteFolderId-el-card{
   padding: 0px;
-  margin:10px;
+  margin: 5px;
   position: relative;
 }
 
@@ -373,6 +408,6 @@ export default {
   background-color: #f1f5fa;
 }
 .el-divider--horizontal{
-   margin:10px;
+   margin:0px;
 }
 </style>

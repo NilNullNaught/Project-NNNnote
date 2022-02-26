@@ -15,6 +15,9 @@ public class SaveNoteVo {
     @ApiModelProperty("笔记标题")
     private String  title;
 
+    @ApiModelProperty("笔记预览")
+    private String  preview;
+
     @ApiModelProperty("文件夹ID")
     private String noteFolderId;
 

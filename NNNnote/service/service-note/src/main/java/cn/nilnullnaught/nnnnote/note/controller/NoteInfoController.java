@@ -81,14 +81,44 @@ public class NoteInfoController {
             @RequestParam(value = "condition", required = false) String condition) {
 
         String userId = JwtUtils.getIdByJwtToken(token);
-        Map<String, Object> map = noteInfoService.getNotes(userId,noteFolderId, page, limit, condition);
+        Map<String, Object> map = noteInfoService.getNotes(userId, noteFolderId, page, limit, condition);
         return R.ok().data(map);
     }
 
-    @ApiOperation(value = "批量删除笔记",notes = "暂时删除，可以从回收站中找回")
+    @ApiOperation(value = "批量删除笔记", notes = "暂时删除，可以从回收站中找回")
     @DeleteMapping("deleteNotes")
-    public R deleteNotes(@RequestBody List<String> nFolderList) {
-        noteInfoService.deleteNotes(nFolderList);
+    public R deleteNotes(@RequestHeader("token") String token,@RequestBody List<String> idList) {
+        String userId = JwtUtils.getIdByJwtToken(token);
+        noteInfoService.deleteNotes(userId,idList);
+        return R.ok();
+    }
+
+    @ApiOperation(value = "分页查询草稿")
+    @PostMapping("getDraftList")
+    public R getDraftList(
+            @RequestHeader("token") String token,
+            @RequestParam("page") long page,
+            @RequestParam("limit") long limit) {
+        String userId = JwtUtils.getIdByJwtToken(token);
+        Map<String,Object> resultList = noteInfoService.getDraftList(userId,page,limit);
+        return R.ok().data(resultList);
+    }
+
+    @ApiOperation(value = "查询草稿数量")
+    @PostMapping("getDraftCount")
+    public R getDraftCount(@RequestHeader("token") String token) {
+        String userId = JwtUtils.getIdByJwtToken(token);
+        QueryWrapper<NoteInfo> qw = new QueryWrapper<>();
+        qw.eq("user_id", userId);
+        qw.eq("status",0);
+        Long count = noteInfoService.count(qw);
+        return R.ok().data("data",count);
+    }
+
+    @ApiOperation(value = "批量删除草稿", notes = "彻底删除，不可找回")
+    @DeleteMapping("deleteDrafts")
+    public R deleteDrafts(@RequestBody List<String> nFolderList) {
+        noteInfoService.deleteDrafts(nFolderList);
         return R.ok();
     }
 

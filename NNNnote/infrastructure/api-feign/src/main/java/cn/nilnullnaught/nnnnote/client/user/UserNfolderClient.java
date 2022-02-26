@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @FeignClient("service-user")
@@ -16,4 +17,7 @@ public interface UserNfolderClient {
 
     @PostMapping("/user/user-nfolder/alterUserNfolderNoteCount")
     public R alterUserNfolderNoteCount(@RequestBody Map<String,Long> map);
+
+    @PostMapping("/getNoteFolderNameByFolderId")
+    public R getNoteFolderNameByFolderId(@RequestBody List<String> idList);
 }

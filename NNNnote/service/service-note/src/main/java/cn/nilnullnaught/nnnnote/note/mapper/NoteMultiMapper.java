@@ -23,4 +23,11 @@ public interface NoteMultiMapper {
                         @Param("title") String title,
                         @Param("text") String text,
                         @Param("date") LocalDateTime date);
+
+    /**
+     * 删除草稿
+     */
+    void deleteDrafts(@Param("ID") String ID,
+                      @Param("userID") String userID);
+
 }

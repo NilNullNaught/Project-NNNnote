@@ -10,9 +10,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -94,8 +97,8 @@ public class UserNfolderController {
     @ApiOperation("根据文件夹 ID 修改笔记文件夹信息")
     @GetMapping("/getNotefolderBynFolderId/{noteFolderID}")
     public R getNotefolderByFolderId(@PathVariable String noteFolderID) {
-        UserNfolder userNfolder=  userNfolderService.getById(noteFolderID);
-        return R.ok().data("data",userNfolder);
+        UserNfolder userNfolder = userNfolderService.getById(noteFolderID);
+        return R.ok().data("data", userNfolder);
     }
 
     @ApiOperation(value = "根据用户 id 获取笔记文件夹列表并分页", notes = "分页查询文件夹列表，返回数据封装为 mapper")
@@ -103,38 +106,40 @@ public class UserNfolderController {
     public R getUserNfolder(@RequestHeader("token") String token,
                             @PathVariable long page,
                             @PathVariable long limit) {
-        String ID = JwtUtils.getIdByJwtToken(token);
-        Map<String, Object> map = userNfolderService.getUserNfolderPage(ID, page, limit);
+        String userId = JwtUtils.getIdByJwtToken(token);
+        Map<String, Object> map = userNfolderService.getUserNfolderPage(userId, page, limit);
         return R.ok().data(map);
     }
 
     @ApiOperation(value = "删除用户文件夹", notes = "删除文件夹，可以进行批量删除。")
+    @Transactional
     @DeleteMapping("/deleteUserNFolder")
-    public R deleteUserNFolder(@RequestBody List<String> nFolderList) {
+    public R deleteUserNFolder(@RequestHeader("token") String token, @RequestBody List<String> nFolderList) {
+        String userId = JwtUtils.getIdByJwtToken(token);
 
         // <- 查询需要被删除的用户文件夹
-        QueryWrapper<UserNfolder> queryWrapper = new QueryWrapper<>();
-        for (String id : nFolderList) {
-            queryWrapper.eq("id", id).or();
-        }
-        List<UserNfolder> userNfolderList = userNfolderService.list(queryWrapper);
+        QueryWrapper<UserNfolder> qw = new QueryWrapper<>();
+        qw.eq("user_id", userId);// 过滤文件夹，防止删除其他用户的文件夹
+        qw.in("id",nFolderList);
+        List<UserNfolder> userNfolderList = userNfolderService.list(qw);
         // ->
 
-        // <- 判断文件夹是否已经清空
+        List<String> _nFolderList = new ArrayList<>();
         for (UserNfolder userNfolder : userNfolderList) {
+            //判断文件夹是否已经清空
             if (userNfolder.getNoteCount() != 0) {
                 throw new MyCustomException(20001, "文件夹未清空");
             }
+            _nFolderList.add(userNfolder.getId());
         }
-        // ->
 
         // <- 删除文件夹 ->
-        userNfolderService.removeByIds(nFolderList);
+        userNfolderService.removeByIds(_nFolderList);
         return R.ok();
     }
 
     @ApiOperation(value = "修改用户文件夹的 note_count ", notes = "通过传入的键值对修改多个文件夹的 note_count 字段")
-    @PostMapping("alterUserNfolderNoteCount")
+    @PostMapping("/alterUserNfolderNoteCount")
     public R alterUserNfolderNoteCount(@RequestBody Map<String, Long> map) {
 
         System.out.println("?");
@@ -150,13 +155,43 @@ public class UserNfolderController {
     }
 
     @ApiOperation(value = "分页条件查询文件夹和笔记")
-    @GetMapping("getNfolderANDNote/{page}/{limit}/{condition}")
+    @GetMapping("/getNfolderANDNote/{page}/{limit}/{condition}")
     public R getNfolderANDNote(@RequestHeader("token") String token,
                                @PathVariable long page,
                                @PathVariable long limit,
                                @PathVariable String condition) {
-        String ID = JwtUtils.getIdByJwtToken(token);
-        Map<String, Object> map = userNfolderService.getNfolderANDNote(ID, page, limit,condition);
-        return  R.ok().data(map);
+        String userId = JwtUtils.getIdByJwtToken(token);
+        Map<String, Object> map = userNfolderService.getNfolderANDNote(userId, page, limit, condition);
+        return R.ok().data(map);
+    }
+
+    @ApiOperation(value = "根据文件夹 Id 获取笔记文件夹标题")
+    @PostMapping("/getNoteFolderNameByFolderId")
+    public R getNoteFolderNameByFolderId(@RequestHeader("token") String token,
+                                         @RequestBody List<String> idList) {
+        String userId = JwtUtils.getIdByJwtToken(token);
+
+        // 构建查询条件，查询与 ID 对应的笔记文件夹标题
+        QueryWrapper<UserNfolder> qw = new QueryWrapper<>();
+        qw.eq("user_id",userId);
+        qw.in("id",idList);
+        qw.select("id", "folder_name");
+        List<UserNfolder> resultList = userNfolderService.list(qw);
+
+        Map<String, String> resultMap = new HashMap<>();
+
+        // 重新封装结果集，将查询条件转换为键值对（id为键，文件夹标题为值）
+        for (UserNfolder userNfolder : resultList) {
+            resultMap.put(userNfolder.getId(), userNfolder.getFolderName());
+        }
+
+        // 将查询结果为空（即已经被删除的笔记文件夹）的文件夹ID也封装入结果集中
+        for (String id : idList) {
+            if (!resultMap.containsKey(id)) {
+                resultMap.put(id, null);
+            }
+        }
+
+        return R.ok().data("data", resultMap);
     }
 }

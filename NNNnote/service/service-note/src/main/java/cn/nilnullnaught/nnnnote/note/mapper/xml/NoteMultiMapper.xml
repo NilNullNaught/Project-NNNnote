@@ -9,4 +9,17 @@
         VALUES
             (#{ID},#{text},#{date},#{date});
     </insert>
+
+    <delete id="deleteDrafts">
+        DELETE FROM `note_info` WHERE `user_id` = #{ID}
+        <foreach item="item" index="index" collection="list"
+                 open=" id in (" separator="," close=")" nullable="true">
+            #{item}
+        </foreach>
+        DELETE FROM `note_text` WHERE
+        <foreach item="item" index="index" collection="list"
+                 open=" id in (" separator="," close=")" nullable="true">
+            #{item}
+        </foreach>
+    </delete>
 </mapper>

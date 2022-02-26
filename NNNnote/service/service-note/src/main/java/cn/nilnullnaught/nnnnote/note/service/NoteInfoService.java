@@ -27,7 +27,12 @@ public interface NoteInfoService extends IService<NoteInfo> {
 
     Map<String, Object> getNotes(String userId,String noteFolderId, long page, long limit, String condition);
 
-    void deleteNotes(List<String> nFolderList);
+    void deleteNotes(String userId,List<String> idList);
 
     void autoSaveNote(SaveNoteVo saveNoteVo);
+
+
+    Map<String, Object> getDraftList(String userId, long page, long limit);
+
+    void deleteDrafts(List<String> nFolderList);
 }
