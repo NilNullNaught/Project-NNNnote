@@ -14,6 +14,7 @@
         <el-row align="middle" justify="center" type="flex">
           <el-col :span="14">
             <el-button
+              type="primary"
               @click="$router.push({ path: '/user/nfolder'})"
             >
               返回主页
@@ -23,21 +24,23 @@
               type="primary"
               @click="CreateNoteDialog.visible = true"
             >
-              <i class="el-icon-edit el-icon--left" />
               写笔记
             </el-button>
 
             <el-button-group
               v-show="select.checkedList.length !== 0"
             >
-              <el-button type="danger" @click="deleteDialog.visible = true">
+              <el-button
+                type="primary"
+                @click="deleteDialog.visible = true"
+              >
                 <i class="el-icon-delete el-icon--left" />
                 删除笔记
               </el-button>
 
               <el-button
                 v-if="select.checkedList.length < 2"
-                type="success"
+                type="primary"
                 @click="editNote"
               >
                 <i class="el-icon-edit el-icon--left" />

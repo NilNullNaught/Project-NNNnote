@@ -34,5 +34,7 @@ public interface NoteInfoService extends IService<NoteInfo> {
 
     Map<String, Object> getDraftList(String userId, long page, long limit);
 
-    void deleteDrafts(List<String> nFolderList);
+    void deleteDrafts(String userId,List<String> idList);
+
+    Map<String, Object> getLogicDeletedNoteList(String userId, long page, long limit);
 }

@@ -120,7 +120,7 @@ public class UserNfolderController {
         // <- 查询需要被删除的用户文件夹
         QueryWrapper<UserNfolder> qw = new QueryWrapper<>();
         qw.eq("user_id", userId);// 过滤文件夹，防止删除其他用户的文件夹
-        qw.in("id",nFolderList);
+        qw.in("id", nFolderList);
         List<UserNfolder> userNfolderList = userNfolderService.list(qw);
         // ->
 
@@ -141,8 +141,6 @@ public class UserNfolderController {
     @ApiOperation(value = "修改用户文件夹的 note_count ", notes = "通过传入的键值对修改多个文件夹的 note_count 字段")
     @PostMapping("/alterUserNfolderNoteCount")
     public R alterUserNfolderNoteCount(@RequestBody Map<String, Long> map) {
-
-        System.out.println("?");
 
         for (Map.Entry<String, Long> entry : map.entrySet()) {
             UpdateWrapper<UserNfolder> updateWrapper = new UpdateWrapper<>();
@@ -171,10 +169,14 @@ public class UserNfolderController {
                                          @RequestBody List<String> idList) {
         String userId = JwtUtils.getIdByJwtToken(token);
 
+        if (idList.size() == 0) {
+            return R.ok().data("data", new HashMap<>());
+        }
+
         // 构建查询条件，查询与 ID 对应的笔记文件夹标题
         QueryWrapper<UserNfolder> qw = new QueryWrapper<>();
-        qw.eq("user_id",userId);
-        qw.in("id",idList);
+        qw.eq("user_id", userId);
+        qw.in("id", idList);
         qw.select("id", "folder_name");
         List<UserNfolder> resultList = userNfolderService.list(qw);
 

@@ -4,6 +4,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Mapper
 public interface NoteMultiMapper {
@@ -17,7 +18,7 @@ public interface NoteMultiMapper {
      * @param text
      * @param date
      */
-    void initializeNote(@Param("ID") String ID,
+    int initializeNote(@Param("ID") String ID,
                         @Param("userID") String userID,
                         @Param("noteFolderId") String noteFolderId,
                         @Param("title") String title,
@@ -27,7 +28,7 @@ public interface NoteMultiMapper {
     /**
      * 删除草稿
      */
-    void deleteDrafts(@Param("ID") String ID,
-                      @Param("userID") String userID);
+    void deleteDrafts(@Param("userID") String userID,
+                      @Param("idList") List<String> ID);
 
 }

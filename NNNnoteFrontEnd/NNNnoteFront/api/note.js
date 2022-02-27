@@ -62,5 +62,21 @@ export default {
       method: 'post',
       data: formdata
     })
+  },
+  // 批量删除草稿
+  deleteDrafts (list) {
+    return request({
+      url: `${ApiName}/deleteDrafts`,
+      method: 'delete',
+      data: list
+    })
+  },
+  // 分页查询被逻辑删除的笔记
+  getLogicDeletedNoteList (formdata) {
+    return request({
+      url: `${ApiName}/getLogicDeletedNoteList`,
+      method: 'post',
+      data: formdata
+    })
   }
 }

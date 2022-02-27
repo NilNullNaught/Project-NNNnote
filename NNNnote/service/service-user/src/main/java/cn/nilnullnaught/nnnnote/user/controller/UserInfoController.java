@@ -4,6 +4,7 @@ package cn.nilnullnaught.nnnnote.user.controller;
 import cn.nilnullnaught.nnnnote.common.utils.JwtUtils;
 import cn.nilnullnaught.nnnnote.common.utils.R;
 import cn.nilnullnaught.nnnnote.entity.user.UserInfo;
+import cn.nilnullnaught.nnnnote.exceptionhandler.MyCustomException;
 import cn.nilnullnaught.nnnnote.user.service.UserInfoService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,9 @@ public class UserInfoController {
 
     @ApiOperation("修改用户信息")
     @PostMapping("/alterUserInfo")
-    public R alterUserInfo(@RequestBody UserInfo userInfo) {
+    public R alterUserInfo(@RequestHeader("token") String token,@RequestBody UserInfo userInfo) {
+        String id = JwtUtils.getIdByJwtToken(token);
+        userInfo.setId(id);
         userInfoService.updateUserInfo(userInfo);
         return R.ok();
     }

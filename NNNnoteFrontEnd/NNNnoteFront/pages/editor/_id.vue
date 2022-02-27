@@ -25,17 +25,15 @@
       </el-col>
     </el-row>
 
-    <no-ssr>
+    <client-only>
       <mavon-editor
         ref="md"
         v-model="saveNote.text"
         :toolbars="markdownOption"
         @imgAdd="$addImg"
-        @imgDel="$delImg"
         @save="$save"
-        @change="$change"
       />
-    </no-ssr>
+    </client-only>
 
     <el-dialog
       title="请选择文件夹"
@@ -127,7 +125,7 @@ export default {
   },
   data () {
     return {
-      folders: '',
+      folders: [],
       saveNote: {
         id: '',
         noteFolderId: '',
@@ -191,12 +189,13 @@ export default {
   created () {
     noteApi.getNoteInfoToEdit(this.$route.params.id).then((response) => {
       if (response.data.code === 20000) {
-        this.saveNote.id = response.data.data.data.noteInfo.id
-        this.saveNote.noteFolderId = response.data.data.data.noteInfo.noteFolderId
-        this.saveNote.title = response.data.data.data.noteInfo.title
-        this.saveNote.status = response.data.data.data.noteInfo.status
-        this.saveNote.text = response.data.data.data.noteText.text
-        this.folders = response.data.data.data.NfolderList
+        this.saveNote.id = response.data.data.noteInfo.id
+        this.saveNote.noteFolderId = response.data.data.noteInfo.noteFolderId
+        this.saveNote.title = response.data.data.noteInfo.title
+        this.saveNote.status = response.data.data.noteInfo.status
+        this.saveNote.text = response.data.data.noteText.text
+        this.folders = response.data.data.NfolderList
+
         if (this.saveNote.status !== 2) {
           this.saveDialog.isPrivate = true
         } else {
@@ -204,7 +203,10 @@ export default {
         }
         this.saveNote.resourceUrlList = this.saveNote.text.match(/\]\(https:\/\/nilnullnaught(.*?)\)/g)
       }
-    })
+    }).catch(error =>
+      // eslint-disable-next-line no-console
+      console.log(error)
+    )
 
     // 设置自动保存
     this.timer = setInterval(() => {

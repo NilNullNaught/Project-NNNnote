@@ -22,6 +22,7 @@
             删除选中
           </el-button>
         </div>
+
         <el-table
           ref="multipleTable"
           :data="list.result"
@@ -36,22 +37,16 @@
             fixed
           />
           <el-table-column
+            prop="title"
             label="标题"
             width="160"
             fixed
-          >
-            <template slot-scope="scope">
-              {{ scope.row.title }}
-            </template>
-          </el-table-column>
+          />
           <el-table-column
+            prop="preview"
             label="预览"
             width="320"
-          >
-            <template slot-scope="scope">
-              {{ scope.row.preview }}
-            </template>
-          </el-table-column>
+          />
 
           <el-table-column
             prop="noteFolderId"
@@ -60,12 +55,7 @@
           />
           <el-table-column
             prop="gmtCreate"
-            label="创建日期"
-            width="170"
-          />
-          <el-table-column
-            prop="gmtModified"
-            label="最后修改日期"
+            label="创建时间"
             width="170"
           />
 
@@ -75,10 +65,10 @@
             width="150"
           >
             <template slot-scope="scope">
-              <el-button type="text" size="small" @click="readNote(scope.row.id)">
+              <el-button type="text" size="small" @click="$router.push({ path: '/note/' + scope.row.id })">
                 查看
               </el-button>
-              <el-button type="text" size="small" @click="editNote(scope.row.id)">
+              <el-button type="text" size="small" @click="$router.push({ path: '/editor/' + scope.row.id })">
                 编辑
               </el-button>
               <el-button type="text" size="small" @click="deleteSingle(scope.row.id)">
@@ -122,8 +112,7 @@ export default {
         result: []
       },
       folderNameList: [],
-      multipleSelection: [],
-      flag: 0
+      multipleSelection: []
     }
   },
   created () {
@@ -134,6 +123,7 @@ export default {
     // 查询数据
     getList (page = 1) {
       this.list.current = page
+
       // 封装数据
       const data = {
         page: this.list.current,
@@ -150,21 +140,20 @@ export default {
               if (!folderIdList.includes(o.noteFolderId)) { folderIdList.push(o.noteFolderId) }
             })
           }
-
-          userApi.getNoteFolderNameByFolderId(folderIdList).then((response) => {
-            if (response.data.code === 20000) {
-              this.folderNameList = response.data.data.data
-              if (result) {
-                result.forEach((o) => {
-                  o.noteFolderId = this.formatFolderName(o.noteFolderId)
-                  o.gmtCreate = this.formatDate(o.gmtCreate)
-                  o.gmtModified = this.formatDate(o.gmtModified)
-                })
+          if (folderIdList.length !== 0) {
+            userApi.getNoteFolderNameByFolderId(folderIdList).then((response) => {
+              if (response.data.code === 20000) {
+                this.folderNameList = response.data.data.data
+                if (result) {
+                  result.forEach((o) => {
+                    o.noteFolderId = this.formatFolderName(o.noteFolderId)
+                    o.gmtCreate = this.formatDate(o.gmtCreate)
+                  })
+                }
+                this.list.result = result
               }
-
-              this.list.result = result
-            }
-          })
+            })
+          }
         }
       })
     },
@@ -222,20 +211,10 @@ export default {
       this.multipleSelection = val
     },
 
-    // 编辑笔记跳转
-    editNote (id) {
-      this.$router.push({ path: '/editor/' + id })
-    },
-    // 查看笔记跳转
-    readNote (id) {
-      this.$router.push({ path: '/note/' + id })
-    },
-
     // 删除单个
     deleteSingle (id) {
       const idList = [`${id}`]
-
-      alert(JSON.stringify(idList))
+      this.deleteDrafts(idList)
     },
 
     // 删除选中
@@ -247,12 +226,27 @@ export default {
           idList.push(o.id)
         })
       }
-
-      alert(JSON.stringify(idList))
+      this.deleteDrafts(idList)
+    },
+    deleteDrafts (idList) {
+      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        noteApi.deleteDrafts(idList).then((response) => {
+          if (response.data.code === 20000) {
+            this.$message('删除成功')
+            this.getList()
+          }
+        })
+      }).catch(() => {
+      })
     }
 
   }
 }
+
 </script>
 
 <style>

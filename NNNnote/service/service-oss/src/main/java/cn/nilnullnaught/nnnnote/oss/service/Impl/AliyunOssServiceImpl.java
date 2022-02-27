@@ -3,21 +3,19 @@ package cn.nilnullnaught.nnnnote.oss.service.Impl;
 import cn.nilnullnaught.nnnnote.entity.oss.AliyunOssResource;
 import cn.nilnullnaught.nnnnote.entity.oss.vo.ResourceManagerVo;
 import cn.nilnullnaught.nnnnote.exceptionhandler.MyCustomException;
-import cn.nilnullnaught.nnnnote.oss.config.AliyunOssConfig;
 import cn.nilnullnaught.nnnnote.oss.mapper.AliyunOssResourceMapper;
 import cn.nilnullnaught.nnnnote.oss.utils.AliyunOssUtils;
 import cn.nilnullnaught.nnnnote.oss.service.AliyunOssService;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.checkerframework.checker.units.qual.s;
+
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -123,7 +121,7 @@ public class AliyunOssServiceImpl extends ServiceImpl<AliyunOssResourceMapper, A
         updateWrapperI.eq("type", type);
         updateWrapperI.eq("belong_id", BelongId);
         updateWrapperI.set("in_use", false);
-        baseMapper.update(null, updateWrapperI);
+        baseMapper.update(new AliyunOssResource(), updateWrapperI);
 
 
         UpdateWrapper<AliyunOssResource> updateWrapperII = new UpdateWrapper<>();
@@ -137,7 +135,7 @@ public class AliyunOssServiceImpl extends ServiceImpl<AliyunOssResourceMapper, A
         updateWrapperII.set("type", type);
         updateWrapperII.set("belong_id", BelongId);
         updateWrapperII.set("in_use", true);
-        int result = baseMapper.update(null, updateWrapperII);
+        int result = baseMapper.update(new AliyunOssResource(), updateWrapperII);
         if (result != ResourceUrl.size()) {
             throw new MyCustomException(20001, "文件状态更新失败");
         }

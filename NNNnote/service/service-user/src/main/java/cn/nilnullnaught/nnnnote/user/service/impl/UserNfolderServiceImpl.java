@@ -36,7 +36,7 @@ public class UserNfolderServiceImpl extends ServiceImpl<UserNfolderMapper, UserN
     public Map<String, Object> getUserNfolderPage(String userId, long page, long limit) {
 
         QueryWrapper<UserNfolder> queryWrapper = new QueryWrapper<>();
-        queryWrapper.orderByDesc("gmt_modified");
+        queryWrapper.orderByAsc("gmt_create");
         queryWrapper.eq("user_id", userId);
         Page<UserNfolder> pageUserNfolder = new Page<>(page, limit);
 

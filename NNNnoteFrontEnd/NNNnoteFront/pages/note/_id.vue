@@ -21,9 +21,9 @@ export default {
   created () {
     noteApi.getNoteInfoToRead(this.$route.params.id).then((response) => {
       if (response.data.code === 20000) {
-        this.note.title = response.data.data.data.noteInfo.title
+        this.note.title = response.data.data.noteInfo.title
         const md = require('markdown-it')()
-        this.note.text = md.render(response.data.data.data.noteText.text)
+        this.note.text = md.render(response.data.data.noteText.text)
       }
     })
   }

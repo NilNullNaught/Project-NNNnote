@@ -1,4 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.nilnullnaught.nnnnote.note.mapper.NoteInfoMapper">
+
+    <select id="getLogicDeletedNoteCount" resultType="java.lang.Integer">
+        SELECT
+            COUNT(*) AS total
+        FROM
+            note_info
+        WHERE
+            is_deleted = 1
+        AND
+            user_id = #{userID}
+    </select>
+
+    <select id="getLogicDeletedNoteList" resultType="cn.nilnullnaught.nnnnote.entity.note.NoteInfo">
+        SELECT
+            id,user_id,note_folder_id,title,preview,likes,collection_count,comment_count,STATUS,version,is_deleted,gmt_create,gmt_modified
+        FROM
+            note_info
+        WHERE
+            is_deleted = 1
+        AND
+            user_id = #{userID}
+        ORDER BY
+            ${orderByColumn}
+        <if test="isAsc">
+            ASC
+        </if>
+        <if test="!isAsc">
+            DESC
+        </if>
+            LIMIT #{limit}
+        OFFSET #{offset}
+    </select>
 </mapper>

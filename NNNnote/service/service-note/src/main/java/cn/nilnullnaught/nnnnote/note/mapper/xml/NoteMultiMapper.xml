@@ -2,23 +2,23 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.nilnullnaught.nnnnote.note.mapper.NoteMultiMapper">
     <insert id="initializeNote">
-        INSERT INTO `note_info` ( id, user_id, note_folder_id, title, gmt_create, gmt_modified )
-        VALUES
-            (#{ID},#{userID},#{noteFolderId},#{title},#{date},#{date});
-        INSERT INTO `note_text` ( id, text, gmt_create, gmt_modified )
-        VALUES
-            (#{ID},#{text},#{date},#{date});
+        INSERT INTO `note_info` (id, user_id, note_folder_id, title, gmt_create, gmt_modified)
+        VALUES (#{ID}, #{userID}, #{noteFolderId}, #{title}, #{date}, #{date});
+        INSERT INTO `note_text` (id, text, gmt_create, gmt_modified)
+        VALUES (#{ID}, #{text}, #{date}, #{date});
     </insert>
 
+    <!--如果 idList 长度为 0，会出现 SQL 语法错误，【但是，也防止了删除语句将整个表清空！】-->
     <delete id="deleteDrafts">
-        DELETE FROM `note_info` WHERE `user_id` = #{ID}
-        <foreach item="item" index="index" collection="list"
-                 open=" id in (" separator="," close=")" nullable="true">
+        DELETE FROM `note_info` WHERE
+        <foreach item="item" index="index" collection="idList"
+                 open="id in (" separator="," close=");" nullable="true">
             #{item}
         </foreach>
+
         DELETE FROM `note_text` WHERE
-        <foreach item="item" index="index" collection="list"
-                 open=" id in (" separator="," close=")" nullable="true">
+        <foreach item="item" index="index" collection="idList"
+                 open="id in (" separator="," close=");" nullable="true">
             #{item}
         </foreach>
     </delete>

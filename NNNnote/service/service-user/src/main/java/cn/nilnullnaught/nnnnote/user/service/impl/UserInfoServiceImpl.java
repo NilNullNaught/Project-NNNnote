@@ -36,16 +36,22 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
      */
     @Override
     public void updateUserInfo(UserInfo userInfo) {
-        UserInfo _userInfo = baseMapper.selectById(userInfo.getId());
+        String oldAvatar = baseMapper.selectById(userInfo.getId()).getAvatar();
 
         // 修改头像
-        if (!_userInfo.getAvatar().equals(userInfo.getAvatar())){
+        if (!oldAvatar.equals(userInfo.getAvatar())){
             ResourceManagerVo vo = new ResourceManagerVo();
             vo.setType(0);
             vo.setBelongId(userInfo.getId());
             vo.setResourceUrlList(Arrays.asList(userInfo.getAvatar()));
             aliyunOssClient.manageResource(vo);
         }
+
+        // <- 清理不需要改变或自动填充的数据
+        userInfo.setGmtCreate(null);
+        userInfo.setGmtModified(null);
+        userInfo.setIsDeleted(null);
+        // ->
 
         baseMapper.updateById(userInfo);
     }

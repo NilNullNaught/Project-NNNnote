@@ -20,7 +20,7 @@
                 删除文件夹
               </el-button>
               <el-button
-                v-show="select.checkedList.length < 2"
+                v-if="select.checkedList.length < 2"
                 type="primary"
                 @click="NfolderDialogInitialize('编辑文件夹')"
               >
