@@ -1,7 +1,7 @@
 <template>
   <div>
-    <el-container class="NoteFolderId-height">
-      <el-main style="padding:0px">
+    <el-container>
+      <el-main>
         <el-row align="middle" justify="center" type="flex">
           <el-col :span="4" align="center" justify="center" type="flex">
             <span style="font-size:20px;font-weight:bold;">{{ folderInfo.folderName }} </span>
@@ -15,38 +15,40 @@
           <el-col :span="14">
             <el-button
               type="primary"
+              plain
               @click="$router.push({ path: '/user/nfolder'})"
             >
+              <i class="el-icon-top-left el-icon--left" />
               返回主页
+            </el-button>
+            <el-button
+              type="primary"
+              plain
+              @click="CreateNoteDialog.visible = true"
+            >
+              &nbsp;<i class="el-icon-notebook-1 el-icon--left" />
+              写笔记&nbsp;
             </el-button>
 
             <el-button
+              v-show="select.checkedList.length > 0"
+              plain
               type="primary"
-              @click="CreateNoteDialog.visible = true"
+              @click="deleteNotes"
             >
-              写笔记
+              <i class="el-icon-delete el-icon--left" />
+              删除笔记
             </el-button>
 
-            <el-button-group
-              v-show="select.checkedList.length !== 0"
+            <el-button
+              v-show="select.checkedList.length == 1"
+              plain
+              type="primary"
+              @click="editNote"
             >
-              <el-button
-                type="primary"
-                @click="deleteDialog.visible = true"
-              >
-                <i class="el-icon-delete el-icon--left" />
-                删除笔记
-              </el-button>
-
-              <el-button
-                v-if="select.checkedList.length < 2"
-                type="primary"
-                @click="editNote"
-              >
-                <i class="el-icon-edit el-icon--left" />
-                编辑笔记
-              </el-button>
-            </el-button-group>
+              <i class="el-icon-edit el-icon--left" />
+              编辑笔记
+            </el-button>
           </el-col>
 
           <el-col :span="6" :offset="4">
@@ -78,7 +80,7 @@
 
         <!-- 笔记列表 ----------------------------------------------------------------------------------------------------------------------------------------->
         <el-row>
-          <el-col v-for="(o) in list.result" :key="o.id" :span="4">
+          <el-col v-for="(o) in list.result" :key="o.id" :lg="{span: '4-8'}">
             <el-card
               :id="'ID-'+o.id"
               class="NoteFolderId-el-card"
@@ -146,7 +148,7 @@
       </el-main>
 
       <!-- 分页 ----------------------------------------------------------------------------------------------------------------------------------->
-      <el-footer height="30px">
+      <el-footer height="40px">
         <el-row justify="center" type="flex">
           <el-pagination
             layout="prev, pager, next"
@@ -173,20 +175,6 @@
       </span>
     </el-dialog>
     <!------------------------------------------------------------------------------------------------------------------------------------------------->
-
-    <!-- 删除确认对话框 ----------------------------------------------------------------------------------------------------------------------------------------->
-    <el-dialog
-      title="确认删除"
-      :visible.sync="deleteDialog.visible"
-      width="30%"
-    >
-      <span>请注意，删除的笔记将会在回收站保存 7 天，7 天后将彻底删除，无法找回。</span>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="deleteDialog.visible = false">取 消</el-button>
-        <el-button type="primary" @click="deleteNotes">确 定</el-button>
-      </span>
-    </el-dialog>
-    <!------------------------------------------------------------------------------------------------------------------------------------------------->
   </div>
 </template>
 
@@ -205,7 +193,7 @@ export default {
       list: {
         keyword: '',
         current: 1,
-        limit: 24,
+        limit: 20,
         total: null,
         result: []
       },
@@ -218,9 +206,6 @@ export default {
       CreateNoteDialog: {
         visible: false,
         folderID: ''
-      },
-      deleteDialog: {
-        visible: false
       }
     }
   },
@@ -270,9 +255,7 @@ export default {
           if (this.list.result) {
             this.list.result.forEach((item) => {
               if (item.shapes) {
-                item.shapes.forEach((tem) => {
-                  tem.ischecked = false
-                })
+                item.ischecked = false
               }
             })
           }
@@ -363,30 +346,35 @@ export default {
 
     // 批量删除
     deleteNotes () {
-      const deleteIdList = []
-      this.select.checkedList.forEach((o) => {
-        deleteIdList.push(o.id)
-      })
+      this.$confirm('', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        const deleteIdList = []
+        this.select.checkedList.forEach((o) => {
+          deleteIdList.push(o.id)
+        })
 
-      noteApi.deleteNotes(deleteIdList).then((response) => {
-        if (response.data.code === 20000) {
-          this.$message('删除成功')
-          this.getList()
-        } else {
-          this.$message.error(response.data.message)
-        }
+        noteApi.deleteNotes(deleteIdList).then((response) => {
+          if (response.data.code === 20000) {
+            this.$message('删除成功')
+            this.getList(this.list.current)
+          } else {
+            this.$message.error(response.data.message)
+          }
+        })
+      }).catch(() => {
       })
-      this.deleteDialog.visible = false
     }
 
   }
 }
 </script>
 <style>
-.NoteFolderId-height{
-  min-height: calc(75vh);
+.el-container {
+     min-height: calc(80vh);
 }
-
 .NoteFolderId-el-button{
   margin-bottom: 10px;
 }
@@ -412,5 +400,11 @@ export default {
 }
 .el-divider--horizontal{
    margin:0px;
+}
+.el-button+.el-button {
+    margin-left: 0px;
+}
+.el-col-lg-4-8 {
+    width: 20%;
 }
 </style>

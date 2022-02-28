@@ -18,6 +18,6 @@ public interface UserNfolderClient {
     @PostMapping("/user/user-nfolder/alterUserNfolderNoteCount")
     public R alterUserNfolderNoteCount(@RequestBody Map<String,Long> map);
 
-    @PostMapping("/getNoteFolderNameByFolderId")
-    public R getNoteFolderNameByFolderId(@RequestBody List<String> idList);
+    @PostMapping("/user/user-nfolder//getNoteFolderNameByFolderId")
+    public R getNoteFolderNameByFolderId(@RequestHeader("token") String token,@RequestBody List<String> idList);
 }

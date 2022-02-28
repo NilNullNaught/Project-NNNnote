@@ -22,6 +22,7 @@ public interface NoteInfoMapper extends BaseMapper<NoteInfo> {
 
     /**
      * 查询被逻辑删除的笔记总数
+     *
      * @param userID
      * @return
      */
@@ -29,6 +30,7 @@ public interface NoteInfoMapper extends BaseMapper<NoteInfo> {
 
     /**
      * 分页查询被逻辑删除的笔记
+     *
      * @param userID
      * @param orderByColumn
      * @param isAsc
@@ -36,9 +38,28 @@ public interface NoteInfoMapper extends BaseMapper<NoteInfo> {
      * @param offset
      * @return
      */
+    List<NoteInfo> getLogicDeletedNoteListPaging(@Param("userID") String userID,
+                                                 @Param("orderByColumn") String orderByColumn,
+                                                 @Param("isAsc") Boolean isAsc,
+                                                 @Param("limit") Long limit,
+                                                 @Param("offset") Long offset);
+
+    /**
+     * 查询被逻辑删除的笔记
+     *
+     * @param userID
+     * @return
+     */
     List<NoteInfo> getLogicDeletedNoteList(@Param("userID") String userID,
-                                           @Param("orderByColumn") String orderByColumn,
-                                           @Param("isAsc") Boolean isAsc,
-                                           @Param("limit") Long limit,
-                                           @Param("offset") Long offset);
+                                           @Param("idList") List<String> idList);
+
+    /**
+     * 还原被逻辑删除的笔记
+     *
+     * @param userID
+     * @return
+     */
+    Integer restoreDeletedNote(@Param("userID") String userID,
+                               @Param("idList") List<String> idList);
+
 }

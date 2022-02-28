@@ -1,7 +1,7 @@
 <template>
   <div>
-    <el-container class="UserDraftIndex-height">
-      <el-main style="padding:0px">
+    <el-container>
+      <el-main>
         <el-row>
           <el-col :offset="9" :span="6" align="center">
             <div style="margin:10px">
@@ -16,9 +16,9 @@
 
         <div style="margin-bottom: 10px">
           <el-button type="primary" plain @click="toggleSelection()">
-            取消选择
+            取消选中
           </el-button>
-          <el-button type="danger" plain @click="deleteSelection()">
+          <el-button type="primary" plain @click="deleteSelection()">
             删除选中
           </el-button>
         </div>
@@ -39,23 +39,28 @@
           <el-table-column
             prop="title"
             label="标题"
-            width="160"
+            width="120"
             fixed
           />
           <el-table-column
             prop="preview"
             label="预览"
-            width="320"
+            width="300"
           />
 
           <el-table-column
             prop="noteFolderId"
             label="所属文件夹"
-            width="160"
+            width="120"
           />
           <el-table-column
             prop="gmtCreate"
             label="创建时间"
+            width="170"
+          />
+          <el-table-column
+            prop="gmtModified"
+            label="最后修改时间"
             width="170"
           />
 
@@ -65,13 +70,13 @@
             width="150"
           >
             <template slot-scope="scope">
-              <el-button type="text" size="small" @click="$router.push({ path: '/note/' + scope.row.id })">
+              <el-button type="text" size="mini" @click="$router.push({ path: '/note/' + scope.row.id })">
                 查看
               </el-button>
-              <el-button type="text" size="small" @click="$router.push({ path: '/editor/' + scope.row.id })">
+              <el-button type="text" size="mini" @click="$router.push({ path: '/editor/' + scope.row.id })">
                 编辑
               </el-button>
-              <el-button type="text" size="small" @click="deleteSingle(scope.row.id)">
+              <el-button type="text" size="mini" @click="deleteSingle(scope.row.id)">
                 删除
               </el-button>
             </template>
@@ -79,7 +84,7 @@
         </el-table>
       </el-main>
 
-      <el-footer height="30px">
+      <el-footer height="40px">
         <el-row justify="center" type="flex">
           <el-pagination
             layout="prev, pager, next"
@@ -118,7 +123,6 @@ export default {
   created () {
     this.getList()
   },
-
   methods: {
     // 查询数据
     getList (page = 1) {
@@ -148,6 +152,7 @@ export default {
                   result.forEach((o) => {
                     o.noteFolderId = this.formatFolderName(o.noteFolderId)
                     o.gmtCreate = this.formatDate(o.gmtCreate)
+                    o.gmtModified = this.formatDate(o.gmtModified)
                   })
                 }
                 this.list.result = result
@@ -229,7 +234,7 @@ export default {
       this.deleteDrafts(idList)
     },
     deleteDrafts (idList) {
-      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+      this.$confirm('删除后不可恢复, 是否确认?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -237,7 +242,7 @@ export default {
         noteApi.deleteDrafts(idList).then((response) => {
           if (response.data.code === 20000) {
             this.$message('删除成功')
-            this.getList()
+            this.getList(this.list.current)
           }
         })
       }).catch(() => {
@@ -250,7 +255,7 @@ export default {
 </script>
 
 <style>
-.UserDraftIndex-height{
-  min-height: calc(75vh);
+.el-container {
+     min-height: calc(80vh);
 }
 </style>

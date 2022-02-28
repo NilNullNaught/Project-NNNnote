@@ -1,7 +1,7 @@
 <template>
-  <el-container>
+  <el-container style="padding:20px">
     <!-- 侧边栏 ----------------------------------------------------------------------------------------------------------------------------------------->
-    <el-aside>
+    <el-aside width="200px">
       <el-menu
         default-active="/setting/safe"
         class="el-menu-vertical-demo"
@@ -314,7 +314,7 @@ export default {
 </script>
 <style>
 .el-container {
-     min-height: calc(85vh);
+     min-height: calc(80vh);
 }
 .el-aside{
   border-right: solid 1px #e6e6e6;

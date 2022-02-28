@@ -1,7 +1,7 @@
 <template>
-  <el-container>
+  <el-container style="padding:20px">
     <!-- 侧边栏 ----------------------------------------------------------------------------------------------------------------------------------------->
-    <el-aside>
+    <el-aside width="200px">
       <el-menu
         default-active="/setting"
         class="el-menu-vertical-demo"
@@ -26,7 +26,7 @@
     <el-main>
       <el-form ref="userInfo" :model="userInfo" label-width="80px">
         <el-form-item>
-          <el-col class="line" :span="5">
+          <el-col class="line" :span="6">
             <el-avatar size="large" :src="userInfo.avatar" style="width:80px;height:80px;block:inline" />
           </el-col>
           <!-- 头像上传 ----------------------------------------------------------------------------------------------------------------------------------------->
@@ -46,13 +46,13 @@
         </el-form-item>
 
         <el-form-item prop="nickname" label="昵称">
-          <el-col class="line" :span="12">
+          <el-col class="line" :span="14">
             <el-input v-model="userInfo.nickname" maxlength="10" show-word-limit />
           </el-col>
         </el-form-item>
 
         <el-form-item prop="birthday" label="生日">
-          <el-col class="line" :span="12">
+          <el-col class="line" :span="14">
             <el-date-picker
               v-model="userInfo.birthday"
               type="date"
@@ -253,7 +253,7 @@ export default {
 </script>
 <style>
 .el-container {
-     min-height: calc(85vh);
+     min-height: calc(80vh);
 }
 .el-aside{
   border-right: solid 1px #e6e6e6;

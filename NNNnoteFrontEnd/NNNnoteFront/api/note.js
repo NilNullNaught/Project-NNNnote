@@ -78,5 +78,13 @@ export default {
       method: 'post',
       data: formdata
     })
+  },
+  // 还原被逻辑删除的笔记
+  restoreDeletedNote (formdata) {
+    return request({
+      url: `${ApiName}/restoreDeletedNote`,
+      method: 'post',
+      data: formdata
+    })
   }
 }

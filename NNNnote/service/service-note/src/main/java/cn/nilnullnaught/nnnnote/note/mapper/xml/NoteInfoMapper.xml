@@ -3,34 +3,55 @@
 <mapper namespace="cn.nilnullnaught.nnnnote.note.mapper.NoteInfoMapper">
 
     <select id="getLogicDeletedNoteCount" resultType="java.lang.Integer">
-        SELECT
-            COUNT(*) AS total
-        FROM
-            note_info
-        WHERE
-            is_deleted = 1
-        AND
-            user_id = #{userID}
+        SELECT COUNT(*) AS total
+        FROM note_info
+        WHERE is_deleted = 1
+          AND user_id = #{userID}
     </select>
 
-    <select id="getLogicDeletedNoteList" resultType="cn.nilnullnaught.nnnnote.entity.note.NoteInfo">
+    <select id="getLogicDeletedNoteListPaging" resultType="cn.nilnullnaught.nnnnote.entity.note.NoteInfo">
         SELECT
-            id,user_id,note_folder_id,title,preview,likes,collection_count,comment_count,STATUS,version,is_deleted,gmt_create,gmt_modified
+        id,user_id,note_folder_id,title,preview,likes,collection_count,comment_count,STATUS,version,is_deleted,gmt_create,gmt_modified
         FROM
-            note_info
+        note_info
         WHERE
-            is_deleted = 1
+        is_deleted = 1
         AND
-            user_id = #{userID}
+        user_id = #{userID}
         ORDER BY
-            ${orderByColumn}
+        ${orderByColumn}
         <if test="isAsc">
             ASC
         </if>
         <if test="!isAsc">
             DESC
         </if>
-            LIMIT #{limit}
+        LIMIT #{limit}
         OFFSET #{offset}
     </select>
+
+    <select id="getLogicDeletedNoteList" resultType="cn.nilnullnaught.nnnnote.entity.note.NoteInfo">
+        SELECT
+        id,user_id,note_folder_id,title,preview,likes,collection_count,comment_count,STATUS,version,is_deleted,gmt_create,gmt_modified
+        FROM
+        note_info
+        WHERE
+        is_deleted = 1
+        AND
+        user_id = #{userID}
+        AND
+        <foreach item="item" index="index" collection="idList"
+                 open="id in (" separator="," close=");" nullable="true">
+            #{item}
+        </foreach>
+    </select>
+
+    <update id="restoreDeletedNote">
+        UPDATE note_info SET is_deleted=0 WHERE user_id = #{userID} AND
+        <foreach item="item" index="index" collection="idList"
+                 open="id in (" separator="," close=");" nullable="true">
+            #{item}
+        </foreach>
+    </update>
+
 </mapper>

@@ -1,33 +1,35 @@
 <template>
   <div>
-    <el-container class="NoteFolderIndex-height">
+    <el-container>
       <el-main>
         <!-- 操作栏 ----------------------------------------------------------------------------------------------------------------------------------------->
         <el-row>
           <el-col :span="18">
             <el-button
               type="primary"
+              plain
               @click="NfolderDialogInitialize('新建文件夹')"
             >
               新建文件夹
             </el-button>
-            <el-button-group
-              v-show="select.checkedList.length !== 0"
-              ref="userIndex_ebg"
+            <el-button
+              v-show="select.checkedList.length > 0"
+              type="primary"
+              plain
+              @click="deleteUserNFolder"
             >
-              <el-button type="primary" @click="deleteDialog.visible = true">
-                <i class="el-icon-delete el-icon--left" />
-                删除文件夹
-              </el-button>
-              <el-button
-                v-if="select.checkedList.length < 2"
-                type="primary"
-                @click="NfolderDialogInitialize('编辑文件夹')"
-              >
-                <i class="el-icon-edit el-icon--left" />
-                编辑文件夹
-              </el-button>
-            </el-button-group>
+              <i class="el-icon-delete el-icon--left" />
+              删除文件夹
+            </el-button>
+            <el-button
+              v-show="select.checkedList.length == 1"
+              type="primary"
+              plain
+              @click="NfolderDialogInitialize('编辑文件夹')"
+            >
+              <i class="el-icon-edit el-icon--left" />
+              编辑文件夹
+            </el-button>
           </el-col>
           <el-col :span="6">
             <el-input
@@ -55,38 +57,43 @@
 
         <!-- 用户文件夹列表 ----------------------------------------------------------------------------------------------------------------------------------------->
         <el-row v-if="!search.isSearching">
-          <el-col v-for="(o) in list" :key="o.id" :span="4">
-            <el-card :id="'ID-'+o.id" class="NoteFolderIndex-el-card" shadow="hover" style="position: relative;">
-              <input
-                v-if="o.id !== o.userId"
-                v-model="o.ischecked"
-                style="position:absolute;top: 10px;left: 10px;"
-                type="checkbox"
-                @change="handleChecked(o)"
-              >
-              <div @click="route(o.id)">
-                <div style="display: flex;justify-content:center;">
-                  <img src="~/assets/img/mine/folder.png" alt>
-                </div>
-                <div style="display: flex;justify-content:center;">
-                  <span
-                    style="
+          <el-col v-for="(o) in list" :key="o.id" :lg="{span: '4-8'}">
+            <el-tooltip class="item" effect="dark" placement="top">
+              <div slot="content">
+                笔记数量: {{ o.noteCount }}<br>描述: {{ o.folderDescription }}
+              </div>
+              <el-card :id="'ID-'+o.id" class="NoteFolderIndex-el-card" shadow="hover" style="position: relative;">
+                <input
+                  v-if="o.id !== o.userId"
+                  v-model="o.ischecked"
+                  style="position:absolute;top: 10px;left: 10px;"
+                  type="checkbox"
+                  @change="handleChecked(o)"
+                >
+                <div @click="route(o.id)">
+                  <div style="display: flex;justify-content:center;">
+                    <img src="~/assets/img/mine/folder.png" alt>
+                  </div>
+                  <div style="display: flex;justify-content:center;">
+                    <span
+                      style="
                         display: -webkit-box;
                         -webkit-box-orient: vertical;
                         -webkit-line-clamp: 1;
                         overflow: hidden;
                         word-break: break-all;"
-                  >{{ o.folderName }}</span>
+                    >{{ o.folderName }}</span>
+                  </div>
                 </div>
-              </div>
-            </el-card>
+              </el-card>
+            </el-tooltip>
           </el-col>
         </el-row>
         <!----------------------------------------------------------------------------------------------------------------------------------------->
 
         <!-- 搜索结果列表 ----------------------------------------------------------------------------------------------------------------------------------------->
         <el-row v-if="search.isSearching">
-          <el-col v-for="(so) in search.searchResult" :key="so.id" :span="4">
+          <el-col v-for="(so) in search.searchResult" :key="so.id" :lg="{span: '4-8'}">
             <el-card :id="'SID-'+so.id" class="NoteFolderIndex-el-card" shadow="hover" style="position: relative;">
               <input
                 v-if="so.id !== so.userId"
@@ -110,7 +117,7 @@
       </el-main>
 
       <!-- 分页 ----------------------------------------------------------------------------------------------------------------------------------->
-      <el-footer height="30px">
+      <el-footer height="40px">
         <el-row justify="center" type="flex">
           <el-pagination
             v-if="!search.isSearching"
@@ -133,7 +140,7 @@
     <!------------------------------------------------------------------------------------------------------------------------------------------------->
     </el-container>
 
-    <!-- 新增与删除文件夹对话框 ----------------------------------------------------------------------------------------------------------------------------------------->
+    <!-- 新增与修改文件夹对话框 ----------------------------------------------------------------------------------------------------------------------------------------->
     <el-dialog
       width="30%"
       :title="NfolderDialog.title"
@@ -161,7 +168,7 @@
                 maxlength="30"
                 show-word-limit
                 type="textarea"
-                placeholder="请输入描述"
+                placeholder="请输入描述信息"
               />
             </el-form-item>
           </el-form>
@@ -171,20 +178,6 @@
       <span slot="footer" class="dialog-footer">
         <el-button @click="NfolderDialog.visible = false">取 消</el-button>
         <el-button type="primary" @click="submitNfolder()">确认</el-button>
-      </span>
-    </el-dialog>
-    <!------------------------------------------------------------------------------------------------------------------------------------------------->
-
-    <!-- 删除确认对话框 ----------------------------------------------------------------------------------------------------------------------------------------->
-    <el-dialog
-      title="提示"
-      :visible.sync="deleteDialog.visible"
-      width="30%"
-    >
-      <span>确认删除{{ select.checkedList.length }}个文件夹？</span>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="deleteDialog.visible = false">取 消</el-button>
-        <el-button type="primary" @click="deleteUserNFolder">确 定</el-button>
       </span>
     </el-dialog>
     <!------------------------------------------------------------------------------------------------------------------------------------------------->
@@ -210,12 +203,12 @@ export default {
       },
       pagination1: {
         current: 1,
-        limit: 24,
+        limit: 20,
         total: null
       },
       pagination2: {
         current: 1,
-        limit: 24,
+        limit: 20,
         total: null
       },
       NfolderDialog: {
@@ -225,9 +218,6 @@ export default {
           nfolderName: '',
           description: ''
         }
-      },
-      deleteDialog: {
-        visible: false
       },
       search: {
         isSearching: false,
@@ -245,17 +235,20 @@ export default {
     // 获取文件夹数据
     getList (page = 1) {
       this.pagination1.current = page
+
+      this.select = {
+        checkedList: [],
+        selectAll: false,
+        isIndeterminate: false,
+        selectSum: '全选'
+      }
       userApi.getUserNfolderPage(this.pagination1.current, this.pagination1.limit).then((response) => {
         this.list = response.data.data.items
         this.pagination1.total = response.data.data.total
 
         if (this.list) {
           this.list.forEach((item) => {
-            if (item.shapes) {
-              item.shapes.forEach((tem) => {
-                tem.ischecked = false
-              })
-            }
+            item.ischecked = false
           })
         }
       })
@@ -355,9 +348,7 @@ export default {
           this.search.searchResult = response.data.data.items
           this.pagination1.total = response.data.data.total
           this.list.forEach((item) => {
-            item.shapes.forEach((tem) => {
-              tem.ischecked = false
-            })
+            item.ischecked = false
           })
           // 清除选中样式
           this.list.forEach((o) => {
@@ -402,7 +393,7 @@ export default {
         }
         userApi.alterUserNfolder(qs.stringify((data))).then((response) => {
           if (response.data.code === 20000) {
-            this.getList()// 获取新的笔记文件夹列表
+            this.getList(this.pagination1.current)// 获取新的笔记文件夹列表
             this.select.checkedList = []// 清空 checkedList
             this.NfolderDialog.visible = false
           } else {
@@ -412,7 +403,7 @@ export default {
       } else {
         userApi.addUserNfolder(qs.stringify(this.NfolderDialog.form)).then((response) => {
           if (response.data.code === 20000) {
-            this.getList()
+            this.getList(this.pagination1.current)// 获取新的笔记文件夹列表
             this.NfolderDialog.visible = false
           } else {
             this.$message.error(response.data.message)
@@ -424,32 +415,39 @@ export default {
 
     // 批量删除
     deleteUserNFolder () {
-      const deleteIdList = []
-      this.select.checkedList.forEach((o) => {
-        deleteIdList.push(o.id)
-      })
+      this.$confirm('删除后无法恢复，是否确认？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        const deleteIdList = []
+        this.select.checkedList.forEach((o) => {
+          deleteIdList.push(o.id)
+        })
 
-      userApi.deleteUserNFolder(deleteIdList).then((response) => {
-        if (response.data.code === 20000) {
-          this.$message('删除成功')
-          this.getList()
-          this.select.checkedList = []
-          this.select.selectAll = false
-          this.select.isIndeterminate = false
-          this.select.selectSum = '全选'
-        } else {
-          this.$message.error(response.data.message)
-        }
+        userApi.deleteUserNFolder(deleteIdList).then((response) => {
+          if (response.data.code === 20000) {
+            this.$message('删除成功')
+            this.getList()
+            this.select.checkedList = []
+            this.select.selectAll = false
+            this.select.isIndeterminate = false
+            this.select.selectSum = '全选'
+          } else {
+            this.$message.error(response.data.message)
+          }
+        })
+      }).catch(() => {
       })
-      this.deleteDialog.visible = false
     }
 
   }
 }
 </script>
 <style>
-.NoteFolderIndex-height{
-  min-height: calc(75vh);
+
+.el-container {
+     min-height: calc(80vh);
 }
 .NoteFolderIndex-el-button{
   margin-bottom: 10px;
@@ -472,5 +470,11 @@ export default {
 }
 .el-divider--horizontal{
    margin:10px;
+}
+.el-button+.el-button {
+    margin-left: 0px;
+}
+.el-col-lg-4-8 {
+    width: 20%;
 }
 </style>

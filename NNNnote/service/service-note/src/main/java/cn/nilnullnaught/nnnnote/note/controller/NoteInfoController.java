@@ -133,4 +133,12 @@ public class NoteInfoController {
         Map<String, Object> resultList = noteInfoService.getLogicDeletedNoteList(userId, page, limit);
         return R.ok().data(resultList);
     }
+
+    @ApiOperation(value = "还原被逻辑删除的笔记",notes = "还原时会对笔记所属的笔记文件夹进行检查，如果文件夹已经被删除，则还原到默认文件夹中")
+    @PostMapping("/restoreDeletedNote")
+    public R restoreDeletedNote(@RequestHeader("token") String token,@RequestBody List<String> idList){
+        String userId = JwtUtils.getIdByJwtToken(token);
+        noteInfoService.restoreDeletedNote(userId, token, idList);
+        return R.ok();
+    }
 }

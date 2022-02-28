@@ -33,8 +33,7 @@
               </el-input>
             </div>
           </el-col>
-          <el-col :span="5" />
-          <el-col :span="4" align="end">
+          <el-col :offset="5" :span="4" align="end">
             <div>
               <div v-if="userInfo.id">
                 <el-menu
@@ -98,14 +97,12 @@
       </el-header>
 
       <el-main class="main">
-        <el-row :gutter="20" align="middle" type="flex">
-          <el-col :span="4" />
-          <el-col :span="16">
-            <el-card class="card" shadow="always">
+        <el-row align="middle" justify="center" type="flex">
+          <el-col :span="12">
+            <el-card :body-style="{ padding: '0px' }" shadow="always">
               <nuxt />
             </el-card>
           </el-col>
-          <el-col :span="4" />
         </el-row>
       </el-main>
 
@@ -226,7 +223,6 @@ body{
   .main{
     margin: 0px;
     padding: 10px;
-    min-height: calc(80vh);
     overflow: auto;
   }
   .h3 {
@@ -239,7 +235,6 @@ body{
 .el-menu.el-menu--horizontal {
      border-bottom: 0px;
 }
-
 #BaseLayout_el_descriptions_backgroundcolor .el-descriptions__title{
           color:#999;
     padding:30px 0px 0px 0px;

@@ -1,7 +1,7 @@
 <template>
   <div>
-    <el-container class="UserDraftIndex-height">
-      <el-main style="padding:0px">
+    <el-container>
+      <el-main>
         <el-row>
           <el-col :offset="9" :span="6" align="center">
             <div style="margin:10px">
@@ -15,11 +15,17 @@
         </el-row>
 
         <div style="margin-bottom: 10px">
-          <el-button type="primary" plain @click="toggleSelection()">
-            取消选择
+          <el-button type="primary" plain size="small" @click="toggleSelection()">
+            <i class="el-icon-close" />
+            取消选中
           </el-button>
-          <el-button type="danger" plain @click="deleteSelection()">
+          <el-button type="primary" plain size="small" @click="deleteSelection()">
+            <i class="el-icon-delete" />
             删除选中
+          </el-button>
+          <el-button type="primary" plain size="small" @click="restoreSelection()">
+            <i class="el-icon-upload2" />
+            还原选中
           </el-button>
         </div>
 
@@ -39,25 +45,25 @@
           <el-table-column
             prop="title"
             label="标题"
-            width="160"
+            width="120"
             fixed
           />
           <el-table-column
             prop="gmtModified"
             label="剩余时间"
-            width="170"
+            width="120"
             fixed
           />
           <el-table-column
             prop="preview"
             label="预览"
-            width="320"
+            width="300"
           />
 
           <el-table-column
             prop="noteFolderId"
             label="所属文件夹"
-            width="160"
+            width="120"
           />
           <el-table-column
             prop="gmtCreate"
@@ -68,10 +74,10 @@
           <el-table-column
             fixed="right"
             label="操作"
-            width="150"
+            width="100"
           >
             <template slot-scope="scope">
-              <el-button type="text" size="small">
+              <el-button type="text" size="small" @click="restoreSingle(scope.row.id)">
                 还原
               </el-button>
               <el-button type="text" size="small" @click="deleteSingle(scope.row.id)">
@@ -82,7 +88,7 @@
         </el-table>
       </el-main>
 
-      <el-footer height="30px">
+      <el-footer height="40px">
         <el-row justify="center" type="flex">
           <el-pagination
             layout="prev, pager, next"
@@ -151,7 +157,7 @@ export default {
                   result.forEach((o) => {
                     o.noteFolderId = this.formatFolderName(o.noteFolderId)
                     o.gmtCreate = this.formatDate(o.gmtCreate)
-                    o.gmtModified = this.formatDate(o.gmtModified)
+                    o.gmtModified = this.formatCountdown(o.gmtModified)
                   })
                 }
                 this.list.result = result
@@ -195,9 +201,21 @@ export default {
       if (data == null) {
         return null
       }
-      // eslint-disable-next-line no-console
-      console.log(this.folderNameList[`${data}`])
       return this.folderNameList[`${data}`]
+    },
+    // 格式化文件夹名
+    formatCountdown (data) { // 设置时间格式
+      if (data == null) {
+        return null
+      }
+      // 指定日期和时间
+      const DeleteTime = new Date(data)
+      // 当前系统时间
+      const NowTime = new Date()
+      const t = 7 * 24 * 60 * 60 * 1000 - (NowTime.getTime() - DeleteTime.getTime())
+
+      return `${Math.floor(t / (1000 * 60 * 60 * 24))} 天 ` +
+             `${Math.floor(t / (1000 * 60 * 60) % 24)} 小时 `
     },
 
     // 取消选择
@@ -225,12 +243,12 @@ export default {
     deleteSelection () {
       const idList = []
 
-      if (this.multipleSelection) {
+      if (this.multipleSelection && this.multipleSelection.length >= 1) {
         this.multipleSelection.forEach((o) => {
           idList.push(o.id)
         })
+        this.deleteDrafts(idList)
       }
-      this.deleteDrafts(idList)
     },
     deleteDrafts (idList) {
       this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
@@ -241,7 +259,38 @@ export default {
         noteApi.deleteDrafts(idList).then((response) => {
           if (response.data.code === 20000) {
             this.$message('删除成功')
-            this.getList()
+            this.getList(this.list.current)
+          }
+        })
+      }).catch(() => {
+      })
+    },
+    // 还原单个
+    restoreSingle (id) {
+      const idList = [`${id}`]
+      this.restoreDeletedNote(idList)
+    },
+    // 还原选中
+    restoreSelection () {
+      const idList = []
+
+      if (this.multipleSelection && this.multipleSelection.length >= 1) {
+        this.multipleSelection.forEach((o) => {
+          idList.push(o.id)
+        })
+        this.restoreDeletedNote(idList)
+      }
+    },
+    restoreDeletedNote (idList) {
+      this.$confirm('确认还原？（如果笔记文件夹已经删除，笔记将会转移到默认文件夹）', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        noteApi.restoreDeletedNote(idList).then((response) => {
+          if (response.data.code === 20000) {
+            this.$message('成功')
+            this.getList(this.list.current)
           }
         })
       }).catch(() => {
@@ -254,7 +303,7 @@ export default {
 </script>
 
 <style>
-.UserDraftIndex-height{
-  min-height: calc(75vh);
+.el-container {
+     min-height: calc(80vh);
 }
 </style>
