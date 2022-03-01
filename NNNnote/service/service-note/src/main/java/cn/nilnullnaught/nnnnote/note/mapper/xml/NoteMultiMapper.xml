@@ -22,4 +22,23 @@
             #{item}
         </foreach>
     </delete>
+
+    <delete id="deleteDeletedNotes">
+        DELETE FROM `note_info` WHERE
+        <foreach item="item" index="index" collection="idList"
+                 open="id in (" separator="," close=");" nullable="true">
+            #{item}
+        </foreach>
+
+        DELETE FROM `note_text` WHERE
+        <foreach item="item" index="index" collection="idList"
+                 open="id in (" separator="," close=");" nullable="true">
+            #{item}
+        </foreach>
+        DELETE FROM `note_comment` WHERE
+        <foreach item="item" index="index" collection="idList"
+                 open="note_id in (" separator="," close=");" nullable="true">
+            #{item}
+        </foreach>
+    </delete>
 </mapper>

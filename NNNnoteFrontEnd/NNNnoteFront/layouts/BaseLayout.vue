@@ -9,6 +9,7 @@
               :src="style.logo"
             />
           </el-col>
+
           <el-col :span="5">
             <el-menu
               :default-active="style.activeIndex"
@@ -33,7 +34,8 @@
               </el-input>
             </div>
           </el-col>
-          <el-col :offset="5" :span="4" align="end">
+          <el-col :span="5" />
+          <el-col :span="4" align="end">
             <div>
               <div v-if="userInfo.id">
                 <el-menu
@@ -56,10 +58,10 @@
                       收藏夹
                     </el-menu-item>
                     <el-menu-item index="/user/draft">
-                      草稿箱
+                      草稿箱（{{ dataCount.draftCount }}）
                     </el-menu-item>
                     <el-menu-item index="/user/recyclebin">
-                      回收站
+                      回收站（{{ dataCount.deletedCount }}）
                     </el-menu-item>
                     <el-menu-item index="/setting">
                       设置
@@ -106,20 +108,9 @@
         </el-row>
       </el-main>
 
-      <el-footer class="head-bg" height="120px">
+      <el-footer class="head-bg" height="160px">
         <el-row justify="center" type="flex">
           <el-col :span="16" align="center" justify="center" type="flex">
-            <!-- <el-descriptions id="BaseLayout_el_descriptions_backgroundcolor" title="Present by NilNullNaught">
-              <el-descriptions-item :span="1" label="Email">
-                nilnullnaught@gmail.com
-              </el-descriptions-item>
-              <el-descriptions-item label="项目地址">
-                github.com/NilNullNaught/Project-NNNnote
-              </el-descriptions-item>
-              <el-descriptions-item :span="1" label="联系方式">
-                188********
-              </el-descriptions-item>
-            </el-descriptions> -->
             <div>
               <h3 class="h3">
                 Present by NilNullNaught
@@ -145,7 +136,6 @@
 <script>
 import jsCookie from 'js-cookie'
 import noteApi from '@/api/note'
-
 export default {
   data () {
     return {
@@ -161,6 +151,11 @@ export default {
         avatar: '',
         sign: ''
       }
+    }
+  },
+  computed: {
+    dataCount () {
+      return this.$store.state.userData.dataCount
     }
   },
   created () {
@@ -196,9 +191,19 @@ export default {
     toEditor () {
       noteApi.initializeNote(this.userInfo.id).then((response) => {
         if (response.data.code === 20000) {
+          this.getCountOfNoteInfo()
           this.$router.push({ path: `/editor/${response.data.data.data}` })
         } else {
           this.$message.error(response.data.message)
+        }
+      })
+    },
+    // 将笔记相关数据更新到 store
+    getCountOfNoteInfo () {
+      noteApi.getCountOfNoteInfo().then((response) => {
+        if (response.data.code === 20000) {
+          const data = response.data.data
+          this.$store.dispatch('userData/updateDataCount', { data })
         }
       })
     }
@@ -234,15 +239,5 @@ body{
 
 .el-menu.el-menu--horizontal {
      border-bottom: 0px;
-}
-#BaseLayout_el_descriptions_backgroundcolor .el-descriptions__title{
-          color:#999;
-    padding:30px 0px 0px 0px;
-    font-size: 20px;
-    font-family: "Lucida Console", "Courier New", monospace;
-}
-
-#BaseLayout_el_descriptions_backgroundcolor .el-descriptions__body{
-      background-color: #323232;
 }
 </style>

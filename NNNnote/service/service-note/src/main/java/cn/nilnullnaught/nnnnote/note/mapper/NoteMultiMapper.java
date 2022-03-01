@@ -28,7 +28,12 @@ public interface NoteMultiMapper {
     /**
      * 删除草稿
      */
-    void deleteDrafts(@Param("userID") String userID,
-                      @Param("idList") List<String> ID);
+    void deleteDrafts(@Param("idList") List<String> ID);
+
+    /**
+     * 删除回收站中的笔记
+     * @param idList
+     */
+    Integer deleteDeletedNotes(@Param("idList")List<String> idList);
 
 }

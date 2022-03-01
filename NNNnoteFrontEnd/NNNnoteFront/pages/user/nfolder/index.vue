@@ -6,14 +6,17 @@
         <el-row>
           <el-col :span="18">
             <el-button
+              size="mini"
               type="primary"
               plain
               @click="NfolderDialogInitialize('新建文件夹')"
             >
+              <i class="el-icon-circle-plus-outline el-icon--left" />
               新建文件夹
             </el-button>
             <el-button
               v-show="select.checkedList.length > 0"
+              size="mini"
               type="primary"
               plain
               @click="deleteUserNFolder"
@@ -23,6 +26,8 @@
             </el-button>
             <el-button
               v-show="select.checkedList.length == 1"
+
+              size="mini"
               type="primary"
               plain
               @click="NfolderDialogInitialize('编辑文件夹')"
@@ -34,6 +39,7 @@
           <el-col :span="6">
             <el-input
               v-model="search.searchKeyWord"
+              size="mini"
               placeholder="请输入内容"
               clearable
               @change="searchNfolderANDNote"
@@ -444,7 +450,7 @@ export default {
   }
 }
 </script>
-<style>
+<style scoped>
 
 .el-container {
      min-height: calc(80vh);

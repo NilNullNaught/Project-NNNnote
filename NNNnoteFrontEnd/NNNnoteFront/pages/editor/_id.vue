@@ -309,7 +309,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .mavonEditor {
   width: 100%;
   height: 100%;

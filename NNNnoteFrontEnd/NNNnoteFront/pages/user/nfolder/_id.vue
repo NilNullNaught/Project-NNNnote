@@ -14,6 +14,7 @@
         <el-row align="middle" justify="center" type="flex">
           <el-col :span="14">
             <el-button
+              size="mini"
               type="primary"
               plain
               @click="$router.push({ path: '/user/nfolder'})"
@@ -22,6 +23,7 @@
               返回主页
             </el-button>
             <el-button
+              size="mini"
               type="primary"
               plain
               @click="CreateNoteDialog.visible = true"
@@ -32,6 +34,7 @@
 
             <el-button
               v-show="select.checkedList.length > 0"
+              size="mini"
               plain
               type="primary"
               @click="deleteNotes"
@@ -42,6 +45,7 @@
 
             <el-button
               v-show="select.checkedList.length == 1"
+              size="mini"
               plain
               type="primary"
               @click="editNote"
@@ -54,6 +58,7 @@
           <el-col :span="6" :offset="4">
             <el-input
               v-model="list.keyword"
+              size="mini"
               placeholder="请输入内容"
               clearable
               @change="getList"
@@ -328,6 +333,7 @@ export default {
     createNoteFun () {
       noteApi.initializeNote(this.CreateNoteDialog.folderID).then((response) => {
         if (response.data.code === 20000) {
+          this.getCountOfNoteInfo()
           this.$router.push({ path: `/editor/${response.data.data.data}` })
         } else {
           this.$message.error(response.data.message)
@@ -346,7 +352,7 @@ export default {
 
     // 批量删除
     deleteNotes () {
-      this.$confirm('', '提示', {
+      this.$confirm('笔记将暂时保存在回收站中，确认删除？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -360,18 +366,28 @@ export default {
           if (response.data.code === 20000) {
             this.$message('删除成功')
             this.getList(this.list.current)
+            this.getCountOfNoteInfo()
           } else {
             this.$message.error(response.data.message)
           }
         })
       }).catch(() => {
       })
+    },
+    // 将笔记相关数据更新到 store
+    getCountOfNoteInfo () {
+      noteApi.getCountOfNoteInfo().then((response) => {
+        if (response.data.code === 20000) {
+          const data = response.data.data
+          this.$store.dispatch('userData/updateDataCount', { data })
+        }
+      })
     }
 
   }
 }
 </script>
-<style>
+<style scoped>
 .el-container {
      min-height: calc(80vh);
 }

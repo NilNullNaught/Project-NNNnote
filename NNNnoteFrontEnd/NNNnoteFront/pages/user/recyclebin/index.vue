@@ -15,15 +15,15 @@
         </el-row>
 
         <div style="margin-bottom: 10px">
-          <el-button type="primary" plain size="small" @click="toggleSelection()">
+          <el-button type="primary" plain size="mini" @click="toggleSelection()">
             <i class="el-icon-close" />
             取消选中
           </el-button>
-          <el-button type="primary" plain size="small" @click="deleteSelection()">
+          <el-button type="primary" plain size="mini" @click="deleteSelection()">
             <i class="el-icon-delete" />
             删除选中
           </el-button>
-          <el-button type="primary" plain size="small" @click="restoreSelection()">
+          <el-button type="primary" plain size="mini" @click="restoreSelection()">
             <i class="el-icon-upload2" />
             还原选中
           </el-button>
@@ -63,7 +63,7 @@
           <el-table-column
             prop="noteFolderId"
             label="所属文件夹"
-            width="120"
+            width="140"
           />
           <el-table-column
             prop="gmtCreate"
@@ -138,17 +138,24 @@ export default {
         page: this.list.current,
         limit: this.list.limit
       }
+
       noteApi.getLogicDeletedNoteList(qs.stringify(data)).then((response) => {
         if (response.data.code === 20000) {
           const result = response.data.data.items
           this.list.total = response.data.data.total
-
           const folderIdList = []
+
+          if (result.length === 0) {
+            this.list.result = []
+            return
+          }
+
           if (result) {
             result.forEach((o) => {
               if (!folderIdList.includes(o.noteFolderId)) { folderIdList.push(o.noteFolderId) }
             })
           }
+
           if (folderIdList.length !== 0) {
             userApi.getNoteFolderNameByFolderId(folderIdList).then((response) => {
               if (response.data.code === 20000) {
@@ -201,9 +208,14 @@ export default {
       if (data == null) {
         return null
       }
-      return this.folderNameList[`${data}`]
+      const folderName = this.folderNameList[`${data}`]
+      if (folderName !== null) {
+        return folderName
+      } else {
+        return '【❗文件夹已删除】'
+      }
     },
-    // 格式化文件夹名
+    // 格式化倒计时
     formatCountdown (data) { // 设置时间格式
       if (data == null) {
         return null
@@ -236,7 +248,7 @@ export default {
     // 删除单个
     deleteSingle (id) {
       const idList = [`${id}`]
-      this.deleteDrafts(idList)
+      this.deleteDeletedNotes(idList)
     },
 
     // 删除选中
@@ -247,19 +259,20 @@ export default {
         this.multipleSelection.forEach((o) => {
           idList.push(o.id)
         })
-        this.deleteDrafts(idList)
+        this.deleteDeletedNotes(idList)
       }
     },
-    deleteDrafts (idList) {
+    deleteDeletedNotes (idList) {
       this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        noteApi.deleteDrafts(idList).then((response) => {
+        noteApi.deleteDeletedNotes(idList).then((response) => {
           if (response.data.code === 20000) {
             this.$message('删除成功')
             this.getList(this.list.current)
+            this.getCountOfNoteInfo()
           }
         })
       }).catch(() => {
@@ -282,7 +295,7 @@ export default {
       }
     },
     restoreDeletedNote (idList) {
-      this.$confirm('确认还原？（如果笔记文件夹已经删除，笔记将会转移到默认文件夹）', '提示', {
+      this.$confirm('确认还原？（如果笔记所属文件夹已经删除，那么将会还原到默认文件夹）', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -291,9 +304,19 @@ export default {
           if (response.data.code === 20000) {
             this.$message('成功')
             this.getList(this.list.current)
+            this.getCountOfNoteInfo()
           }
         })
       }).catch(() => {
+      })
+    },
+    // 将笔记相关数据更新到 store
+    getCountOfNoteInfo () {
+      noteApi.getCountOfNoteInfo().then((response) => {
+        if (response.data.code === 20000) {
+          const data = response.data.data
+          this.$store.dispatch('userData/updateDataCount', { data })
+        }
       })
     }
 
@@ -302,7 +325,7 @@ export default {
 
 </script>
 
-<style>
+<style scoped>
 .el-container {
      min-height: calc(80vh);
 }

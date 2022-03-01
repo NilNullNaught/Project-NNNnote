@@ -86,5 +86,20 @@ export default {
       method: 'post',
       data: formdata
     })
+  },
+  // 删除回收站中的笔记
+  deleteDeletedNotes (list) {
+    return request({
+      url: `${ApiName}/deleteDeletedNotes`,
+      method: 'delete',
+      data: list
+    })
+  },
+  // 查询笔记相关数据（回收站数量，草稿数量，笔记总数）
+  getCountOfNoteInfo () {
+    return request({
+      url: `${ApiName}/getCountOfNoteInfo`,
+      method: 'get'
+    })
   }
 }

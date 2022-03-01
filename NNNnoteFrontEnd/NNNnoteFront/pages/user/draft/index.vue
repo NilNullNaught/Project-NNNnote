@@ -15,10 +15,12 @@
         </el-row>
 
         <div style="margin-bottom: 10px">
-          <el-button type="primary" plain @click="toggleSelection()">
+          <el-button size="mini" type="primary" plain @click="toggleSelection()">
+            <i class="el-icon-close" />
             取消选中
           </el-button>
-          <el-button type="primary" plain @click="deleteSelection()">
+          <el-button size="mini" type="primary" plain @click="deleteSelection()">
+            <i class="el-icon-delete" />
             删除选中
           </el-button>
         </div>
@@ -139,6 +141,10 @@ export default {
           this.list.total = response.data.data.total
 
           const folderIdList = []
+          if (result.length === 0) {
+            this.list.result = []
+            return
+          }
           if (result) {
             result.forEach((o) => {
               if (!folderIdList.includes(o.noteFolderId)) { folderIdList.push(o.noteFolderId) }
@@ -196,9 +202,12 @@ export default {
       if (data == null) {
         return null
       }
-      // eslint-disable-next-line no-console
-      console.log(this.folderNameList[`${data}`])
-      return this.folderNameList[`${data}`]
+      const folderName = this.folderNameList[`${data}`]
+      if (folderName !== null) {
+        return folderName
+      } else {
+        return "<span style='color:red'>文件夹已被删除</span>"
+      }
     },
 
     // 取消选择
@@ -243,9 +252,19 @@ export default {
           if (response.data.code === 20000) {
             this.$message('删除成功')
             this.getList(this.list.current)
+            this.getCountOfNoteInfo()
           }
         })
       }).catch(() => {
+      })
+    },
+    // 将笔记相关数据更新到 store
+    getCountOfNoteInfo () {
+      noteApi.getCountOfNoteInfo().then((response) => {
+        if (response.data.code === 20000) {
+          const data = response.data.data
+          this.$store.dispatch('userData/updateDataCount', { data })
+        }
       })
     }
 
@@ -254,7 +273,7 @@ export default {
 
 </script>
 
-<style>
+<style scoped>
 .el-container {
      min-height: calc(80vh);
 }

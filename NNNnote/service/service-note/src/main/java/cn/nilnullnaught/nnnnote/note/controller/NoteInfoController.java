@@ -104,17 +104,6 @@ public class NoteInfoController {
         return R.ok().data(resultList);
     }
 
-    @ApiOperation(value = "查询草稿数量")
-    @GetMapping("/getDraftCount")
-    public R getDraftCount(@RequestHeader("token") String token) {
-        String userId = JwtUtils.getIdByJwtToken(token);
-        QueryWrapper<NoteInfo> qw = new QueryWrapper<>();
-        qw.eq("user_id", userId);
-        qw.eq("status", 0);
-        Long count = noteInfoService.count(qw);
-        return R.ok().data("data", count);
-    }
-
     @ApiOperation(value = "批量删除草稿", notes = "彻底删除，不可找回")
     @DeleteMapping("/deleteDrafts")
     public R deleteDrafts(@RequestHeader("token") String token, @RequestBody List<String> idList) {
@@ -140,5 +129,21 @@ public class NoteInfoController {
         String userId = JwtUtils.getIdByJwtToken(token);
         noteInfoService.restoreDeletedNote(userId, token, idList);
         return R.ok();
+    }
+
+    @ApiOperation(value = "删除回收站中的笔记")
+    @DeleteMapping("/deleteDeletedNotes")
+    public R deleteDeletedNotes(@RequestHeader("token")String token,@RequestBody List<String> idList){
+        String userId = JwtUtils.getIdByJwtToken(token);
+        noteInfoService.deleteDeletedNotes(userId,idList);
+        return R.ok();
+    }
+
+    @ApiOperation(value = "查询笔记相关数据（回收站数量，草稿数量，笔记总数）")
+    @GetMapping("/getCountOfNoteInfo")
+    public R getCountOfNoteInfo(@RequestHeader("token") String token) {
+        String userId = JwtUtils.getIdByJwtToken(token);
+        Map<String, Object> map= noteInfoService.getCountOfNoteInfo(userId);
+        return R.ok().data(map);
     }
 }

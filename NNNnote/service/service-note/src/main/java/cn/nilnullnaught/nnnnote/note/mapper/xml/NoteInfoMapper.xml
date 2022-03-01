@@ -47,11 +47,14 @@
     </select>
 
     <update id="restoreDeletedNote">
-        UPDATE note_info SET is_deleted=0 WHERE user_id = #{userID} AND
+        UPDATE note_info SET is_deleted=0 WHERE
         <foreach item="item" index="index" collection="idList"
                  open="id in (" separator="," close=");" nullable="true">
             #{item}
         </foreach>
     </update>
 
+    <select id="getCountOfDeletedNote" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM `note_info` WHERE user_id = #{userID} AND is_deleted = 1
+    </select>
 </mapper>

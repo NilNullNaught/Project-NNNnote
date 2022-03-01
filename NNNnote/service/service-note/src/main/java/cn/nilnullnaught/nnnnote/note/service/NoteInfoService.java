@@ -39,4 +39,8 @@ public interface NoteInfoService extends IService<NoteInfo> {
     Map<String, Object> getLogicDeletedNoteList(String userId, long page, long limit);
 
     void restoreDeletedNote(String userId,String token, List<String> idList);
+
+    void deleteDeletedNotes(String userId, List<String> idList);
+
+    Map<String, Object> getCountOfNoteInfo(String userId);
 }

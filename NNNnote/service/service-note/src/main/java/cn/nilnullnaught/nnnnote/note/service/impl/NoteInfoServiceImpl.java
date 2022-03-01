@@ -213,7 +213,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
         // 执行删除
         List<String> _idList = noteList.stream().map(NoteInfo::getId).collect(Collectors.toList());
-        noteMultiMapper.deleteDrafts(userId, _idList);
+        noteMultiMapper.deleteDrafts(_idList);
 
         //更新文件夹笔记数量
         List<String> noteFolderIdList = noteList.stream().map(NoteInfo::getNoteFolderId).collect(Collectors.toList());
@@ -279,7 +279,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         // ->
 
         // <- 3.还原被删除的笔记
-        baseMapper.restoreDeletedNote(userId, _idList);
+        baseMapper.restoreDeletedNote(_idList);
         // ->
 
         // <- 4.如果文件夹已经被删除，则还原到默认文件夹
@@ -299,6 +299,47 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         // <- 5.更新文件夹中笔记的数量
         this.updateNoteCountInNoteFolder(noteFolderIdList);
         // ->
+    }
+
+    /**
+     * 删除回收站中的笔记
+     * @param userId
+     * @param idList
+     */
+    @Override
+    @Transactional
+    public void deleteDeletedNotes(String userId, List<String> idList) {
+        // <- 1.验证 idList 的合法性
+        var noteInfoList = baseMapper.getLogicDeletedNoteList(userId, idList);
+        var _idList = noteInfoList.stream().map(NoteInfo::getId).collect(Collectors.toList());
+        if (_idList.size() == 0) return;
+        // ->
+
+        // <- 2.完成删除
+        noteMultiMapper.deleteDeletedNotes(_idList);
+        // ->
+    }
+
+    @Override
+    public Map<String, Object> getCountOfNoteInfo(String userId) {
+
+        var qw1 =new QueryWrapper<NoteInfo>();
+        qw1.eq("user_id",userId);
+        var noteCount = baseMapper.selectCount(qw1);
+
+        var qw2 = new QueryWrapper<NoteInfo>();
+        qw2.eq("user_id",userId);
+        qw2.eq("status",0);
+        var draftCount = baseMapper.selectCount(qw2);
+
+        var deletedCount = baseMapper.getCountOfDeletedNote(userId);
+
+        var map = new HashMap<String,Object>();
+        map.put("noteCount",noteCount);
+        map.put("draftCount",draftCount);
+        map.put("deletedCount",deletedCount);
+
+        return map;
     }
 
 

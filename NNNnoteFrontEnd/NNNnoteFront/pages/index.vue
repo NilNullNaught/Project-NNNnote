@@ -1,7 +1,11 @@
 <template>
   <div>
     <br><br><br><br><br><br><span style="font-size:50px">
-      中间
+
+      <!--<input v-model="count">
+       <el-button type="text" @click="addFirstStore2">
+        提交
+      </el-button> -->
     </span><br><br><br><br><br><br><br>
     <br><br><br><br><br><br><br><br><br><br><br><br><br>
     <br><br><br><br><br><br><span style="font-size:50px">
@@ -18,12 +22,17 @@ export default {
 
   data () {
     return {
-
+      // count: 0
     }
   },
-  created () {}
+  created () {},
+  methods: {
+    // addFirstStore2 () {
+    //
+    // }
+  }
 }
 </script>
-<style>
+<style scoped>
 
 </style>

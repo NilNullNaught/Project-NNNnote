@@ -37,8 +37,8 @@ public class UserNfolderController {
 
     @ApiOperation("根据用户 id 获取笔记文件夹列表")
     @GetMapping("/getUserNfolder")
-    public R getUserNfolder(HttpServletRequest request) {
-        String ID = JwtUtils.getIdByJwtToken(request);
+    public R getUserNfolder(@RequestHeader("token") String token) {
+        String ID = JwtUtils.getIdByJwtToken(token);
         QueryWrapper<UserNfolder> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", ID);
         queryWrapper.orderByAsc("gmt_modified");
@@ -57,10 +57,10 @@ public class UserNfolderController {
 
     @ApiOperation("根据用户 id 创建新的笔记文件夹，文件夹描述可以为空")
     @PostMapping("/addUserNfolder")
-    public R addUserNfolder(HttpServletRequest request,
+    public R addUserNfolder(@RequestHeader("token") String token,
                             @RequestParam("nfolderName") String nfolderName,
                             @RequestParam("description") String description) {
-        String ID = JwtUtils.getIdByJwtToken(request);
+        String ID = JwtUtils.getIdByJwtToken(token);
 
         //判断文件夹名是否已存在
         QueryWrapper<UserNfolder> queryWrapper = new QueryWrapper<>();
@@ -82,19 +82,23 @@ public class UserNfolderController {
 
     @ApiOperation("根据文件夹 ID 修改笔记文件夹信息")
     @PostMapping("/alterUserNfolder")
-    public R alterUserNfolder(@RequestParam("nfolderID") String nfolderID,
+    public R alterUserNfolder(@RequestHeader("token") String token,
+                              @RequestParam("nfolderID") String id,
                               @RequestParam("folderName") String folderName,
                               @RequestParam("description") String description) {
-        UpdateWrapper<UserNfolder> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("id", nfolderID);
-        updateWrapper.set("folder_name", folderName);
-        updateWrapper.set("folder_description", description);
+        String userId = JwtUtils.getIdByJwtToken(token);
 
-        userNfolderService.update(updateWrapper);
+        UserNfolder userNfolder = new UserNfolder();
+        userNfolder.setId(id);
+        userNfolder.setUserId(userId);
+        userNfolder.setFolderName(folderName);
+        userNfolder.setFolderDescription(description);
+
+        userNfolderService.updateById(userNfolder);
         return R.ok();
     }
 
-    @ApiOperation("根据文件夹 ID 修改笔记文件夹信息")
+    @ApiOperation("根据文件夹 ID 获取文件夹信息")
     @GetMapping("/getNotefolderBynFolderId/{noteFolderID}")
     public R getNotefolderByFolderId(@PathVariable String noteFolderID) {
         UserNfolder userNfolder = userNfolderService.getById(noteFolderID);

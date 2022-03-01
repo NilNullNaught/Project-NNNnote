@@ -56,10 +56,15 @@ public interface NoteInfoMapper extends BaseMapper<NoteInfo> {
     /**
      * 还原被逻辑删除的笔记
      *
+     * @return
+     */
+    Integer restoreDeletedNote(@Param("idList") List<String> idList);
+
+    /**
+     * 查询逻辑删除状态的笔记数量
+     *
      * @param userID
      * @return
      */
-    Integer restoreDeletedNote(@Param("userID") String userID,
-                               @Param("idList") List<String> idList);
-
+    Integer getCountOfDeletedNote(@Param("userID") String userID);
 }

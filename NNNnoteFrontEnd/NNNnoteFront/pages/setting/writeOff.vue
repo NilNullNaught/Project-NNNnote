@@ -121,7 +121,7 @@ export default {
   }
 }
 </script>
-<style>
+<style scoped>
 .el-container {
      min-height: calc(80vh);
 }
