@@ -1,12 +1,16 @@
 <template>
-  <div>
-    <h1>{{ note.title }}</h1>
-    <div v-dompurify-html="note.text" />
-  </div>
+  <el-container>
+    <div>
+      <h1>{{ note.title }}</h1>
+      <div v-dompurify-html="note.text" />
+    </div>
+  </el-container>
 </template>
 
 <script>
+import MavonEditor from 'mavon-editor'
 import noteApi from '@/api/note'
+
 export default {
   name: 'NoteIdPage',
   layout: 'BaseLayout',
@@ -22,7 +26,7 @@ export default {
     noteApi.getNoteInfoToRead(this.$route.params.id).then((response) => {
       if (response.data.code === 20000) {
         this.note.title = response.data.data.noteInfo.title
-        const md = require('markdown-it')()
+        const md = MavonEditor.mavonEditor.getMarkdownIt()
         this.note.text = md.render(response.data.data.noteText.text)
       }
     })
@@ -32,5 +36,4 @@ export default {
 </script>
 
 <style scoped>
-
 </style>

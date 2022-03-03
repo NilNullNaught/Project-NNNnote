@@ -6,13 +6,12 @@
           <el-col :span="4">
             <el-image
               style="width: 55px; height: 55px;padding:5px 0px 0px 0px;"
-              :src="style.logo"
+              :src="require('~/assets/img/logo.png')"
             />
           </el-col>
 
           <el-col :span="5">
             <el-menu
-              :default-active="style.activeIndex"
               mode="horizontal"
               background-color="#323232"
               text-color="#fff"
@@ -34,12 +33,10 @@
               </el-input>
             </div>
           </el-col>
-          <el-col :span="5" />
-          <el-col :span="4" align="end">
+          <el-col :offset="5" :span="4" align="end">
             <div>
-              <div v-if="userInfo.id">
+              <div v-if="userInfo">
                 <el-menu
-                  :default-active="style.activeIndex"
                   class="el-menu-demo"
                   mode="horizontal"
                   background-color="#323232"
@@ -51,7 +48,7 @@
                     <template slot="title">
                       <el-avatar :src="userInfo.avatar" />
                     </template>
-                    <el-menu-item index="/user/nfolder">
+                    <el-menu-item index="/user">
                       我的主页
                     </el-menu-item>
                     <el-menu-item index="/user/collection">
@@ -75,9 +72,8 @@
                   </el-menu-item>
                 </el-menu>
               </div>
-              <div v-if="!userInfo.id">
+              <div v-if="!userInfo">
                 <el-menu
-                  :default-active="style.activeIndex"
                   class="el-menu-demo"
                   mode="horizontal"
                   background-color="#323232"
@@ -139,17 +135,8 @@ import noteApi from '@/api/note'
 export default {
   data () {
     return {
-      style: {
-        activeIndex: '1',
-        logo: require('~/assets/img/logo.png')
-      },
       userInfo: {
-        id: '',
-        nickname: '',
-        sex: '',
-        age: '',
-        avatar: '',
-        sign: ''
+
       }
     }
   },
@@ -173,6 +160,9 @@ export default {
     if (userStr) {
       this.userInfo = JSON.parse(userStr)
     }
+    if (this.userInfo) {
+      this.getCountOfNoteInfo()
+    }
   },
   methods: {
 
@@ -182,7 +172,6 @@ export default {
         jsCookie.remove('NNNnote_token', { domain: 'localhost' }) // 删除成功
         jsCookie.remove('NNNnote_userInfo', { domain: 'localhost' })
         this.userInfo = ''
-        this.style.activeIndex = 1
         this.$router.push({ path: '/' })
       }
     },
@@ -219,12 +208,10 @@ body{
     padding:0px;
     margin:0px;
     box-sizing: border-box;
-    font-size: 14px;
   }
   .head-bg {
     background-color: #323232;
   }
-
   .main{
     margin: 0px;
     padding: 10px;
@@ -239,5 +226,10 @@ body{
 
 .el-menu.el-menu--horizontal {
      border-bottom: 0px;
+}
+/* 设置 BaseLayout 下所有 <el-container/> 标签的最低高度 */
+/* 但是这也导致，只要是 BaseLayout 基于的页面 el-container 的最低高度都是相同的*/
+.el-container {
+     min-height: calc(90vh);
 }
 </style>

@@ -252,9 +252,6 @@ export default {
 
 </script>
 <style scoped>
-.el-container {
-     min-height: calc(80vh);
-}
 .el-aside{
   border-right: solid 1px #e6e6e6;
 }

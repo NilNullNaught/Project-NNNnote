@@ -3,7 +3,7 @@
     <el-container>
       <el-main>
         <el-row align="middle" justify="center" type="flex">
-          <el-col :span="4" align="center" justify="center" type="flex">
+          <el-col :span="12" align="center" justify="center" type="flex">
             <span style="font-size:20px;font-weight:bold;">{{ folderInfo.folderName }} </span>
           </el-col>
         </el-row>
@@ -17,7 +17,7 @@
               size="mini"
               type="primary"
               plain
-              @click="$router.push({ path: '/user/nfolder'})"
+              @click="$router.push({ path: '/user'})"
             >
               <i class="el-icon-top-left el-icon--left" />
               返回主页
@@ -108,7 +108,7 @@
                 <i class="el-icon-warning" />
               </el-tooltip>
 
-              <div style="margin:10px 10px 0px 10px;height:120px" @click="route(o.id)">
+              <div style="margin:0px 10px;height:120px" @click="route(o.id)">
                 <div style="display: flex;justify-content:center;">
                   <p
                     style="
@@ -117,10 +117,9 @@
                         -webkit-line-clamp: 1;
                         overflow: hidden;
                         word-break: break-all;
-                        font-size:10px;
-                        height:15px;"
+                        font-size:12px;"
                   >
-                    {{ o.title }}
+                    {{ (o.title === '')? '&nbsp;' : o.title }}
                   </p>
                 </div>
                 <div style="margin:5px 0px">
@@ -133,17 +132,15 @@
                     justify-content:center;"
                 >
                   <p
+                    v-dompurify-html="o.preview"
                     style="
                         display: -webkit-box;
                         -webkit-box-orient: vertical;
                         -webkit-line-clamp: 6;
                         overflow: hidden;
                         word-break: break-all;
-                        font-size:10px;
-                        font-size:10px"
-                  >
-                    {{ o.preview }}
-                  </p>
+                        font-size:10px;"
+                  />
                 </div>
               </div>
             </el-card>
@@ -185,6 +182,7 @@
 
 <script>
 import qs from 'qs'
+import MavonEditor from 'mavon-editor'
 import noteApi from '@/api/note'
 import userApi from '@/api/user'
 
@@ -259,8 +257,9 @@ export default {
 
           if (this.list.result) {
             this.list.result.forEach((item) => {
-              if (item.shapes) {
-                item.ischecked = false
+              item.ischecked = false
+              if (item.preview !== null) {
+                item.preview = MavonEditor.mavonEditor.getMarkdownIt().render(item.preview)
               }
             })
           }
@@ -388,9 +387,6 @@ export default {
 }
 </script>
 <style scoped>
-.el-container {
-     min-height: calc(80vh);
-}
 .NoteFolderId-el-button{
   margin-bottom: 10px;
 }

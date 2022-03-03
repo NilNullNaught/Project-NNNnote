@@ -2,6 +2,29 @@
   <div>
     <el-container>
       <el-main>
+        <el-row>
+          <el-col :span="4" :offset="1">
+            <el-avatar :size="70" />
+          </el-col>
+          <el-col :span="19">
+            <el-descriptions :colon="false" :column="3">
+              <el-descriptions-item>
+                <h3>xx</h3>
+              </el-descriptions-item>
+              <el-descriptions-item />
+              <el-descriptions-item />
+              <el-descriptions-item>
+                <el-tooltip effect="dark" content="开通会员后将解除保存上限">
+                  <i class="el-icon-info" />
+                </el-tooltip>
+                笔记：{{ dataCount.noteCount }}/40
+              </el-descriptions-item>
+            </el-descriptions>
+          </el-col>
+        </el-row>
+
+        <div style="height:10px" />
+
         <!-- 操作栏 ----------------------------------------------------------------------------------------------------------------------------------------->
         <el-row>
           <el-col :span="18">
@@ -68,7 +91,13 @@
               <div slot="content">
                 笔记数量: {{ o.noteCount }}<br>描述: {{ o.folderDescription }}
               </div>
-              <el-card :id="'ID-'+o.id" class="NoteFolderIndex-el-card" shadow="hover" style="position: relative;">
+              <el-card
+                :id="'ID-'+o.id"
+                :body-style="{ padding: '10px' }"
+                class="NoteFolderIndex-el-card"
+                shadow="hover"
+                style="position: relative;"
+              >
                 <input
                   v-if="o.id !== o.userId"
                   v-model="o.ischecked"
@@ -82,13 +111,15 @@
                   </div>
                   <div style="display: flex;justify-content:center;">
                     <span
+
                       style="
+                      font-size: 12px;
                         display: -webkit-box;
                         -webkit-box-orient: vertical;
                         -webkit-line-clamp: 1;
                         overflow: hidden;
                         word-break: break-all;"
-                    >{{ o.folderName }}</span>
+                    >{{ (o.folderName === '')? '&nbsp;' : o.folderName }}</span>
                   </div>
                 </div>
               </el-card>
@@ -232,10 +263,13 @@ export default {
       }
     }
   },
+  computed: {
+    dataCount () {
+      return this.$store.state.userData.dataCount
+    }
+  },
   created () {
     this.getList()
-  },
-  mounted () {
   },
   methods: {
     // 获取文件夹数据
@@ -452,9 +486,6 @@ export default {
 </script>
 <style scoped>
 
-.el-container {
-     min-height: calc(80vh);
-}
 .NoteFolderIndex-el-button{
   margin-bottom: 10px;
 }

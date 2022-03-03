@@ -31,7 +31,7 @@
         v-model="saveNote.text"
         :toolbars="markdownOption"
         @imgAdd="$addImg"
-        @save="$save"
+        @save="saveDialog.visible = true"
       />
     </client-only>
 
@@ -242,9 +242,8 @@ export default {
     }
   },
   methods: {
-    $save (value, render) {
-      this.saveDialog.visible = true
-    },
+
+    // 保存图片
     $addImg (pos, file) {
       // 封装 file
       const fileData = new FormData()
@@ -257,6 +256,7 @@ export default {
           this.saveNote.resourceUrlList.push(url)
         })
     },
+    // 提交保存
     submitSave () {
       // <- 修改笔记状态
       if (this.saveDialog.isPrivate) {
@@ -275,17 +275,16 @@ export default {
       }
       // ->
 
-      noteApi.saveNote(this.saveNote)
-        .then((response) => {
-          if (response.data.code === 20000) {
-            this.$message({
-              type: 'success',
-              message: '保存成功'
-            })
-          } else {
-            this.$message.error(response.data.message)
-          }
-        })
+      noteApi.saveNote(this.saveNote).then((response) => {
+        if (response.data.code === 20000) {
+          this.$message({
+            type: 'success',
+            message: '保存成功'
+          })
+        } else {
+          this.$message.error(response.data.message)
+        }
+      })
     },
 
     // 创建新的笔记文件夹
@@ -302,6 +301,7 @@ export default {
         }
       })
     },
+
     exit () {
       window.history.back()
     }

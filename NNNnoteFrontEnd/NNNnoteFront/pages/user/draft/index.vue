@@ -2,8 +2,8 @@
   <div>
     <el-container>
       <el-main>
-        <el-row>
-          <el-col :offset="9" :span="6" align="center">
+        <el-row align="middle" justify="center" type="flex">
+          <el-col :span="12" align="center" justify="center" type="flex">
             <div style="margin:10px">
               <el-tooltip class="item" effect="dark" content="存放没有保存的笔记" placement="right-start">
                 <el-badge is-dot class="item">
@@ -45,10 +45,22 @@
             fixed
           />
           <el-table-column
-            prop="preview"
             label="预览"
             width="300"
-          />
+          >
+            <template slot-scope="scope">
+              <p
+                v-dompurify-html="scope.row.preview"
+                style="
+                        display: -webkit-box;
+                        -webkit-box-orient: vertical;
+                        -webkit-line-clamp: 2;
+                        overflow: hidden;
+                        word-break: break-all;
+                        font-size:5px;"
+              />
+            </template>
+          </el-table-column>
 
           <el-table-column
             prop="noteFolderId"
@@ -103,6 +115,7 @@
 
 <script>
 import qs from 'qs'
+import MavonEditor from 'mavon-editor'
 import noteApi from '@/api/note'
 import userApi from '@/api/user'
 
@@ -157,6 +170,7 @@ export default {
                 if (result) {
                   result.forEach((o) => {
                     o.noteFolderId = this.formatFolderName(o.noteFolderId)
+                    o.preview = this.formatPreview(o.preview)
                     o.gmtCreate = this.formatDate(o.gmtCreate)
                     o.gmtModified = this.formatDate(o.gmtModified)
                   })
@@ -207,6 +221,15 @@ export default {
         return folderName
       } else {
         return "<span style='color:red'>文件夹已被删除</span>"
+      }
+    },
+    // 解析 preview 的 markdown 语法
+    formatPreview (data) {
+      if (data === null) {
+        return data
+      } else {
+        const md = MavonEditor.mavonEditor.getMarkdownIt()
+        return md.render(data)
       }
     },
 
@@ -274,7 +297,4 @@ export default {
 </script>
 
 <style scoped>
-.el-container {
-     min-height: calc(80vh);
-}
 </style>

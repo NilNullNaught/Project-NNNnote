@@ -122,40 +122,39 @@ export default {
         return
       }
       this.activeLoginBtn = true
-      loginApi.login(this.user)
-        .then((response) => {
-          if (response.data.code === 20000) {
-            // 提示登录成功
-            this.$message({
-              type: 'success',
-              message: '登录成功'
-            })
+      loginApi.login(this.user).then((response) => {
+        if (response.data.code === 20000) {
+          // 提示登录成功
+          this.$message({
+            type: 'success',
+            message: '登录成功'
+          })
 
-            let expiration
-            if (this.rememberMe) {
-              expiration = 30
-            } else {
-              expiration = 1
-            }
-
-            // 将返回的token保存在 cookie 中
-            jsCookie.set('NNNnote_token', response.data.data.token, { domain: 'localhost' }, { expires: expiration })
-
-            // 调用接口 根据token获取用户信息，为了首页面显示
-            userApi.getUserInfo()
-              .then((response) => {
-                const userInfo = JSON.stringify(response.data.data.data)
-                jsCookie.set('NNNnote_userInfo', userInfo, { domain: 'localhost' }, { expires: expiration })
-                // 跳转至登录页
-                this.$router.push({ path: '/' })
-              })
+          let expiration
+          if (this.rememberMe) {
+            expiration = 30
           } else {
-            this.user = ''
-            this.activeLoginBtn = false
-            // 提示登录失败
-            this.$message.error('登录失败')
+            expiration = 1
           }
-        })
+
+          // 将返回的token保存在 cookie 中
+          jsCookie.set('NNNnote_token', response.data.data.token, { domain: 'localhost' }, { expires: expiration })
+
+          // 调用接口 根据token获取用户信息，为了首页面显示
+          userApi.getUserInfo()
+            .then((response) => {
+              const userInfo = JSON.stringify(response.data.data.data)
+              jsCookie.set('NNNnote_userInfo', userInfo, { domain: 'localhost' }, { expires: expiration })
+              // 跳转至登录页
+              this.$router.push({ path: '/' })
+            })
+        } else {
+          this.user = ''
+          this.activeLoginBtn = false
+          // 提示登录失败
+          this.$message.error('登录失败')
+        }
+      })
     }
   }
 }

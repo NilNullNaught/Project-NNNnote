@@ -55,10 +55,22 @@
             fixed
           />
           <el-table-column
-            prop="preview"
             label="预览"
             width="300"
-          />
+          >
+            <template slot-scope="scope">
+              <p
+                v-dompurify-html="scope.row.preview"
+                style="
+                        display: -webkit-box;
+                        -webkit-box-orient: vertical;
+                        -webkit-line-clamp: 2;
+                        overflow: hidden;
+                        word-break: break-all;
+                        font-size:5px;"
+              />
+            </template>
+          </el-table-column>
 
           <el-table-column
             prop="noteFolderId"
@@ -105,6 +117,7 @@
 
 <script>
 import qs from 'qs'
+import MavonEditor from 'mavon-editor'
 import noteApi from '@/api/note'
 import userApi from '@/api/user'
 
@@ -163,6 +176,7 @@ export default {
                 if (result) {
                   result.forEach((o) => {
                     o.noteFolderId = this.formatFolderName(o.noteFolderId)
+                    o.preview = this.formatPreview(o.preview)
                     o.gmtCreate = this.formatDate(o.gmtCreate)
                     o.gmtModified = this.formatCountdown(o.gmtModified)
                   })
@@ -228,6 +242,15 @@ export default {
 
       return `${Math.floor(t / (1000 * 60 * 60 * 24))} 天 ` +
              `${Math.floor(t / (1000 * 60 * 60) % 24)} 小时 `
+    },
+    // 解析 preview 的 markdown 语法
+    formatPreview (data) {
+      if (data === null) {
+        return data
+      } else {
+        const md = MavonEditor.mavonEditor.getMarkdownIt()
+        return md.render(data)
+      }
     },
 
     // 取消选择
@@ -326,7 +349,4 @@ export default {
 </script>
 
 <style scoped>
-.el-container {
-     min-height: calc(80vh);
-}
 </style>
