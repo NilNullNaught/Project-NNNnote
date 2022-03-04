@@ -36,6 +36,13 @@ public class UserInfoController {
         return R.ok().data("data", userInfo);
     }
 
+    @ApiOperation("根据 id 获取用户信息")
+    @GetMapping("/getUserInfoById/{Id}")
+    public R getUserInfoById(@PathVariable String Id) {
+        UserInfo userInfo = userInfoService.getById(Id);
+        return R.ok().data("data", userInfo);
+    }
+
     @ApiOperation("修改用户信息")
     @PostMapping("/alterUserInfo")
     public R alterUserInfo(@RequestHeader("token") String token,@RequestBody UserInfo userInfo) {
@@ -44,7 +51,4 @@ public class UserInfoController {
         userInfoService.updateUserInfo(userInfo);
         return R.ok();
     }
-
-
-
 }

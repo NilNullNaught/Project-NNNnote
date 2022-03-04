@@ -2,15 +2,15 @@
   <div>
     <el-container>
       <el-header class="head-bg">
-        <el-row :gutter="20" align="middle" type="flex">
-          <el-col :span="4">
+        <el-row align="middle" type="flex">
+          <el-col :xs="0" :sm="2" :md="2" :lg="4" :xl="4">
             <el-image
               style="width: 55px; height: 55px;padding:5px 0px 0px 0px;"
               :src="require('~/assets/img/logo.png')"
             />
           </el-col>
 
-          <el-col :span="5">
+          <el-col :xs="7" :sm="6" :md="6" :lg="5" :xl="5">
             <el-menu
               mode="horizontal"
               background-color="#323232"
@@ -26,16 +26,17 @@
               </el-menu-item>
             </el-menu>
           </el-col>
-          <el-col :span="6">
+          <el-col :xs="10" :sm="8" :md="8" :lg="6" :xl="6">
             <div>
               <el-input placeholder="请输入内容" class="input-with-select">
                 <el-button slot="append" icon="el-icon-search" />
               </el-input>
             </div>
           </el-col>
-          <el-col :offset="5" :span="4" align="end">
+          <el-col :xs="0" :sm="2" :md="2" :lg="5" :xl="5" />
+          <el-col :xs="7" :sm="6" :md="6" :lg="4" :xl="4">
             <div>
-              <div v-if="userInfo">
+              <div v-if="userInfo.id">
                 <el-menu
                   class="el-menu-demo"
                   mode="horizontal"
@@ -72,7 +73,7 @@
                   </el-menu-item>
                 </el-menu>
               </div>
-              <div v-if="!userInfo">
+              <div v-if="!userInfo.id">
                 <el-menu
                   class="el-menu-demo"
                   mode="horizontal"
@@ -94,19 +95,23 @@
         </el-row>
       </el-header>
 
+      <div class="el-backtop-target" />
+
       <el-main class="main">
-        <el-row align="middle" justify="center" type="flex">
-          <el-col :span="12">
-            <el-card :body-style="{ padding: '0px' }" shadow="always">
+        <el-row>
+          <el-col
+            :span="24"
+            style="  display:flex;justify-content:center;"
+          >
+            <el-card style="width:900px;" :body-style="{ padding: '0px' }" shadow="always">
               <nuxt />
             </el-card>
           </el-col>
         </el-row>
       </el-main>
-
       <el-footer class="head-bg" height="160px">
         <el-row justify="center" type="flex">
-          <el-col :span="16" align="center" justify="center" type="flex">
+          <el-col align="center" justify="center" type="flex">
             <div>
               <h3 class="h3">
                 Present by NilNullNaught
@@ -171,7 +176,7 @@ export default {
       if (jsCookie.get('NNNnote_token')) {
         jsCookie.remove('NNNnote_token', { domain: 'localhost' }) // 删除成功
         jsCookie.remove('NNNnote_userInfo', { domain: 'localhost' })
-        this.userInfo = ''
+        this.userInfo = {}
         this.$router.push({ path: '/' })
       }
     },

@@ -12,6 +12,13 @@ export default {
       method: 'get'
     })
   },
+  // 获取用户信息
+  getUserInfoById (id) {
+    return request({
+      url: `${ApiName}/getUserInfoById/${id}`,
+      method: 'get'
+    })
+  },
   // 修改用户信息
   alterUserInfo (form) {
     return request({

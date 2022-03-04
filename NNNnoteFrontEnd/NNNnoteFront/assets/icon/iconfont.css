@@ -1,0 +1,45 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 3210660 */
+  src: url('iconfont.woff2?t=1646408803262') format('woff2'),
+       url('iconfont.woff?t=1646408803262') format('woff'),
+       url('iconfont.ttf?t=1646408803262') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+[class^="alibaba_icons_"], [class*="alibaba_icons_"] {
+  font-family:"iconfont" !important;
+  font-size:16px;
+  font-style:normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.alibaba_icons_rely:before {
+  content: "\e632";
+}
+
+.alibaba_icons_xinlangweibo:before {
+  content: "\e600";
+}
+
+.alibaba_icons_weixin:before {
+  content: "\e601";
+}
+
+.alibaba_icons_QQ:before {
+  content: "\e882";
+}
+
+.alibaba_icons_bad:before {
+  content: "\e666";
+}
+
+.alibaba_icons_good:before {
+  content: "\e673";
+}
+

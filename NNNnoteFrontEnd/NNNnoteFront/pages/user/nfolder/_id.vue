@@ -12,7 +12,7 @@
 
         <!-- 操作栏 ----------------------------------------------------------------------------------------------------------------------------------------->
         <el-row align="middle" justify="center" type="flex">
-          <el-col :span="14">
+          <el-col :span="16">
             <el-button
               size="mini"
               type="primary"
@@ -55,7 +55,7 @@
             </el-button>
           </el-col>
 
-          <el-col :span="6" :offset="4">
+          <el-col :span="8">
             <el-input
               v-model="list.keyword"
               size="mini"
@@ -87,7 +87,7 @@
         <el-row>
           <el-col v-for="(o) in list.result" :key="o.id" :lg="{span: '4-8'}">
             <el-card
-              :id="'ID-'+o.id"
+              :ref="'Note-'+o.id"
               class="NoteFolderId-el-card"
               shadow="hover"
               :body-style="{ padding: '10px' }"
@@ -310,13 +310,13 @@ export default {
     // 选中后修改样式以及取消选中后去除样式
     // 问题：通过 JS 设置 visibility 后，再通过 css 设置 visibility 会失效
     addOrRemoveStyle (id, checked) {
-      const ID = `ID-${id}`
-      const element = document.getElementById(ID)
-
+      const style = this.$refs[`Note-${id}`][0].$el.style
       if (checked) {
-        element.classList.add('NoteFolderId-el-card--select')
+        style.background = '#f1f5fa'
+        style.border = '1px solid #90d8ff'
       } else {
-        element.classList.remove('NoteFolderId-el-card--select')
+        style.background = null
+        style.border = null
       }
     },
     // ->

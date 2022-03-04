@@ -130,6 +130,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
      * @param saveNoteVo
      */
     @Override
+    @Transactional
     public void autoSaveNote(SaveNoteVo saveNoteVo) {
         // <- 更新图片信息，如果不包含图片，直接跳过这一步
         if (saveNoteVo.getResourceUrlList() != null) {
