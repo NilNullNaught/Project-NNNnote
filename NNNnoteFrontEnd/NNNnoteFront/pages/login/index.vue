@@ -6,7 +6,7 @@
         登录
       </a>
       <span>·</span>
-      <a href="/register">
+      <a href="/login/register">
         注册
       </a>
     </div>
@@ -66,8 +66,16 @@
       <div class="more-sign">
         <h6>社交帐号登录</h6>
         <ul>
-          <li><a id="weixin" class="weixin" target="_blank" href="http://qy.free.idcfengye.com/api/ucenter/weixinLogin/login"><i class="iconfont icon-weixin" /></a></li>
-          <li><a id="qq" class="qq" target="_blank" href="#"><i class="iconfont icon-qq" /></a></li>
+          <li>
+            <a id="weixin" class="weixin" target="_blank" href="http://qy.free.idcfengye.com/api/ucenter/weixinLogin/login">
+              <i class="alibaba_icons_weixin" style="color: #00bb29;font-size: 36px;" />
+            </a>
+          </li>
+          <li>
+            <a id="qq" class="qq" target="_blank" href="#">
+              <i class="alibaba_icons_QQ" style="color: #498ad5;font-size: 36px;" />
+            </a>
+          </li>
         </ul>
       </div>
       <!-- 结束 -- 更多登录方式 --------------------------------------------------------------------------------------------------------------------------------->
@@ -76,12 +84,10 @@
 </template>
 
 <script>
-import '~/assets/css/sign.css'
-import '~/assets/css/iconfont.css'
-// import testApi from '@/api/test'
+import '~/assets/css/loginCss/sign.css'
+
 import jsCookie from 'js-cookie'
 import loginApi from '@/api/login'
-import userApi from '@/api/user'
 
 export default {
   name: 'LoginIndexPage',
@@ -140,14 +146,8 @@ export default {
           // 将返回的token保存在 cookie 中
           jsCookie.set('NNNnote_token', response.data.data.token, { domain: 'localhost' }, { expires: expiration })
 
-          // 调用接口 根据token获取用户信息，为了首页面显示
-          userApi.getUserInfo()
-            .then((response) => {
-              const userInfo = JSON.stringify(response.data.data.data)
-              jsCookie.set('NNNnote_userInfo', userInfo, { domain: 'localhost' }, { expires: expiration })
-              // 跳转至登录页
-              this.$router.push({ path: '/' })
-            })
+          // 跳转至登录页
+          this.$router.push({ path: '/' })
         } else {
           this.user = ''
           this.activeLoginBtn = false

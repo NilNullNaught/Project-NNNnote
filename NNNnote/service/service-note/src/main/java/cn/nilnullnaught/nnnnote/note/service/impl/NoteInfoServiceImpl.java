@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 @Service
 public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> implements NoteInfoService {
 
+    // region <- 成员变量 ->
     @Autowired
     private NoteMultiMapper noteMultiMapper;
 
@@ -50,6 +51,9 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
     @Autowired
     private UserNfolderClient userNfolderClient;
+
+    // endregion
+
 
     /**
      * 初始化笔记，创建草稿
@@ -82,8 +86,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
     @Transactional
     public void saveNote(SaveNoteVo saveNoteVo) {
 
-        // <- 更新图片信息
-        // 如果不包含图片，直接跳过这一步
+        // region <- 更新笔记内的图片信息（如果笔记不包含图片，直接跳过这一步） ->
         if (saveNoteVo.getResourceUrlList() != null) {
             ResourceManagerVo resourceManagerVo = new ResourceManagerVo();
             resourceManagerVo.setBelongId(saveNoteVo.getId());
@@ -94,34 +97,61 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
                 throw new MyCustomException(20001, r.getMessage());
             }
         }
-        // ->
+        // endregion
 
-        // <- 更新 note_info
-        // 获取旧的笔记文件夹
-        String oldFolder = baseMapper.selectById(saveNoteVo.getId()).getNoteFolderId();
-        String newFolder = saveNoteVo.getNoteFolderId();
 
+
+        // region <- 更新 note_info 与相关信息 ->
+
+        // 1.获取旧的笔记信息
+        var oldNoteInfo = baseMapper.selectById(saveNoteVo.getId());
+
+        // 2.提取旧文件夹 ID 与旧封面 URL
+        var oldFolder = oldNoteInfo.getNoteFolderId();
+        if (oldFolder == null) oldFolder = "";
+        var oldCover = oldNoteInfo.getCover();
+        if (oldCover == null) oldCover = "";
+
+        // 3.提取新文件夹 ID 与旧封面 URL
+        var newFolder = saveNoteVo.getNoteFolderId();
+        if (newFolder == null) newFolder = "";
+        var newCover = saveNoteVo.getCover();
+        if (newCover == null) newCover = "";
+
+        // 4.更新 noteInfo 信息
         NoteInfo noteInfo = new NoteInfo();
         noteInfo.setId(saveNoteVo.getId());
         noteInfo.setTitle(saveNoteVo.getTitle());
         noteInfo.setPreview(saveNoteVo.getPreview());
         noteInfo.setStatus(saveNoteVo.getStatus());
-        noteInfo.setNoteFolderId(newFolder);
-        baseMapper.updateById(noteInfo);
-        // ->
 
-        // 更新用户文件夹中的笔记数量, （前提条件，笔记的文件夹发生了变更）
-        if (oldFolder != newFolder) {
+        noteInfo.setCover(newCover);
+        noteInfo.setNoteFolderId(newFolder);
+
+        baseMapper.updateById(noteInfo);
+
+        // 5.更新用户文件夹中的笔记数量，必须在更新 noteInfo 信息之后进行
+        if (!oldFolder.equals(newFolder)) {
             this.updateNoteCountInNoteFolder(Arrays.asList(oldFolder, newFolder));
         }
 
+        // 6.更新封面状态
+        if (!oldCover.equals(newCover)){
+            ResourceManagerVo vo = new ResourceManagerVo();
+            vo.setType(2);
+            vo.setBelongId(saveNoteVo.getId());
+            vo.setResourceUrlList(Arrays.asList(newCover));
+            aliyunOssClient.manageResource(vo);
+        }
+        // endregion
 
-        // <- 更新 note_text
+
+        // region <- 更新 note_text ->
         NoteText noteText = new NoteText();
         noteText.setId(saveNoteVo.getId());
         noteText.setText(saveNoteVo.getText());
         noteTextMapper.updateById(noteText);
-        // ->
+        // endregion
     }
 
     /**
@@ -132,7 +162,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
     @Override
     @Transactional
     public void autoSaveNote(SaveNoteVo saveNoteVo) {
-        // <- 更新图片信息，如果不包含图片，直接跳过这一步
+        // region <- 更新图片信息，如果不包含图片，直接跳过这一步 ->
         if (saveNoteVo.getResourceUrlList() != null) {
             ResourceManagerVo resourceManagerVo = new ResourceManagerVo();
             resourceManagerVo.setBelongId(saveNoteVo.getId());
@@ -143,22 +173,22 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
                 throw new MyCustomException(20001, r.getMessage());
             }
         }
-        // ->
+        // endregion
 
-        // <- 更新 note_info
+        // region <- 更新 note_info ->
         NoteInfo noteInfo = new NoteInfo();
         noteInfo.setId(saveNoteVo.getId());
         noteInfo.setTitle(saveNoteVo.getTitle());
         noteInfo.setPreview(saveNoteVo.getPreview());
         baseMapper.updateById(noteInfo);
-        // ->
+        // endregion
 
-        // <- 更新 note_text
+        // region <- 更新 note_text ->
         NoteText noteText = new NoteText();
         noteText.setId(saveNoteVo.getId());
         noteText.setText(saveNoteVo.getText());
         noteTextMapper.updateById(noteText);
-        // ->
+        // endregion
     }
 
     /**
@@ -202,7 +232,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
     @Transactional
     public void deleteDrafts(String userId, List<String> idList) {
 
-        // <- 验证笔记 id
+        // region <- 确认数据属于该用户 ->
         QueryWrapper<NoteInfo> qw = new QueryWrapper<>();
         qw.eq("user_id", userId);//确认用户
         qw.eq("status", 0);//草稿状态
@@ -210,15 +240,19 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         qw.in("id", idList);
         qw.select("id", "note_folder_id");
         List<NoteInfo> noteList = baseMapper.selectList(qw);
-        // ->
+        // endregion
 
-        // 执行删除
+
+        // region <- 执行删除 ->
         List<String> _idList = noteList.stream().map(NoteInfo::getId).collect(Collectors.toList());
         noteMultiMapper.deleteDrafts(_idList);
+        // endregion
 
-        //更新文件夹笔记数量
+
+        // region <- 更新文件夹笔记数量 ->
         List<String> noteFolderIdList = noteList.stream().map(NoteInfo::getNoteFolderId).collect(Collectors.toList());
         this.updateNoteCountInNoteFolder(noteFolderIdList);
+        // endregion
     }
 
     /**
@@ -256,13 +290,14 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
     @Override
     @Transactional
     public void restoreDeletedNote(String userId, String token, List<String> idList) {
-        // <- 1.验证 idList 的合法性
+
+        // region <- 确认数据属于该用户 ->
         var noteInfoList = baseMapper.getLogicDeletedNoteList(userId, idList);
         var _idList = noteInfoList.stream().map(NoteInfo::getId).collect(Collectors.toList());
         if (_idList.size() == 0) return;
-        // ->
+        // endregion
 
-        // <- 2.验证文件夹是否被删除
+        // region <- 验证文件夹是否被删除 ->
         var noteFolderIdList = new ArrayList<>(
                 noteInfoList.stream().map(NoteInfo::getNoteFolderId).collect(Collectors.toSet()));
         var r = userNfolderClient.getNoteFolderNameByFolderId(token, noteFolderIdList);
@@ -277,13 +312,13 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
                 });
             }
         }
-        // ->
+        // endregion
 
-        // <- 3.还原被删除的笔记
+        // region <- 还原被删除的笔记 ->
+
         baseMapper.restoreDeletedNote(_idList);
-        // ->
 
-        // <- 4.如果文件夹已经被删除，则还原到默认文件夹
+        //如果文件夹已经被删除，则还原到默认文件夹
         if (!deletedFolderList.isEmpty()) {
             var uw2 = new UpdateWrapper<NoteInfo>();
             uw2.set("note_folder_id", userId);
@@ -295,50 +330,52 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
                 noteFolderIdList.add(userId);
             }
         }
-        // ->
+        // endregion
 
-        // <- 5.更新文件夹中笔记的数量
+        // region <- 更新文件夹中笔记的数量 ->
         this.updateNoteCountInNoteFolder(noteFolderIdList);
-        // ->
+        // endregion
     }
 
     /**
      * 删除回收站中的笔记
+     *
      * @param userId
      * @param idList
      */
     @Override
     @Transactional
     public void deleteDeletedNotes(String userId, List<String> idList) {
-        // <- 1.验证 idList 的合法性
+
+        // region <- 确认数据属于该用户 ->
         var noteInfoList = baseMapper.getLogicDeletedNoteList(userId, idList);
         var _idList = noteInfoList.stream().map(NoteInfo::getId).collect(Collectors.toList());
         if (_idList.size() == 0) return;
-        // ->
+        // endregion
 
-        // <- 2.完成删除
+        // region <- 完成删除 ->
         noteMultiMapper.deleteDeletedNotes(_idList);
-        // ->
+        // endregion
     }
 
     @Override
     public Map<String, Object> getCountOfNoteInfo(String userId) {
 
-        var qw1 =new QueryWrapper<NoteInfo>();
-        qw1.eq("user_id",userId);
+        var qw1 = new QueryWrapper<NoteInfo>();
+        qw1.eq("user_id", userId);
         var noteCount = baseMapper.selectCount(qw1);
 
         var qw2 = new QueryWrapper<NoteInfo>();
-        qw2.eq("user_id",userId);
-        qw2.eq("status",0);
+        qw2.eq("user_id", userId);
+        qw2.eq("status", 0);
         var draftCount = baseMapper.selectCount(qw2);
 
         var deletedCount = baseMapper.getCountOfDeletedNote(userId);
 
-        var map = new HashMap<String,Object>();
-        map.put("noteCount",noteCount);
-        map.put("draftCount",draftCount);
-        map.put("deletedCount",deletedCount);
+        var map = new HashMap<String, Object>();
+        map.put("noteCount", noteCount);
+        map.put("draftCount", draftCount);
+        map.put("deletedCount", deletedCount);
 
         return map;
     }
@@ -479,6 +516,11 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         if (result.getCode() != 20000) {
             throw new MyCustomException(20001, "更新笔记数量失败");
         }
+    }
+
+
+    void t(){
+        ;
     }
 
 }

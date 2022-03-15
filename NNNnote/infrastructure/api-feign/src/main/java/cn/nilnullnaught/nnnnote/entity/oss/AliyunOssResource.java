@@ -29,7 +29,10 @@ public class AliyunOssResource implements Serializable {
     @TableId(value = "id", type = IdType.ASSIGN_UUID)
     private String id;
 
-    @ApiModelProperty("资源类型（0：用户头像，1：笔记图片，2：网站资源，3：其他）")
+    @ApiModelProperty("笔记预览")
+    private String  preview;
+
+    @ApiModelProperty("资源类型（0：用户头像，1：笔记图片，2：笔记封面，3：待定，4：待定，5：待定）")
     private Integer type;
 
     @ApiModelProperty("该资源的使用者ID（使用者可能为用户，也可能为笔记，或者其他）")

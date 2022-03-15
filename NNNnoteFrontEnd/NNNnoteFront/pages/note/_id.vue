@@ -85,7 +85,7 @@ import noteApi from '@/api/note'
 import userApi from '@/api/user'
 import 'mavon-editor/dist/css/index.css'
 import NoteCommentComponent from '@/components/note/NoteCommentComponent'
-import '~/assets/icon/iconfont.css'
+
 export default {
   name: 'NoteIdPage',
   components: {

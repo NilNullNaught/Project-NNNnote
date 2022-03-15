@@ -63,7 +63,7 @@
         <el-form-item label="社交账号">
           <el-row>
             <el-col :span="2" :offset="1">
-              <i class="iconfont icon-weixin" style="color: #00bb29;font-size: 28px;" />
+              <i class="alibaba_icons_weixin" style="color: #00bb29;font-size: 28px;" />
             </el-col>
             <el-col :span="10">
               <div v-if="userSafeInfo.openidWx">
@@ -84,7 +84,7 @@
           </el-row>
           <el-row>
             <el-col :span="2" :offset="1">
-              <i class="iconfont icon-qq" style="color: #498ad5;font-size: 28px;" />
+              <i class="alibaba_icons_QQ" style="color: #498ad5;font-size: 28px;" />
             </el-col>
             <el-col :span="10">
               <div v-if="userSafeInfo.openidQq">
@@ -103,10 +103,9 @@
               </div>
             </el-col>
           </el-row>
-          <!--
           <el-row>
             <el-col :span="2" :offset="1">
-              <i class="iconfont icon-wb" style="color: #498ad5;font-size: 28px;" />
+              <i class="alibaba_icons_xinlangweibo" style="color: red;font-size: 28px;" />
             </el-col>
             <el-col :span="10">
               <div v-if="userSafeInfo.openidQq">
@@ -124,7 +123,7 @@
                 </el-button>
               </div>
             </el-col>
-          </el-row> -->
+          </el-row>
         </el-form-item>
       </el-form>
       <el-row>
@@ -185,7 +184,6 @@
 </template>
 
 <script>
-import '~/assets/css/iconfont.css'
 import qs from 'qs'
 import userApi from '@/api/user'
 import registerApi from '@/api/register'

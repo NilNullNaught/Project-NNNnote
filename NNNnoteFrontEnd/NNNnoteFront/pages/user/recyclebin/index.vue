@@ -59,8 +59,17 @@
             width="300"
           >
             <template slot-scope="scope">
+              <p v-dompurify-html="scope.row.noteFolderId" />
+            </template>
+          </el-table-column>
+
+          <el-table-column
+            label="所属文件夹"
+            width="140"
+          >
+            <template slot-scope="scope">
               <p
-                v-dompurify-html="scope.row.preview"
+                v-dompurify-html="scope.row.noteFolderId"
                 style="
                         display: -webkit-box;
                         -webkit-box-orient: vertical;
@@ -71,12 +80,6 @@
               />
             </template>
           </el-table-column>
-
-          <el-table-column
-            prop="noteFolderId"
-            label="所属文件夹"
-            width="140"
-          />
           <el-table-column
             prop="gmtCreate"
             label="创建时间"
@@ -117,7 +120,6 @@
 
 <script>
 import qs from 'qs'
-import MavonEditor from 'mavon-editor'
 import noteApi from '@/api/note'
 import userApi from '@/api/user'
 
@@ -176,7 +178,6 @@ export default {
                 if (result) {
                   result.forEach((o) => {
                     o.noteFolderId = this.formatFolderName(o.noteFolderId)
-                    o.preview = this.formatPreview(o.preview)
                     o.gmtCreate = this.formatDate(o.gmtCreate)
                     o.gmtModified = this.formatCountdown(o.gmtModified)
                   })
@@ -242,15 +243,6 @@ export default {
 
       return `${Math.floor(t / (1000 * 60 * 60 * 24))} 天 ` +
              `${Math.floor(t / (1000 * 60 * 60) % 24)} 小时 `
-    },
-    // 解析 preview 的 markdown 语法
-    formatPreview (data) {
-      if (data === null) {
-        return data
-      } else {
-        const md = MavonEditor.mavonEditor.getMarkdownIt()
-        return md.render(data)
-      }
     },
 
     // 取消选择

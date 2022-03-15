@@ -24,10 +24,10 @@
     <!------------------------------------------------------------------------------------------------------------------------------------------->
 
     <el-main>
-      <el-form ref="userInfo" :model="userInfo" label-width="80px">
+      <el-form ref="userInfo" :model="newUserInfo" label-width="80px">
         <el-form-item>
           <el-col class="line" :span="6">
-            <el-avatar size="large" :src="userInfo.avatar" style="width:80px;height:80px;block:inline" />
+            <el-avatar size="large" :src="newUserInfo.avatar" style="width:80px;height:80px;block:inline" />
           </el-col>
           <!-- 头像上传 ----------------------------------------------------------------------------------------------------------------------------------------->
           <el-col :span="8">
@@ -47,14 +47,14 @@
 
         <el-form-item prop="nickname" label="昵称">
           <el-col class="line" :span="14">
-            <el-input v-model="userInfo.nickname" maxlength="10" show-word-limit />
+            <el-input v-model="newUserInfo.nickname" maxlength="10" show-word-limit />
           </el-col>
         </el-form-item>
 
         <el-form-item prop="birthday" label="生日">
           <el-col class="line" :span="14">
             <el-date-picker
-              v-model="userInfo.birthday"
+              v-model="newUserInfo.birthday"
               type="date"
               placeholder="选择日期"
               style="width: 60%;"
@@ -64,7 +64,7 @@
         </el-form-item>
 
         <el-form-item prop="sex" label="性别">
-          <el-radio-group :key="userInfo.sex" v-model="userInfo.sex">
+          <el-radio-group v-model="newUserInfo.sex">
             <el-radio :label="0">
               男
             </el-radio>
@@ -80,7 +80,7 @@
         <el-form-item prop="sign" label="签名">
           <el-col class="line" :span="18">
             <el-input
-              v-model="userInfo.sign"
+              v-model="newUserInfo.sign"
               type="textarea"
               rows="6"
               maxlength="100"
@@ -99,14 +99,13 @@
 </template>
 
 <script>
-import jsCookie from 'js-cookie'
 import userApi from '@/api/user'
 import ossApi from '@/api/oss'
 export default {
   name: 'SettingIndexPage',
   // vue路由的钩子函数
   beforeRouteLeave (to, from, next) {
-    if (JSON.stringify(this.userInfoCheck) !==
+    if (JSON.stringify(this.newUserInfo) !==
       JSON.stringify(this.userInfo)) {
       this.$confirm('离开页面 , 数据将不做保存, 请确认已经保存', '提示', {
         confirmButtonText: '确定',
@@ -128,50 +127,28 @@ export default {
     return {
       imageUrl: '',
       activeSubmitBtn: false,
-      userInfo: {
+      newUserInfo: {
         id: '',
         nickname: '',
-        sex: null,
-        birthday: '',
-        avatar: '',
-        sign: ''
-      },
-      userInfoCheck: {
-        id: '',
-        nickname: '',
-        sex: null,
+        sex: '',
         birthday: '',
         avatar: '',
         sign: ''
       }
+    }
+  },
+  computed: {
+    dataCount () {
+      return this.$store.state.userData.dataCount
+    },
+    userInfo () {
+      return this.$store.state.userData.userInfo
     }
   },
   created () {
-    // 从 cookie 中获取用户信息
-    this.userStr = jsCookie.get('NNNnote_userInfo')
-    // 把字符串转换json对象(js对象)
-    if (this.userStr) {
-      this.userInfo = JSON.parse(this.userStr)
-      this.userInfoCheck = JSON.parse(this.userStr)
-    }
+    this.newUserInfo = JSON.parse(JSON.stringify(this.$store.state.userData.userInfo))
   },
-  mounted () {
-    // 校验用户信息是否被修改
-    if (JSON.stringify(this.userInfoCheck) !==
-      JSON.stringify(this.userInfo) ||
-          this.imageUrl !== ''
-    ) {
-      window.onbeforeunload = function (e) { // 刷新与关闭时弹出提示
-        e = e || window.event
-        // 兼容IE8和Firefox 4之前的版本
-        if (e) {
-          e.returnValue = '关闭提示'
-        }
-        // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
-        return '关闭提示'
-      }
-    }
-  },
+
   methods: {
     // 提交修改的用户信息
     onSubmit () {
@@ -179,10 +156,10 @@ export default {
       // 是否上传了新的头像
       if (this.imageUrl !== '') {
         // 如果头像被改变，则提交修改
-        this.userInfo.avatar = this.imageUrl
+        this.newUserInfo.avatar = this.imageUrl
       }
       // 检测用户信息是否进行了修改
-      if (JSON.stringify(this.userInfoCheck) ===
+      if (JSON.stringify(this.newUserInfo) ===
         JSON.stringify(this.userInfo)) {
         // 提示修改失败
         this.$message({
@@ -195,7 +172,7 @@ export default {
 
       this.activeSubmitBtn = true
 
-      userApi.alterUserInfo(this.userInfo)
+      userApi.alterUserInfo(this.newUserInfo)
         .then((response) => {
           if (response.data.code === 20000) {
             // 提示修改成功
@@ -207,10 +184,9 @@ export default {
             // 重新获取用户信息
             userApi.getUserInfo()
               .then((response) => {
-                const userInfo = JSON.stringify(response.data.data.data)
-                jsCookie.set('NNNnote_userInfo', userInfo)
-                // 使用 window.logcation.href 跳转页面,可以刷新所有组件状态
-                window.location.href = '/setting'
+                const data = response.data.data.data
+                this.newUserInfo = response.data.data.data
+                this.$store.dispatch('userData/updateUserInfo', { data })
               })
           }
         })
@@ -218,7 +194,7 @@ export default {
 
     // 检查头像文件格式与大小
     beforeAvatarUpload (file) {
-      const isJPG = file.type === 'image/jpeg'
+      const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png')
       const isLt2M = file.size / 1024 / 1024 < 2
       this.file = file
       if (!isJPG) {
@@ -260,7 +236,7 @@ export default {
 }
 
 /* 上传头像组件 CSS*/
-  .avatar-uploader .el-upload {
+  .avatar-uploader ::v-deep .el-upload {
     border: 1px dashed #d9d9d9;
     border-radius: 80px;
     cursor: pointer;

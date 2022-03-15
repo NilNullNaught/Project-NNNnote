@@ -42,6 +42,9 @@ public class NoteInfo implements Serializable {
     @ApiModelProperty("笔记预览")
     private String  preview;
 
+    @ApiModelProperty("笔记封面")
+    private String  cover;
+
     @ApiModelProperty("点赞数")
     private Long likes;
 
@@ -52,7 +55,7 @@ public class NoteInfo implements Serializable {
     private Long commentCount;
 
     @ApiModelProperty("0 草稿状态，1 完成状态，2 发布状态")
-    private byte status;
+    private Byte status;
 
     @ApiModelProperty("乐观锁")
     private Long version;

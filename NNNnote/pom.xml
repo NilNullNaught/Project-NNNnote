@@ -35,10 +35,12 @@
         <commons-fileupload.version>1.3.1</commons-fileupload.version>
         <commons-io.version>2.6</commons-io.version>
         <httpclient.version>4.5.1</httpclient.version>
-        <canal.client.version>1.1.0</canal.client.version>
+        <canal.client.version>1.1.5</canal.client.version>
         <docker.image.prefix>zx</docker.image.prefix>
         <junit.version>4.12</junit.version>
         <jbcrypt.version>0.4</jbcrypt.version>
+        <elasticsearch.version>7.16.3</elasticsearch.version>
+
 
         <jodatime.version>2.10.1</jodatime.version>
         <poi.version>3.17</poi.version>
@@ -56,6 +58,10 @@
 
     <dependencyManagement>
         <dependencies>
+
+
+
+
             <!--Spring Cloud-->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
@@ -83,6 +89,13 @@
                 <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
                 <version>${cloud-alibaba.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.elasticsearch.client</groupId>
+                <artifactId>elasticsearch-rest-high-level-client</artifactId>
+                <version>${elasticsearch.version}</version>
+            </dependency>
+
 
             <!--mybatis-plus 持久层-->
             <dependency>

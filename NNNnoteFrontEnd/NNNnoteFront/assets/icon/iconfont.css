@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3210660 */
-  src: url('iconfont.woff2?t=1646408803262') format('woff2'),
-       url('iconfont.woff?t=1646408803262') format('woff'),
-       url('iconfont.ttf?t=1646408803262') format('truetype');
+  src: url('iconfont.woff2?t=1647249059453') format('woff2'),
+       url('iconfont.woff?t=1647249059453') format('woff'),
+       url('iconfont.ttf?t=1647249059453') format('truetype');
 }
 
 .iconfont {
@@ -19,6 +19,26 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+.alibaba_icons_public:before {
+  content: "\e736";
+}
+
+.alibaba_icons_bad-fill:before {
+  content: "\e779";
+}
+
+.alibaba_icons_good-fill:before {
+  content: "\e780";
+}
+
+.alibaba_icons_return:before {
+  content: "\e6ba";
+}
+
+.alibaba_icons_baocun:before {
+  content: "\e63b";
+}
+
 .alibaba_icons_rely:before {
   content: "\e632";
 }

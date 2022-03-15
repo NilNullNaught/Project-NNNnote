@@ -37,7 +37,6 @@
 </template>
 
 <script>
-import jsCookie from 'js-cookie'
 import NoteFolderComponent from '@/components/user/NoteFolderComponent'
 export default {
   name: 'UserNfolderIndexPage',
@@ -47,32 +46,19 @@ export default {
   layout: 'BaseLayout',
   data () {
     return {
-
-      userInfo: {
-
-      },
       activeTab: 'first'
     }
   },
   computed: {
     dataCount () {
       return this.$store.state.userData.dataCount
+    },
+    userInfo () {
+      return this.$store.state.userData.userInfo
     }
   },
-  created () {
-    this.getUserInfo()
-  },
+
   methods: {
-    // 从 cookie 中获取用户信息
-    getUserInfo () {
-    // 判断是否通过密码登录
-    // 从cookie获取用户信息
-      const userStr = jsCookie.get('NNNnote_userInfo')
-      // 把字符串转换json对象(js对象)
-      if (userStr) {
-        this.userInfo = JSON.parse(userStr)
-      }
-    }
 
   }
 }

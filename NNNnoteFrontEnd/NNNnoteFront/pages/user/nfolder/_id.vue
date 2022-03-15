@@ -10,7 +10,7 @@
 
         <div style="padding:5px" />
 
-        <!-- 操作栏 ----------------------------------------------------------------------------------------------------------------------------------------->
+        <!-- #region 操作栏 -->
         <el-row align="middle" justify="center" type="flex">
           <el-col :span="16">
             <el-button
@@ -65,8 +65,9 @@
             />
           </el-col>
         </el-row>
+        <!-- #endregion -->
 
-        <!-- 全选框 ----------------------------------------------------------------------------------------------------------------------------------------->
+        <!-- #region 全选框 -->
         <div style="margin: 10px;">
           <el-checkbox
             v-model="select.selectAll"
@@ -75,17 +76,15 @@
             @change="handleCheckAll"
           />
         </div>
-        <!----------------------------------------------------------------------------------------------------------------------------------------->
-
-        <!----------------------------------------------------------------------------------------------------------------------------------------->
+        <!-- #endregion -->
 
         <div style="margin:10px 0px">
           <el-divider />
         </div>
 
-        <!-- 笔记列表 ----------------------------------------------------------------------------------------------------------------------------------------->
+        <!-- #region 笔记列表 -->
         <el-row>
-          <el-col v-for="(o) in list.result" :key="o.id" :lg="{span: '4-8'}">
+          <el-col v-for="(o) in list.result" :key="o.id" :span="6">
             <el-card
               :ref="'Note-'+o.id"
               class="NoteFolderId-el-card"
@@ -95,7 +94,7 @@
               <input
                 v-if="o.id !== o.userId"
                 v-model="o.ischecked"
-                style="position:absolute;top: 5px;left: 5px;"
+                style="position:absolute;top: 5px;left: 5px;height:15px;width:15px;"
                 type="checkbox"
                 @change="handleChecked(o)"
               >
@@ -108,7 +107,16 @@
                 <i class="el-icon-warning" />
               </el-tooltip>
 
-              <div style="margin:0px 10px;height:120px" @click="route(o.id)">
+              <el-tooltip
+                v-if="o.status === 2"
+                style="position:absolute;top: 5px;right: 5px;"
+                content="该笔记已公开，可被其他用户查阅。"
+                placement="top"
+              >
+                <i class="alibaba_icons_public" />
+              </el-tooltip>
+
+              <div style="margin:0px 10px;height:220px" @click="route(o.id)">
                 <div style="display: flex;justify-content:center;">
                   <p
                     style="
@@ -125,31 +133,38 @@
                 <div style="margin:5px 0px">
                   <el-divider />
                 </div>
-                <div
-                  style="
-                    font-size:10px;
-                    display: flex;
-                    justify-content:center;"
+                <el-image
+                  style="width: 160px; height: 120px;dispaly:inline-block !important;"
+                  fit="scale-down"
+                  :src="o.cover"
                 >
-                  <p
-                    v-dompurify-html="o.preview"
-                    style="
-                        display: -webkit-box;
-                        -webkit-box-orient: vertical;
-                        -webkit-line-clamp: 6;
-                        overflow: hidden;
-                        word-break: break-all;
-                        font-size:10px;"
-                  />
-                </div>
+                  <div slot="error" class="image-slot">
+                    <el-skeleton-item variant="image" style="width: 160px; height: 120px;" />
+                  </div>
+                </el-image>
+
+                <p
+                  style="
+                    margin:5px 0px;
+                    display: flex;
+                    justify-content:center;
+                    display:-webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 4;
+                    overflow: hidden;
+                    word-break: break-all;
+                    font-size:10px;"
+                >
+                  {{ o.preview }}
+                </p>
               </div>
             </el-card>
           </el-col>
         </el-row>
-        <!----------------------------------------------------------------------------------------------------------------------------------------->
+        <!-- #endregion -->
       </el-main>
 
-      <!-- 分页 ----------------------------------------------------------------------------------------------------------------------------------->
+      <!-- #region 分页 -->
       <el-footer height="40px">
         <el-row justify="center" type="flex">
           <el-pagination
@@ -161,7 +176,7 @@
           />
         </el-row>
       </el-footer>
-    <!------------------------------------------------------------------------------------------------------------------------------------------------->
+      <!-- #endregion -->
     </el-container>
 
     <!-- 添加笔记对话框 ----------------------------------------------------------------------------------------------------------------------------------------->
@@ -182,7 +197,6 @@
 
 <script>
 import qs from 'qs'
-import MavonEditor from 'mavon-editor'
 import noteApi from '@/api/note'
 import userApi from '@/api/user'
 
@@ -258,9 +272,6 @@ export default {
           if (this.list.result) {
             this.list.result.forEach((item) => {
               item.ischecked = false
-              if (item.preview !== null) {
-                item.preview = MavonEditor.mavonEditor.getMarkdownIt().render(item.preview)
-              }
             })
           }
         } else {
@@ -416,7 +427,5 @@ export default {
 .el-button+.el-button {
     margin-left: 0px;
 }
-.el-col-lg-4-8 {
-    width: 20%;
-}
+
 </style>

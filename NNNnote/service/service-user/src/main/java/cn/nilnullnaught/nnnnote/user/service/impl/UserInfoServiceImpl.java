@@ -1,6 +1,7 @@
 package cn.nilnullnaught.nnnnote.user.service.impl;
 
 import cn.nilnullnaught.nnnnote.client.oss.AliyunOssClient;
+
 import cn.nilnullnaught.nnnnote.entity.oss.vo.ResourceManagerVo;
 import cn.nilnullnaught.nnnnote.entity.user.UserInfo;
 import cn.nilnullnaught.nnnnote.user.mapper.UserInfoMapper;
@@ -8,11 +9,10 @@ import cn.nilnullnaught.nnnnote.user.service.UserInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
+
 import java.util.Arrays;
-import java.util.List;
+
 
 /**
  * <p>
@@ -36,16 +36,23 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
      */
     @Override
     public void updateUserInfo(UserInfo userInfo) {
-        String oldAvatar = baseMapper.selectById(userInfo.getId()).getAvatar();
+        var oldAvatar = baseMapper.selectById(userInfo.getId()).getAvatar();
+        if (oldAvatar == null) oldAvatar = "";
 
-        // 修改头像
-        if (!oldAvatar.equals(userInfo.getAvatar())){
+        // region <- 修改头像 ->
+        var newAvatar = userInfo.getAvatar();
+        if (oldAvatar == null) oldAvatar = "";
+
+
+        if (!newAvatar.equals(oldAvatar)) {
             ResourceManagerVo vo = new ResourceManagerVo();
             vo.setType(0);
             vo.setBelongId(userInfo.getId());
-            vo.setResourceUrlList(Arrays.asList(userInfo.getAvatar()));
+            vo.setResourceUrlList(Arrays.asList(newAvatar));
             aliyunOssClient.manageResource(vo);
         }
+        // endregion
+
 
         // <- 清理不需要改变或自动填充的数据
         userInfo.setGmtCreate(null);

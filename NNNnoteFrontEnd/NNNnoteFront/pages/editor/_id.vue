@@ -1,5 +1,5 @@
 <template>
-  <div class="mavonEditor">
+  <div>
     <el-row style="margin:5px;">
       <el-col :span="8">
         <el-button type="danger" @click="exit()">
@@ -9,7 +9,6 @@
       <el-col :span="8">
         <el-input
           v-model="saveNote.title"
-
           placeholder="请输入标题"
           maxlength="20"
           show-word-limit
@@ -20,50 +19,87 @@
           </template>
         </el-input>
       </el-col>
-      <el-col :span="8">
-        <br>
-      </el-col>
     </el-row>
 
     <client-only>
       <mavon-editor
         ref="md"
         v-model="saveNote.text"
+        style="margin:5px;"
         :toolbars="markdownOption"
         @imgAdd="$addImg"
         @save="saveDialog.visible = true"
+        @change="$change"
       />
     </client-only>
 
     <el-dialog
       title="请选择文件夹"
       :visible.sync="saveDialog.visible"
-      width="30%"
+      width="600px"
       center
     >
-      <el-row style="height:calc(30vh);overflow-y:scroll">
-        <el-col :span="24" align="center">
-          <el-radio-group v-model="saveNote.noteFolderId">
-            <el-radio v-for="folder in folders" :key="folder.id" :label="folder.id" border style="width:300px;margin:5px">
+      <el-row style="height:calc(30vh);overflow-y:scroll" justify="center" :gutter="10" type="flex">
+        <el-radio-group v-model="saveNote.noteFolderId">
+          <el-col v-for="folder in folders" :key="folder.id" :span="12">
+            <el-radio :label="folder.id" border style="width:100%;margin:5px;">
               {{ folder.folderName }}
             </el-radio>
-          </el-radio-group>
-        </el-col>
+          </el-col>
+          <el-col :span="12">
+            <el-button style="width:100%;margin:5px;" @click="addNfolderDialog.visible = true">
+              <i class="el-icon-plus" />
+            </el-button>
+          </el-col>
+        </el-radio-group>
       </el-row>
 
       <span slot="footer" class="dialog-footer">
-        <el-button @click="saveDialog.visible = false">取 消</el-button>
-        <el-button type="primary" @click="addNfolderDialog.visible = true">
-          创建文件夹
+        <el-button @click="saveDialog.visible = false">&nbsp;&nbsp;&nbsp;取&nbsp;&nbsp;消&nbsp;&nbsp;&nbsp;</el-button>
+
+        <el-button type="primary" @click="coverNfolderDialog.visible = true">
+          <i class="el-icon-upload" />
+          上传封面
         </el-button>
-        <el-button type="primary" @click="submitSave()">保存</el-button>
+
+        <el-button type="primary" @click="submitSave()">
+          <i class="alibaba_icons_baocun" />
+          保&nbsp;&nbsp;&nbsp;&nbsp;存&nbsp;</el-button>
         <el-checkbox v-model="saveDialog.isPrivate">私密</el-checkbox>
 
       </span>
 
       <el-dialog
+        id="coverNfolderDialog"
         width="20%"
-        title="创建新文件夹"
+        title="上传封面"
+        :visible.sync="coverNfolderDialog.visible"
+        append-to-body
+      >
+        <el-row>
+          <el-col :span="24" align="center">
+            <el-upload
+              class="cover-uploader "
+              action="fakeaction"
+              :show-file-list="false"
+              :before-upload="beforeCoverUpload"
+              :http-request="uploadCover"
+            >
+              <img v-if="saveNote.cover" :src="saveNote.cover" class="cover">
+              <i v-else class="el-icon-plus cover-uploader-icon" />
+            </el-upload>
+          </el-col>
+        </el-row>
+
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="cancelUpload">取 消</el-button>
+          <el-button type="primary" @click="coverNfolderDialog.visible = false">确认</el-button>
+        </span>
+      </el-dialog>
+
+      <el-dialog
+        width="20%"
+        title="新增文件夹"
         :visible.sync="addNfolderDialog.visible"
         append-to-body
       >
@@ -115,7 +151,6 @@ export default {
       type: 'warning'
     })
       .then(() => {
-        clearTimeout(this.timer)
         window.onbeforeunload = null
         next()
       })
@@ -131,6 +166,7 @@ export default {
         noteFolderId: '',
         title: '',
         preview: '',
+        cover: null,
         text: '',
         // 笔记状态 0 代表用户没有主动保存过，1 代表以私密状态保存，2 代表以公开状态保存
         status: 0,
@@ -147,6 +183,10 @@ export default {
           nfolderName: '',
           description: ''
         }
+      },
+      coverNfolderDialog: {
+        visible: false,
+        cover: null
       },
       markdownOption: {
         bold: true, // 粗体
@@ -183,7 +223,7 @@ export default {
         subfield: true, // 单双栏模式
         preview: true // 预览
       },
-      timer: null
+      saveCount: 0
     }
   },
   created () {
@@ -194,6 +234,7 @@ export default {
         this.saveNote.title = response.data.data.noteInfo.title
         this.saveNote.status = response.data.data.noteInfo.status
         this.saveNote.text = response.data.data.noteText.text
+        this.saveNote.cover = response.data.data.noteInfo.cover
         this.folders = response.data.data.NfolderList
 
         if (this.saveNote.status !== 2) {
@@ -207,28 +248,6 @@ export default {
       // eslint-disable-next-line no-console
       console.log(error)
     )
-
-    // 设置自动保存
-    this.timer = setInterval(() => {
-      // <- 生成笔记预览
-      if (this.saveNote.text.length >= 60) {
-        this.saveNote.preview = this.saveNote.text.substring(0, 60) + '…'
-      } else {
-        this.saveNote.preview = this.saveNote.text
-      }
-      // ->
-
-      noteApi.autoSaveNote(this.saveNote).then((response) => {
-        if (response.data.code === 20000) {
-          this.$message({
-            type: 'success',
-            message: '保存成功'
-          })
-        } else {
-          this.$message.error(response.data.message)
-        }
-      })
-    }, 30000)
   },
   mounted () {
     window.onbeforeunload = function (e) { // 刷新与关闭前弹出提示
@@ -256,6 +275,27 @@ export default {
           this.saveNote.resourceUrlList.push(url)
         })
     },
+    // 自动保存
+    $change (pos, file) {
+      this.saveCount = ++this.saveCount
+      if (this.saveCount % 5 !== 0) {
+        return
+      }
+      // 生成笔记预览
+      this.generateNotePreivew()
+
+      noteApi.autoSaveNote(this.saveNote)
+      // .then((response) => {
+      //   if (response.data.code === 20000) {
+      //     this.$message({
+      //       type: 'success',
+      //       message: '保存成功'
+      //     })
+      //   } else {
+      //     this.$message.error(response.data.message)
+      //   }
+      // })
+    },
     // 提交保存
     submitSave () {
       // <- 修改笔记状态
@@ -267,13 +307,8 @@ export default {
       this.saveDialog.visible = false
       // ->
 
-      // <- 生成笔记预览
-      if (this.saveNote.text.length >= 60) {
-        this.saveNote.preview = this.saveNote.text.substring(0, 60) + '…'
-      } else {
-        this.saveNote.preview = this.saveNote.text
-      }
-      // ->
+      // 生成笔记预览
+      this.generateNotePreivew()
 
       noteApi.saveNote(this.saveNote).then((response) => {
         if (response.data.code === 20000) {
@@ -286,7 +321,6 @@ export default {
         }
       })
     },
-
     // 创建新的笔记文件夹
     submitNfolder () {
       userApi.addUserNfolder(qs.stringify(this.addNfolderDialog.form)).then((response) => {
@@ -301,6 +335,52 @@ export default {
         }
       })
     },
+    // 生成笔记预览
+    generateNotePreivew () {
+      const raw = document.getElementsByClassName('v-show-content').item(0).innerText
+      if (raw.length >= 60) {
+        // 获取不含 markdown 语法的笔记预览
+        this.saveNote.preview = raw.substring(0, 60) + '…'
+      } else {
+        this.saveNote.preview = raw
+      }
+    },
+    // 取消上传
+    cancelUpload () {
+      this.saveNote.cover = null
+      this.coverNfolderDialog.visible = false
+    },
+    // 上传封面
+    uploadCover (params) {
+      const data = new FormData()
+      // 创建一个表单数据
+      data.append('file', params.file)
+      ossApi.uploadFile(data).then((response) => {
+        if (response.data.code === 20000) {
+          // 提示修改成功
+          this.$message({
+            type: 'success',
+            message: '封面上传成功'
+          })
+          this.saveNote.cover = response.data.data.url
+        } else {
+          this.$message.error('封面上传失败')
+        }
+      })
+    },
+
+    beforeCoverUpload (file) {
+      const isJPG = file.type === 'image/jpeg'
+      const isLt2M = file.size / 1024 / 1024 < 5
+
+      if (!isJPG) {
+        this.$message.error('上传图片只能是 JPG 格式!')
+      }
+      if (!isLt2M) {
+        this.$message.error('上传图片大小不能超过 5MB!')
+      }
+      return isJPG && isLt2M
+    },
 
     exit () {
       window.history.back()
@@ -310,8 +390,33 @@ export default {
 </script>
 
 <style scoped>
-.mavonEditor {
-  width: 100%;
-  height: 100%;
+.cover-uploader ::v-deep .el-upload {
+    border: 1px dashed #d9d9d9;
+    width: 160px;
+    height: 120px;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover-uploader ::v-deep .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .cover-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 160px;
+    height: 120px;
+    line-height: 120px;
+    text-align: center;
+  }
+  .cover {
+    width: 178px;
+    height: 178px;
+    display: block;
+    border: 1px dashed #8c939d;
+  }
+#coverNfolderDialog ::v-deep .el-dialog__body{
+  padding: 0px;
 }
 </style>

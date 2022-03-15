@@ -4,7 +4,7 @@
     <div class="title">
       <a href="/login">登录</a>
       <span>·</span>
-      <a class="active" href="/register">注册</a>
+      <a class="active" href="/login/register">注册</a>
     </div>
     <!-- 结束 -- 跳转部分 --------------------------------------------------------------------------------------------------------------------------------->
 
@@ -80,11 +80,15 @@
         <h6>社交帐号直接注册</h6>
         <ul>
           <li>
-            <a id="weixin" class="weixin" target="_blank" href="http://huaan.free.idcfengye.com/api/ucenter/wx/login"><i
-              class="iconfont icon-weixin"
-            /></a>
+            <a id="weixin" class="weixin" target="_blank" href="http://huaan.free.idcfengye.com/api/ucenter/wx/login">
+              <i class="alibaba_icons_weixin" style="color: #00bb29;font-size: 36px;" />
+            </a>
           </li>
-          <li><a id="qq" class="qq" target="_blank" href="#"><i class="iconfont icon-qq" /></a></li>
+          <li>
+            <a id="qq" class="qq" target="_blank" href="#">
+              <i class="alibaba_icons_QQ" style="color: #498ad5;font-size: 36px;" />
+            </a>
+          </li>
         </ul>
       </div>
       <!-- 结束 -- 更多登录方式 --------------------------------------------------------------------------------------------------------------------------------->
@@ -93,12 +97,11 @@
 </template>
 
 <script>
-import '~/assets/css/sign.css'
-import '~/assets/css/iconfont.css'
+import '~/assets/css/loginCss/sign.css'
 import registerApi from '@/api/register'
 
 export default {
-  name: 'RegisterIndexPage',
+  name: 'LoginRegisterPage',
   layout: 'SignLayout',
 
   data () {

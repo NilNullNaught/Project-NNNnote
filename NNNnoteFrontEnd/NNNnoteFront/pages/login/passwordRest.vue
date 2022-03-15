@@ -48,7 +48,7 @@
           </div>
         </el-form-item>
         <div class="btn">
-          <input type="button" class="sign-in-button" value="重置密码" @click="submitRestPassword()">
+          <input type="button" class="sign-in-button" value="重置" @click="submitRestPassword()">
         </div>
       </el-form>
       <!-- 结束 -- 表单 --------------------------------------------------------------------------------------------------------------------------------->
@@ -57,9 +57,7 @@
 </template>
 
 <script>
-import '~/assets/css/sign.css'
-import '~/assets/css/iconfont.css'
-// import testApi from '@/api/test'
+import '~/assets/css/loginCss/sign.css'
 import registerApi from '@/api/register'
 import loginApi from '@/api/login'
 
@@ -77,7 +75,8 @@ export default {
       },
       checkPasswordVal: '',
       second: 60, // 倒计时长度
-      codeTest: '获取验证码'
+      codeTest: '获取验证码',
+      activeSendCodeBtn: false
     }
   },
   methods: {

@@ -6,7 +6,7 @@
           <el-col :xs="0" :sm="2" :md="2" :lg="4" :xl="4">
             <el-image
               style="width: 55px; height: 55px;padding:5px 0px 0px 0px;"
-              :src="require('~/assets/img/logo.png')"
+              :src="require('@/static/logo.png')"
             />
           </el-col>
 
@@ -21,7 +21,7 @@
               <el-menu-item index="/">
                 主页
               </el-menu-item>
-              <el-menu-item index="/note">
+              <el-menu-item index="/recommend">
                 推荐
               </el-menu-item>
             </el-menu>
@@ -64,11 +64,11 @@
                     <el-menu-item index="/setting">
                       设置
                     </el-menu-item>
-                    <el-menu-item @click="signOut">
+                    <el-menu-item index="/" @click="signOut">
                       退出
                     </el-menu-item>
                   </el-submenu>
-                  <el-menu-item @click="toEditor">
+                  <el-menu-item index="/" @click="toEditor">
                     写笔记
                   </el-menu-item>
                 </el-menu>
@@ -85,7 +85,7 @@
                   <el-menu-item index="/login">
                     登录
                   </el-menu-item>
-                  <el-menu-item index="/register">
+                  <el-menu-item index="/login/register">
                     注册
                   </el-menu-item>
                 </el-menu>
@@ -137,17 +137,19 @@
 <script>
 import jsCookie from 'js-cookie'
 import noteApi from '@/api/note'
+import userApi from '@/api/user'
+
 export default {
   data () {
     return {
-      userInfo: {
-
-      }
     }
   },
   computed: {
     dataCount () {
       return this.$store.state.userData.dataCount
+    },
+    userInfo () {
+      return this.$store.state.userData.userInfo
     }
   },
   created () {
@@ -158,14 +160,23 @@ export default {
       // this.wxLogin()
     }
 
+    // // 判断是否通过密码登录
+    // // 从cookie获取用户信息
+    // const userStr = jsCookie.get('NNNnote_userInfo')
+    // // 把字符串转换json对象(js对象)
+    // if (userStr) {
+    //   this.userInfo = JSON.parse(userStr)
+    // }
+    // if (this.userInfo) {
+    //   this.getCountOfNoteInfo()
+    // }
+
     // 判断是否通过密码登录
-    // 从cookie获取用户信息
-    const userStr = jsCookie.get('NNNnote_userInfo')
+    // 从 cookie 获取用户信息
+    const cookie = jsCookie.get('NNNnote_token')
     // 把字符串转换json对象(js对象)
-    if (userStr) {
-      this.userInfo = JSON.parse(userStr)
-    }
-    if (this.userInfo) {
+    if (cookie) {
+      this.getUserInfo()
       this.getCountOfNoteInfo()
     }
   },
@@ -174,9 +185,12 @@ export default {
     // 退出登录
     signOut () {
       if (jsCookie.get('NNNnote_token')) {
-        jsCookie.remove('NNNnote_token', { domain: 'localhost' }) // 删除成功
-        jsCookie.remove('NNNnote_userInfo', { domain: 'localhost' })
-        this.userInfo = {}
+        // 删除 token
+        jsCookie.remove('NNNnote_token', { domain: 'localhost' })
+
+        const data = {}
+        // 清除用户信息
+        this.$store.dispatch('userData/updateUserInfo', { data })
         this.$router.push({ path: '/' })
       }
     },
@@ -200,6 +214,16 @@ export default {
           this.$store.dispatch('userData/updateDataCount', { data })
         }
       })
+    },
+    // 获取用户信息
+    getUserInfo () {
+      userApi.getUserInfo()
+        .then((response) => {
+          if (response.data.code === 20000) {
+            const data = response.data.data.data
+            this.$store.dispatch('userData/updateUserInfo', { data })
+          }
+        })
     }
   }
 
