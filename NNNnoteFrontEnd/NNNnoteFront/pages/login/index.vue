@@ -149,7 +149,7 @@ export default {
           // 跳转至登录页
           this.$router.push({ path: '/' })
         } else {
-          this.user = ''
+          this.user.password = ''
           this.activeLoginBtn = false
           // 提示登录失败
           this.$message.error('登录失败')

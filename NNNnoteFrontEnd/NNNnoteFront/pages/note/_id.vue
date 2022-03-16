@@ -2,7 +2,7 @@
   <el-container>
     <el-header height="140px">
       <h1 style="font-size:30px;margin:20px 0px 15px 0px">
-        {{ noteInfo.title }}
+        {{ noteInfo.title ? noteInfo.title:"&nbsp;" }}
       </h1>
       <el-row>
         <el-col :span="2">
@@ -25,7 +25,7 @@
               {{ formatDate(noteInfo.gmtModified) }}
             </el-descriptions-item>
             <el-descriptions-item label="长度">
-              {{ (noteText.text)? noteText.text.length : ' ' }}字
+              {{ noteInfo.length }}字
             </el-descriptions-item>
           </el-descriptions>
         </el-col>

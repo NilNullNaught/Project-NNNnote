@@ -101,5 +101,13 @@ export default {
       url: `${ApiName}/getCountOfNoteInfo`,
       method: 'get'
     })
+  },
+  // 搜索笔记（分页，可以附带条件）
+  searchNoteList (data) {
+    return request({
+      url: `${ApiName}/searchNoteList`,
+      method: 'get',
+      params: data
+    })
   }
 }

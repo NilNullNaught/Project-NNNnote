@@ -123,6 +123,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         noteInfo.setId(saveNoteVo.getId());
         noteInfo.setTitle(saveNoteVo.getTitle());
         noteInfo.setPreview(saveNoteVo.getPreview());
+        noteInfo.setLength(saveNoteVo.getLength());
         noteInfo.setStatus(saveNoteVo.getStatus());
 
         noteInfo.setCover(newCover);
@@ -180,6 +181,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         noteInfo.setId(saveNoteVo.getId());
         noteInfo.setTitle(saveNoteVo.getTitle());
         noteInfo.setPreview(saveNoteVo.getPreview());
+        noteInfo.setLength(saveNoteVo.getLength());
         baseMapper.updateById(noteInfo);
         // endregion
 

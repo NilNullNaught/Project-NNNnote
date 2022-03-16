@@ -166,7 +166,8 @@ export default {
         noteFolderId: '',
         title: '',
         preview: '',
-        cover: null,
+        cover: '',
+        length: '',
         text: '',
         // 笔记状态 0 代表用户没有主动保存过，1 代表以私密状态保存，2 代表以公开状态保存
         status: 0,
@@ -282,7 +283,7 @@ export default {
         return
       }
       // 生成笔记预览
-      this.generateNotePreivew()
+      this.generateNotePreivewANDLength()
 
       noteApi.autoSaveNote(this.saveNote)
       // .then((response) => {
@@ -308,7 +309,7 @@ export default {
       // ->
 
       // 生成笔记预览
-      this.generateNotePreivew()
+      this.generateNotePreivewANDLength()
 
       noteApi.saveNote(this.saveNote).then((response) => {
         if (response.data.code === 20000) {
@@ -335,14 +336,16 @@ export default {
         }
       })
     },
-    // 生成笔记预览
-    generateNotePreivew () {
+    // 生成笔记预览与笔记长度
+    generateNotePreivewANDLength () {
       const raw = document.getElementsByClassName('v-show-content').item(0).innerText
       if (raw.length >= 60) {
-        // 获取不含 markdown 语法的笔记预览
+        // 获取不含 markdown 语法的笔记预览与长度
         this.saveNote.preview = raw.substring(0, 60) + '…'
+        this.saveNote.length = raw.length
       } else {
         this.saveNote.preview = raw
+        this.saveNote.length = raw.length
       }
     },
     // 取消上传
@@ -411,10 +414,10 @@ export default {
     text-align: center;
   }
   .cover {
-    width: 178px;
-    height: 178px;
+    width: 160px;
+    height: 120px;
     display: block;
-    border: 1px dashed #8c939d;
+    object-fit: scale-down;
   }
 #coverNfolderDialog ::v-deep .el-dialog__body{
   padding: 0px;

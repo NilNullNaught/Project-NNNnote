@@ -47,7 +47,9 @@
                 >
                   <el-submenu index="3">
                     <template slot="title">
-                      <el-avatar :src="userInfo.avatar" />
+                      <el-avatar :src="userInfo.avatar" @error="true">
+                        <img src="@/static/img/unsetAvatar.png">
+                      </el-avatar>
                     </template>
                     <el-menu-item index="/user">
                       我的主页

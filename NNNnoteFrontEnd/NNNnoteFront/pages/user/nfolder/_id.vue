@@ -94,7 +94,7 @@
               <input
                 v-if="o.id !== o.userId"
                 v-model="o.ischecked"
-                style="position:absolute;top: 5px;left: 5px;height:15px;width:15px;"
+                style="position:absolute;top: 10px;left: 5px;height:14px;width:14px;"
                 type="checkbox"
                 @change="handleChecked(o)"
               >
@@ -210,7 +210,7 @@ export default {
       list: {
         keyword: '',
         current: 1,
-        limit: 20,
+        limit: 12,
         total: null,
         result: []
       },

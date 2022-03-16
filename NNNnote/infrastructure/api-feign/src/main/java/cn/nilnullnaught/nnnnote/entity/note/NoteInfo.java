@@ -45,6 +45,9 @@ public class NoteInfo implements Serializable {
     @ApiModelProperty("笔记封面")
     private String  cover;
 
+    @ApiModelProperty("笔记长度")
+    private Integer length;
+
     @ApiModelProperty("点赞数")
     private Long likes;
 

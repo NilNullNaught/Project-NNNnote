@@ -1,50 +1,63 @@
 <template>
-  <div>
-    <el-card style="margin:10px" :body-style="{ padding: '10px' }">
-      <div style="display:inline-block;width:680px">
-        <p class="card-title">
-          文章标题一二三四五六七八九十一二三四五六
-        </p>
-        <p class="card-preview">
-          预览：
-          一二三四五六七八九十
-          二二三四五六七八九十
-          三二三四五六七八九十
-          四二三四五六七八九十
-          五二三四五六七八九十
-          六二三四五六七八九十
-          七二三四五六七八九十
-          八二三四五六七八九十
-          九二三四五六七八九十
-          十二三四五六七八九十
-          八二三四五六七八九十
-          九二三四五六七八九十
-          十二三四五六七八九十
-        </p>
+  <el-container>
+    <el-main>
+      <!-- <el-card
+        v-for="(item) in list"
+        :key="item.id"
+        style="margin-bottom:20px;"
+        :body-style="{ padding: '15px' }"
+      >
+        <div style="display:inline-block;width:650px">
+          <p class="card-title" v-text="item.title ? item.title : '作者未设置标题'" />
+          <p class="card-preview" />
 
-        <div class="centerVertical">
-          <el-avatar style="margin-right:5px" :size="20" />
-          <span> 作者昵称一二三四五六</span>
+          <div class="centerVertical">
+            <el-avatar style="margin-right:5px" :size="20" />
+            <span> 作者昵称一二三四五六</span>
 
-          <el-divider direction="vertical" />
-          <span><i class="alibaba_icons_good" /> 111111111</span>
+            <el-divider direction="vertical" />
+            <span><i class="alibaba_icons_good" /> {{ item.likes }}</span>
 
-          <el-divider direction="vertical" />
-          <span><i class="el-icon-chat-line-round" />11111111</span>
+            <el-divider direction="vertical" />
+            <span><i class="el-icon-chat-line-round" /> {{ item.commentCount }}</span>
 
-          <el-divider direction="vertical" />
-          <span><i class="el-icon-star-off" /> 111111111</span>
+            <el-divider direction="vertical" />
+            <span><i class="el-icon-star-off" /> {{ item.collectionCount }}</span>
+          </div>
         </div>
+        <el-image
+          :src="item.cover"
+          style="margin:0px 5px;width: 160px; height: 120px;dispaly:inline-block;"
+          fit="scale-down"
+        >
+          <div slot="error" class="image-slot">
+            <el-skeleton-item variant="image" style="width: 160px; height: 120px;" />
+          </div>
+        </el-image>
+      </el-card> -->
+      <div class="infinite-list-wrapper" style="overflow:auto">
+        <ul
+          v-infinite-scroll="load"
+          class="list"
+          infinite-scroll-disabled="disabled"
+        >
+          <li v-for="i in count" :key="i" class="list-item">
+            {{ i }}
+          </li>
+        </ul>
+        <p v-if="loading">
+          加载中...
+        </p>
+        <p v-if="noMore">
+          没有更多了
+        </p>
       </div>
-      <el-image
-        style="margin:0px 5px;width: 160px; height: 120px;dispaly:inline-block !important;"
-        fit="scale-down"
-      />
-    </el-card>
-  </div>
+    </el-main>
+  </el-container>
 </template>
 
 <script>
+import noteApi from '@/api/note'
 
 export default {
   name: 'RecommendIndexPage',
@@ -52,11 +65,38 @@ export default {
 
   data () {
     return {
+      list: [],
+      count: 10,
+      loading: false
     }
   },
-  created () {},
+  computed: {
+    noMore () {
+      return this.count >= 20
+    },
+    disabled () {
+      return this.loading || this.noMore
+    }
+  },
+  created () {
+    const data = {
+      limit: 5,
+      page: 1,
+      sortField: 'gmt_create'
+    }
+    noteApi.searchNoteList(data)
+      .then((response) => {
+        this.list = response.data.data.data
+      })
+  },
   methods: {
-
+    load () {
+      this.loading = true
+      setTimeout(() => {
+        this.count += 2
+        this.loading = false
+      }, 2000)
+    }
   }
 }
 </script>

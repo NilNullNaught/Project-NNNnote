@@ -7,6 +7,7 @@ import cn.nilnullnaught.nnnnote.entity.note.NoteInfo;
 import cn.nilnullnaught.nnnnote.entity.user.UserNfolder;
 import cn.nilnullnaught.nnnnote.exceptionhandler.MyCustomException;
 import cn.nilnullnaught.nnnnote.note.service.NoteInfoService;
+import cn.nilnullnaught.nnnnote.note.util.MyElasticsearchRestTemplate;
 import cn.nilnullnaught.nnnnote.note.vo.SaveNoteVo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiOperation;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,8 @@ public class NoteInfoController {
     @Autowired
     private NoteInfoService noteInfoService;
 
+    @Autowired
+    private MyElasticsearchRestTemplate myElasticsearchRestTemplate;
 
     @ApiOperation("笔记初始化")
     @PostMapping("/initializeNote/{nFolderId}")
@@ -146,4 +150,22 @@ public class NoteInfoController {
         Map<String, Object> map= noteInfoService.getCountOfNoteInfo(userId);
         return R.ok().data(map);
     }
+
+    @ApiOperation("分页搜索已公开的笔记,通过 ElasticSearch 实现")
+    @GetMapping("/searchNoteList")
+    public R searchNoteList(@RequestParam(value = "condition",required = false)String condition,
+                            @RequestParam("sortField")String sortField,
+                            @RequestParam("page")Integer page,
+                            @RequestParam("limit")Integer limit)  {
+
+        try {
+            if (condition == null) condition ="";
+            var result = myElasticsearchRestTemplate.noteList(condition,sortField,page,limit);
+            return R.ok().data("data",result);
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new MyCustomException(20001,"搜索失败");
+        }
+    }
+
 }

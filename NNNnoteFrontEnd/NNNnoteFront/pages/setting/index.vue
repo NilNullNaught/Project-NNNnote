@@ -27,7 +27,14 @@
       <el-form ref="userInfo" :model="newUserInfo" label-width="80px">
         <el-form-item>
           <el-col class="line" :span="6">
-            <el-avatar size="large" :src="newUserInfo.avatar" style="width:80px;height:80px;block:inline" />
+            <el-avatar
+              size="large"
+              :src="newUserInfo.avatar"
+              style="width:80px;height:80px;block:inline;"
+              @error="true"
+            >
+              <img src="@/static/img/unsetAvatar.png">
+            </el-avatar>
           </el-col>
           <!-- 头像上传 ----------------------------------------------------------------------------------------------------------------------------------------->
           <el-col :span="8">
@@ -145,8 +152,17 @@ export default {
       return this.$store.state.userData.userInfo
     }
   },
+  watch: {
+    userInfo: {
+      handler () {
+        this.newUserInfo = JSON.parse(JSON.stringify(this.$store.state.userData.userInfo))
+      },
+      immediate: true,
+      deep: true
+    }
+  },
   created () {
-    this.newUserInfo = JSON.parse(JSON.stringify(this.$store.state.userData.userInfo))
+
   },
 
   methods: {

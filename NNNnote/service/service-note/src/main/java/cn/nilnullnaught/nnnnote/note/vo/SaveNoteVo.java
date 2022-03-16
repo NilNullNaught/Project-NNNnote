@@ -18,6 +18,9 @@ public class SaveNoteVo {
     @ApiModelProperty("笔记预览")
     private String  preview;
 
+    @ApiModelProperty("笔记长度")
+    private Integer length;
+
     @ApiModelProperty("笔记封面")
     private String  cover;
 

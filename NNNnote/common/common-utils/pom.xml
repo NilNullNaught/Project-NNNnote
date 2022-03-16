@@ -24,6 +24,7 @@
             <scope>test</scope>
         </dependency>
 
+
         <!--以下依赖均为 JJWT 所使用的依赖，因为 JJWT 不支持 JDK11 版本所以需要引入-->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
