@@ -1,19 +1,23 @@
 <template>
   <el-container>
     <el-main>
-      <!-- <el-card
+      <el-card
         v-for="(item) in list"
         :key="item.id"
         style="margin-bottom:20px;"
         :body-style="{ padding: '15px' }"
       >
         <div style="display:inline-block;width:650px">
-          <p class="card-title" v-text="item.title ? item.title : '作者未设置标题'" />
-          <p class="card-preview" />
+          <nuxt-link :to="'/note/'+item.id">
+            <p class="card-title" v-text="item.title ? item.title : '作者未设置标题'" />
+          </nuxt-link>
+          <nuxt-link :to="'/note/'+item.id">
+            <p class="card-preview" v-text="item.preview" />
+          </nuxt-link>
 
           <div class="centerVertical">
-            <el-avatar style="margin-right:5px" :size="20" />
-            <span> 作者昵称一二三四五六</span>
+            <el-avatar style="margin-right:5px" :src="avatarAndNickName[item.userId].avatar" :size="20" />
+            <span> {{ avatarAndNickName[item.userId].nickname }}</span>
 
             <el-divider direction="vertical" />
             <span><i class="alibaba_icons_good" /> {{ item.likes }}</span>
@@ -25,33 +29,24 @@
             <span><i class="el-icon-star-off" /> {{ item.collectionCount }}</span>
           </div>
         </div>
-        <el-image
-          :src="item.cover"
-          style="margin:0px 5px;width: 160px; height: 120px;dispaly:inline-block;"
-          fit="scale-down"
-        >
-          <div slot="error" class="image-slot">
-            <el-skeleton-item variant="image" style="width: 160px; height: 120px;" />
-          </div>
-        </el-image>
-      </el-card> -->
-      <div class="infinite-list-wrapper" style="overflow:auto">
-        <ul
-          v-infinite-scroll="load"
-          class="list"
-          infinite-scroll-disabled="disabled"
-        >
-          <li v-for="i in count" :key="i" class="list-item">
-            {{ i }}
-          </li>
-        </ul>
-        <p v-if="loading">
-          加载中...
-        </p>
-        <p v-if="noMore">
-          没有更多了
-        </p>
-      </div>
+        <nuxt-link :to="'/note/'+item.id">
+          <el-image
+            :src="item.cover"
+            style="margin:0px 5px;width: 160px; height: 120px;dispaly:inline-block;"
+            fit="scale-down"
+          >
+            <div slot="error" class="image-slot">
+              <el-skeleton-item variant="image" style="width: 160px; height: 120px;" />
+            </div>
+          </el-image>
+        </nuxt-link>
+      </el-card>
+      <p v-if="loading" class="centerHorizontal">
+        加载中<i class="el-icon-loading" />
+      </p>
+      <p v-if="noMore" class="centerHorizontal">
+        没有更多了
+      </p>
     </el-main>
   </el-container>
 </template>
@@ -66,36 +61,68 @@ export default {
   data () {
     return {
       list: [],
-      count: 10,
+      avatarAndNickName: [],
+      data: {
+        limit: 5,
+        page: 1,
+        sortField: 'gmt_create'
+      },
+      total: 0,
       loading: false
     }
   },
   computed: {
     noMore () {
-      return this.count >= 20
-    },
-    disabled () {
-      return this.loading || this.noMore
+      return (this.list.length >= this.total) && (this.total !== 0)
     }
   },
   created () {
-    const data = {
-      limit: 5,
-      page: 1,
-      sortField: 'gmt_create'
-    }
-    noteApi.searchNoteList(data)
+    noteApi.searchNoteList(this.data)
       .then((response) => {
         this.list = response.data.data.data
+        this.total = response.data.data.total
+        const temp = response.data.data.avatarAndNickname
+        if (temp) {
+          for (let i = 0; i < temp.length; i++) {
+            this.avatarAndNickName[temp[i].id] = {
+              avatar: temp[i].avatar,
+              nickname: temp[i].nickname
+            }
+          }
+        }
       })
   },
+  mounted () {
+    window.addEventListener('scroll', this.handleScroll)
+  },
   methods: {
-    load () {
-      this.loading = true
-      setTimeout(() => {
-        this.count += 2
-        this.loading = false
-      }, 2000)
+    handleScroll () {
+      if (this.noMore || this.loading) { return }
+
+      // !important 该实现方式兼容性极差
+      if ((document.documentElement.scrollTop + window.innerHeight) * 1.1 >= document.body.offsetHeight) {
+        this.loading = true
+        this.data.page += 1
+
+        noteApi.searchNoteList(this.data)
+          .then((response) => {
+            this.list.push(...response.data.data.data)
+            this.total = response.data.data.total
+            const temp = response.data.data.avatarAndNickname
+            if (temp) {
+              for (let i = 0; i < temp.length; i++) {
+                this.avatarAndNickName[temp[i].id] = {
+                  avatar: temp[i].avatar,
+                  nickname: temp[i].nickname
+                }
+              }
+            }
+            this.loading = false
+          })
+      }
+    },
+    route (id) {
+      this.$router.push({ path: '/note/' + id })
     }
   }
 }
@@ -106,15 +133,22 @@ export default {
     font-size: 20px;
 }
 .card-preview{
-    font-size: 12px;
+    font-size: 14px;
     color: #999;
     height:42px;
+    text-indent: 14px;
     margin: 15px 0px;
+    margin-right: 20px;
+    line-height: 18px;
 }
 .centerVertical{
     display: flex;
     align-items: center;
     font-size: 10px;
     color: #b4b4b4;
+}
+.centerHorizontal{
+    display: flex;
+    justify-content:center;
 }
 </style>

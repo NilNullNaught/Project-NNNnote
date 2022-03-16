@@ -3,20 +3,17 @@ package cn.nilnullnaught.nnnnote.note.controller;
 
 import cn.nilnullnaught.nnnnote.common.utils.JwtUtils;
 import cn.nilnullnaught.nnnnote.common.utils.R;
-import cn.nilnullnaught.nnnnote.entity.note.NoteInfo;
-import cn.nilnullnaught.nnnnote.entity.user.UserNfolder;
-import cn.nilnullnaught.nnnnote.exceptionhandler.MyCustomException;
+
 import cn.nilnullnaught.nnnnote.note.service.NoteInfoService;
-import cn.nilnullnaught.nnnnote.note.util.MyElasticsearchRestTemplate;
+
 import cn.nilnullnaught.nnnnote.note.vo.SaveNoteVo;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
 
@@ -34,9 +31,6 @@ public class NoteInfoController {
 
     @Autowired
     private NoteInfoService noteInfoService;
-
-    @Autowired
-    private MyElasticsearchRestTemplate myElasticsearchRestTemplate;
 
     @ApiOperation("笔记初始化")
     @PostMapping("/initializeNote/{nFolderId}")
@@ -119,17 +113,17 @@ public class NoteInfoController {
     @ApiOperation(value = "分页查询被逻辑删除的笔记", notes = "")
     @PostMapping("/getLogicDeletedNoteList")
     public R getLogicDeletedNoteList(@RequestHeader("token") String token,
-                                  @RequestParam("page") long page,
-                                  @RequestParam("limit") long limit) {
+                                     @RequestParam("page") long page,
+                                     @RequestParam("limit") long limit) {
 
         String userId = JwtUtils.getIdByJwtToken(token);
         Map<String, Object> resultList = noteInfoService.getLogicDeletedNoteList(userId, page, limit);
         return R.ok().data(resultList);
     }
 
-    @ApiOperation(value = "还原被逻辑删除的笔记",notes = "还原时会对笔记所属的笔记文件夹进行检查，如果文件夹已经被删除，则还原到默认文件夹中")
+    @ApiOperation(value = "还原被逻辑删除的笔记", notes = "还原时会对笔记所属的笔记文件夹进行检查，如果文件夹已经被删除，则还原到默认文件夹中")
     @PostMapping("/restoreDeletedNote")
-    public R restoreDeletedNote(@RequestHeader("token") String token,@RequestBody List<String> idList){
+    public R restoreDeletedNote(@RequestHeader("token") String token, @RequestBody List<String> idList) {
         String userId = JwtUtils.getIdByJwtToken(token);
         noteInfoService.restoreDeletedNote(userId, token, idList);
         return R.ok();
@@ -137,9 +131,9 @@ public class NoteInfoController {
 
     @ApiOperation(value = "删除回收站中的笔记")
     @DeleteMapping("/deleteDeletedNotes")
-    public R deleteDeletedNotes(@RequestHeader("token")String token,@RequestBody List<String> idList){
+    public R deleteDeletedNotes(@RequestHeader("token") String token, @RequestBody List<String> idList) {
         String userId = JwtUtils.getIdByJwtToken(token);
-        noteInfoService.deleteDeletedNotes(userId,idList);
+        noteInfoService.deleteDeletedNotes(userId, idList);
         return R.ok();
     }
 
@@ -147,25 +141,20 @@ public class NoteInfoController {
     @GetMapping("/getCountOfNoteInfo")
     public R getCountOfNoteInfo(@RequestHeader("token") String token) {
         String userId = JwtUtils.getIdByJwtToken(token);
-        Map<String, Object> map= noteInfoService.getCountOfNoteInfo(userId);
+        Map<String, Object> map = noteInfoService.getCountOfNoteInfo(userId);
         return R.ok().data(map);
     }
 
     @ApiOperation("分页搜索已公开的笔记,通过 ElasticSearch 实现")
     @GetMapping("/searchNoteList")
-    public R searchNoteList(@RequestParam(value = "condition",required = false)String condition,
-                            @RequestParam("sortField")String sortField,
-                            @RequestParam("page")Integer page,
-                            @RequestParam("limit")Integer limit)  {
+    public R searchNoteList(@RequestParam(value = "condition", required = false) String condition,
+                            @RequestParam("sortField") String sortField,
+                            @RequestParam("page") Integer page,
+                            @RequestParam("limit") Integer limit) {
 
-        try {
-            if (condition == null) condition ="";
-            var result = myElasticsearchRestTemplate.noteList(condition,sortField,page,limit);
-            return R.ok().data("data",result);
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new MyCustomException(20001,"搜索失败");
-        }
+        var result = noteInfoService.searchNoteList(condition, sortField, page, limit);
+        return R.ok().data(result);
+
     }
 
 }

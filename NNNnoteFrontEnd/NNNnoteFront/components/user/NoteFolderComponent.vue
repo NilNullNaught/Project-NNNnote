@@ -38,12 +38,12 @@
           </el-button>
         </el-col>
         <el-col :span="6">
-          <el-input
+          <!-- <el-input
             v-model="search.searchKeyWord"
             size="mini"
             placeholder="请输入内容"
             clearable
-          />
+          /> -->
         </el-col>
       </el-row>
       <!----------------------------------------------------------------------------------------------------------------------------------------->
@@ -83,7 +83,8 @@
                 type="checkbox"
                 @change="handleChecked(o)"
               >
-              <div @click="route(o.id)">
+
+              <nuxt-link :to="'/user/nfolder/'+o.id">
                 <div style="display: flex;justify-content:center;">
                   <img src="~/assets/img/mine/folder.png" alt>
                 </div>
@@ -99,7 +100,7 @@
                         word-break: break-all;"
                   >{{ (o.folderName === '')? '&nbsp;' : o.folderName }}</span>
                 </div>
-              </div>
+              </nuxt-link>
             </el-card>
           </el-tooltip>
         </el-col>
@@ -122,13 +123,11 @@
               type="checkbox"
               @change="handleChecked(so)"
             >
-            <div @click="route($event,so.id)">
-              <div style="display: flex;justify-content:center;">
-                <img src="~/assets/img/mine/note.png" alt>
-              </div>
-              <div style="display: flex;justify-content:center;">
-                <span>{{ so.folderName }}</span>
-              </div>
+            <div style="display: flex;justify-content:center;">
+              <img src="~/assets/img/mine/note.png" alt>
+            </div>
+            <div style="display: flex;justify-content:center;">
+              <span>{{ so.folderName }}</span>
             </div>
           </el-card>
         </el-col>
@@ -315,13 +314,6 @@ export default {
       }
     },
     // ->
-
-    route (id) {
-      // 如果没有被选中的文件夹，则进行跳转
-      if (this.select.checkedList.length === 0) {
-        this.$router.push({ path: '/user/nfolder/' + id })
-      }
-    },
 
     // <- NfolderDialog
     // 对话框初始化

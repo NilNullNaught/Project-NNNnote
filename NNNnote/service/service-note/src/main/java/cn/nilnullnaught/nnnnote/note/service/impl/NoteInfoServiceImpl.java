@@ -1,6 +1,7 @@
 package cn.nilnullnaught.nnnnote.note.service.impl;
 
 import cn.nilnullnaught.nnnnote.client.oss.AliyunOssClient;
+import cn.nilnullnaught.nnnnote.client.user.UserInfoClient;
 import cn.nilnullnaught.nnnnote.client.user.UserNfolderClient;
 import cn.nilnullnaught.nnnnote.common.utils.R;
 import cn.nilnullnaught.nnnnote.entity.note.NoteInfo;
@@ -11,6 +12,7 @@ import cn.nilnullnaught.nnnnote.note.mapper.NoteInfoMapper;
 import cn.nilnullnaught.nnnnote.note.mapper.NoteMultiMapper;
 import cn.nilnullnaught.nnnnote.note.mapper.NoteTextMapper;
 import cn.nilnullnaught.nnnnote.note.service.NoteInfoService;
+import cn.nilnullnaught.nnnnote.note.util.MyElasticsearchRestTemplate;
 import cn.nilnullnaught.nnnnote.note.vo.SaveNoteVo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -50,8 +52,13 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
     private AliyunOssClient aliyunOssClient;
 
     @Autowired
+    private UserInfoClient userInfoClient;
+
+    @Autowired
     private UserNfolderClient userNfolderClient;
 
+    @Autowired
+    private MyElasticsearchRestTemplate myElasticsearchRestTemplate;
     // endregion
 
 
@@ -382,6 +389,38 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         return map;
     }
 
+    /**
+     * 分页搜索已公开的笔记
+     * @param condition
+     * @param sortField
+     * @param page
+     * @param limit
+     * @return
+     */
+    @Override
+    public Map<String, Object> searchNoteList(String condition, String sortField, Integer page, Integer limit) {
+        try {
+            // region <- 通过 ElasticSearch 搜索笔记 ->
+            if (condition == null) condition ="";
+            // noteList() 返回的是一个由 Total 和 List 组成的 HashMap
+            var result = myElasticsearchRestTemplate.noteList(condition,sortField,page,limit);
+            // endregion
+
+            // region <- 获取笔记对应用户的头像和昵称 ->
+            var list = (List<NoteInfo>)result.get("data");
+            var idList = list.stream().map(object -> object.getUserId()).collect(Collectors.toSet());
+            var response=userInfoClient.getUserAvatarAndNickNameByIdList(idList);
+            var avatarAndNickname=  response.getData().get("data");
+            result.put("avatarAndNickname",avatarAndNickname);
+            // endregion
+
+            return result;
+
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new MyCustomException(20001,"搜索失败");
+        }
+    }
 
     /**
      * 获取笔记信息（编辑）

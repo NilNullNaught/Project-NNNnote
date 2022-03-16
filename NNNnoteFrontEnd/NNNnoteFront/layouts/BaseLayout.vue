@@ -27,11 +27,7 @@
             </el-menu>
           </el-col>
           <el-col :xs="10" :sm="8" :md="8" :lg="6" :xl="6">
-            <div>
-              <el-input placeholder="请输入内容" class="input-with-select">
-                <el-button slot="append" icon="el-icon-search" />
-              </el-input>
-            </div>
+            <LayoutSearchComponent />
           </el-col>
           <el-col :xs="0" :sm="2" :md="2" :lg="5" :xl="5" />
           <el-col :xs="7" :sm="6" :md="6" :lg="4" :xl="4">
@@ -140,8 +136,12 @@
 import jsCookie from 'js-cookie'
 import noteApi from '@/api/note'
 import userApi from '@/api/user'
-
+import LayoutSearchComponent from '@/components/layout/LayoutSearchComponent'
 export default {
+
+  components: {
+    LayoutSearchComponent
+  },
   data () {
     return {
     }

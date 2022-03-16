@@ -87,12 +87,18 @@
             width="150"
           >
             <template slot-scope="scope">
-              <el-button type="text" size="mini" @click="$router.push({ path: '/note/' + scope.row.id })">
-                查看
-              </el-button>
-              <el-button type="text" size="mini" @click="$router.push({ path: '/editor/' + scope.row.id })">
-                编辑
-              </el-button>
+              <nuxt-link :to="'/note/'+scope.row.id">
+                <el-button type="text" size="mini">
+                  查看
+                </el-button>
+              </nuxt-link>
+
+              <nuxt-link :to="'/editor/'+scope.row.id">
+                <el-button type="text" size="mini">
+                  编辑
+                </el-button>
+              </nuxt-link>
+
               <el-button type="text" size="mini" @click="deleteSingle(scope.row.id)">
                 删除
               </el-button>

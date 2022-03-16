@@ -339,9 +339,9 @@ export default {
     // 生成笔记预览与笔记长度
     generateNotePreivewANDLength () {
       const raw = document.getElementsByClassName('v-show-content').item(0).innerText
-      if (raw.length >= 60) {
+      if (raw.length >= 99) {
         // 获取不含 markdown 语法的笔记预览与长度
-        this.saveNote.preview = raw.substring(0, 60) + '…'
+        this.saveNote.preview = raw.substring(0, 99)
         this.saveNote.length = raw.length
       } else {
         this.saveNote.preview = raw

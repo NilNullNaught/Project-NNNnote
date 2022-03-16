@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@FeignClient("service-user")
+@FeignClient(name = "service-user",contextId = "user-nfolder")
 public interface UserNfolderClient {
 
     @GetMapping("/user/user-nfolder/getUserNfolder/{userId}")

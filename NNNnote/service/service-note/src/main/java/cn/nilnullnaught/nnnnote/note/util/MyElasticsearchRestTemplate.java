@@ -32,10 +32,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -186,7 +183,7 @@ public class MyElasticsearchRestTemplate {
      * @return
      * @throws IOException
      */
-    public List<NoteInfo> noteList(
+    public Map<String,Object> noteList(
             String condition,
             String sortField,
             Integer page,
@@ -222,12 +219,14 @@ public class MyElasticsearchRestTemplate {
 
         // 1.获取文档 source
         var searchHits = response.getHits();
-        // 2.查询结果为 0
-        if (searchHits.getTotalHits().value == 0) return null;
+
+        // 2.查询结果为 0 直接返回
+        var total = searchHits.getTotalHits().value;
+        if (total == 0) return null;
         // 3.获取文档数组
         SearchHit[] hits = searchHits.getHits();
         // 4.遍历
-        return Arrays.stream(hits).map(hit -> {
+        var data = Arrays.stream(hits).map(hit -> {
             // 获取文档source
             String json = hit.getSourceAsString();
 
@@ -257,6 +256,11 @@ public class MyElasticsearchRestTemplate {
             return noteInfo;
         }).collect(Collectors.toList());
 
+        // 封装数据
+        var result= new HashMap<String,Object>();
+        result.put("data",data);
+        result.put("total",total);
+        return result;
         // endregion
     }
 }

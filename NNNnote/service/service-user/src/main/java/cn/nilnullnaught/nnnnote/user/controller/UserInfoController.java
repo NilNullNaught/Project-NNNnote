@@ -6,12 +6,15 @@ import cn.nilnullnaught.nnnnote.common.utils.R;
 import cn.nilnullnaught.nnnnote.entity.user.UserInfo;
 import cn.nilnullnaught.nnnnote.exceptionhandler.MyCustomException;
 import cn.nilnullnaught.nnnnote.user.service.UserInfoService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Set;
 
 /**
  * <p>
@@ -50,5 +53,18 @@ public class UserInfoController {
         userInfo.setId(id);
         userInfoService.updateUserInfo(userInfo);
         return R.ok();
+    }
+
+    @ApiOperation("根据 id 列表获取用户头像和昵称信息")
+    @PostMapping("/getUserAvatarAndNickNameByIdList")
+    public R getUserAvatarAndNickNameByIdList(@RequestBody Set<String> idList){
+
+        var qw = new QueryWrapper<UserInfo>();
+        qw.select("id","nickname","avatar");
+        qw.groupBy("id");
+        qw.in("id",idList);
+        var data = userInfoService.listMaps(qw);
+
+        return R.ok().data("data",data);
     }
 }

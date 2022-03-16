@@ -13,15 +13,16 @@
         <!-- #region 操作栏 -->
         <el-row align="middle" justify="center" type="flex">
           <el-col :span="16">
-            <el-button
-              size="mini"
-              type="primary"
-              plain
-              @click="$router.push({ path: '/user'})"
-            >
-              <i class="el-icon-top-left el-icon--left" />
-              返回主页
-            </el-button>
+            <nuxt-link to="/user">
+              <el-button
+                size="mini"
+                type="primary"
+                plain
+              >
+                <i class="el-icon-top-left el-icon--left" />
+                返回主页
+              </el-button>
+            </nuxt-link>
             <el-button
               size="mini"
               type="primary"
@@ -116,35 +117,38 @@
                 <i class="alibaba_icons_public" />
               </el-tooltip>
 
-              <div style="margin:0px 10px;height:220px" @click="route(o.id)">
-                <div style="display: flex;justify-content:center;">
-                  <p
-                    style="
+              <nuxt-link :to="'/note/'+o.id">
+                <div style="margin:0px 10px;height:220px">
+                  <div style="display: flex;justify-content:center;">
+                    <p
+                      style="
                         display: -webkit-box;
                         -webkit-box-orient: vertical;
                         -webkit-line-clamp: 1;
                         overflow: hidden;
                         word-break: break-all;
                         font-size:12px;"
-                  >
-                    {{ (o.title === '')? '&nbsp;' : o.title }}
-                  </p>
-                </div>
-                <div style="margin:5px 0px">
-                  <el-divider />
-                </div>
-                <el-image
-                  style="width: 160px; height: 120px;dispaly:inline-block !important;"
-                  fit="scale-down"
-                  :src="o.cover"
-                >
-                  <div slot="error" class="image-slot">
-                    <el-skeleton-item variant="image" style="width: 160px; height: 120px;" />
+                    >
+                      {{ (o.title === '')? '&nbsp;' : o.title }}
+                    </p>
                   </div>
-                </el-image>
 
-                <p
-                  style="
+                  <div style="margin:5px 0px">
+                    <el-divider />
+                  </div>
+
+                  <el-image
+                    style="width: 160px; height: 120px;dispaly:inline-block !important;"
+                    fit="scale-down"
+                    :src="o.cover"
+                  >
+                    <div slot="error" class="image-slot">
+                      <el-skeleton-item variant="image" style="width: 160px; height: 120px;" />
+                    </div>
+                  </el-image>
+
+                  <p
+                    style="
                     margin:5px 0px;
                     display: flex;
                     justify-content:center;
@@ -154,10 +158,10 @@
                     overflow: hidden;
                     word-break: break-all;
                     font-size:10px;"
-                >
-                  {{ o.preview }}
-                </p>
-              </div>
+                    v-text="o.preview"
+                  />
+                </div>
+              </nuxt-link>
             </el-card>
           </el-col>
         </el-row>
@@ -331,13 +335,6 @@ export default {
       }
     },
     // ->
-
-    route (id) {
-      // 如果没有被选中的笔记，则进行跳转
-      if (this.select.checkedList.length === 0) {
-        this.$router.push({ path: '/note/' + id })
-      }
-    },
 
     // 在当前文件夹下新建笔记
     createNoteFun () {
