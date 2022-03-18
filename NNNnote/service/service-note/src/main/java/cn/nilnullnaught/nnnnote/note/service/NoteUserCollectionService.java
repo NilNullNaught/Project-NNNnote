@@ -13,4 +13,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface NoteUserCollectionService extends IService<NoteUserCollection> {
 
+    void noteCollect(String noteId, String userId);
 }

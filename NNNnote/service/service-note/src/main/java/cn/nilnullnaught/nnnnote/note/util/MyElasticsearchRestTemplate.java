@@ -176,15 +176,15 @@ public class MyElasticsearchRestTemplate {
     /**
      * 分页条件查询笔记（笔记状态为公开，且未被逻辑删除）
      *
-     * @param condition
+     * @param criteria
      * @param sortField
      * @param page
      * @param limit
      * @return
      * @throws IOException
      */
-    public Map<String,Object> noteList(
-            String condition,
+    public Map<String, Object> noteList(
+            String criteria,
             String sortField,
             Integer page,
             Integer limit) throws IOException {
@@ -195,22 +195,28 @@ public class MyElasticsearchRestTemplate {
         // 1.准备 Request
         var request = new SearchRequest("nnnnote_note_info");
         // 2.封装查询条件
-        var boolQuery = QueryBuilders.boolQuery() ;
-        if (!condition.isEmpty()) boolQuery.must(QueryBuilders.multiMatchQuery(condition,"title","preview"));
+        var boolQuery = QueryBuilders.boolQuery();
+        if (!criteria.isEmpty()) {
+            boolQuery.must(QueryBuilders.multiMatchQuery(criteria, "title", "preview"));
+            // 高亮
+            var highLights = new HighlightBuilder();
+            highLights.field("title").requireFieldMatch(false);
+            highLights.field("preview").requireFieldMatch(false);
 
-        boolQuery.must(QueryBuilders.termQuery("is_deleted",false));
-        boolQuery.must(QueryBuilders.termQuery("status",2));
+            request.source().highlighter(highLights);
+        }
+
+        boolQuery.must(QueryBuilders.termQuery("is_deleted", false));
+        boolQuery.must(QueryBuilders.termQuery("status", 2));
 
         request.source().query(boolQuery);
-        // 3.排序
-        request.source().sort(sortField, SortOrder.ASC);
+        // 3.排序 如果有查询条件设置查询条件，否则使用算风查询
+        if (!sortField.isEmpty()) request.source().sort(sortField, SortOrder.ASC);
         // 4.分页
         request.source().from(((page - 1) * limit)).size(limit);
-        // 5.高亮
-        request.source().highlighter(new HighlightBuilder().field("title").requireFieldMatch(false));
-        request.source().highlighter(new HighlightBuilder().field("preview").requireFieldMatch(false));
 
-        // 6.发送请求
+
+        // 5.发送请求
         var response = restHighLevelClient.search(request, RequestOptions.DEFAULT);
 
         // endregion
@@ -235,10 +241,12 @@ public class MyElasticsearchRestTemplate {
 
             // 获取高亮结果
             var highlightFields = hit.getHighlightFields();
+
             if (!CollectionUtils.isEmpty(highlightFields)) {
                 // 根据字段名获取高亮结果
                 HighlightField highlightField_1 = highlightFields.get("title");
                 HighlightField highlightField_2 = highlightFields.get("preview");
+
 
                 if (highlightField_1 != null) {
                     // 获取高亮值
@@ -257,9 +265,9 @@ public class MyElasticsearchRestTemplate {
         }).collect(Collectors.toList());
 
         // 封装数据
-        var result= new HashMap<String,Object>();
-        result.put("data",data);
-        result.put("total",total);
+        var result = new HashMap<String, Object>();
+        result.put("data", data);
+        result.put("total", total);
         return result;
         // endregion
     }

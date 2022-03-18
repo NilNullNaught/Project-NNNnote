@@ -17,9 +17,9 @@ import java.util.Map;
  */
 public interface NoteInfoService extends IService<NoteInfo> {
 
-    String initializeNote(String userID,String nFolderId);
+    String initializeNote(String userId,String nFolderId);
 
-    void saveNote(SaveNoteVo saveNoteVo);
+    void saveNote(SaveNoteVo saveNoteVo,String userId);
 
     Map getNoteInfoToEdit(String noteId);
 
@@ -29,7 +29,7 @@ public interface NoteInfoService extends IService<NoteInfo> {
 
     void deleteNotes(String userId,List<String> idList);
 
-    void autoSaveNote(SaveNoteVo saveNoteVo);
+    void autoSaveNote(SaveNoteVo saveNoteVo,String userId);
 
 
     Map<String, Object> getDraftList(String userId, long page, long limit);
@@ -44,5 +44,9 @@ public interface NoteInfoService extends IService<NoteInfo> {
 
     Map<String, Object> getCountOfNoteInfo(String userId);
 
-    Map<String,Object> searchNoteList(String condition, String sortField, Integer page, Integer limit);
+    Map<String,Object> searchNoteList(String criteria, String sortField, Integer page, Integer limit);
+
+    void noteLike(String userId, String noteId);
+
+    Boolean userLikeNote(String userId, String noteId);
 }

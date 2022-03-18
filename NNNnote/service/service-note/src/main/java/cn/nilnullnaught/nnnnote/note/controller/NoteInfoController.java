@@ -4,10 +4,12 @@ package cn.nilnullnaught.nnnnote.note.controller;
 import cn.nilnullnaught.nnnnote.common.utils.JwtUtils;
 import cn.nilnullnaught.nnnnote.common.utils.R;
 
+import cn.nilnullnaught.nnnnote.entity.note.NoteInfo;
 import cn.nilnullnaught.nnnnote.note.service.NoteInfoService;
 
 import cn.nilnullnaught.nnnnote.note.vo.SaveNoteVo;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -34,9 +36,9 @@ public class NoteInfoController {
 
     @ApiOperation("笔记初始化")
     @PostMapping("/initializeNote/{nFolderId}")
-    public R initializeNote(HttpServletRequest request, @PathVariable(required = false) String nFolderId) {
-        String ID = JwtUtils.getIdByJwtToken(request);
-        String noteID = noteInfoService.initializeNote(ID, nFolderId);
+    public R initializeNote(@RequestHeader("token") String token, @PathVariable(required = false) String nFolderId) {
+        String userId = JwtUtils.getIdByJwtToken(token);
+        String noteID = noteInfoService.initializeNote(userId, nFolderId);
         return R.ok().data("data", noteID);
     }
 
@@ -57,15 +59,17 @@ public class NoteInfoController {
 
     @ApiOperation("笔记保存")
     @PostMapping("/saveNote")
-    public R saveNote(@RequestBody SaveNoteVo saveNoteVo) {
-        noteInfoService.saveNote(saveNoteVo);
+    public R saveNote(@RequestHeader("token") String token, @RequestBody SaveNoteVo saveNoteVo) {
+        String userId = JwtUtils.getIdByJwtToken(token);
+        noteInfoService.saveNote(saveNoteVo, userId);
         return R.ok();
     }
 
     @ApiOperation("笔记自动保存")
     @PostMapping("/autoSaveNote")
-    public R autoSaveNote(@RequestBody SaveNoteVo saveNoteVo) {
-        noteInfoService.autoSaveNote(saveNoteVo);
+    public R autoSaveNote(@RequestHeader("token") String token, @RequestBody SaveNoteVo saveNoteVo) {
+        String userId = JwtUtils.getIdByJwtToken(token);
+        noteInfoService.autoSaveNote(saveNoteVo, userId);
         return R.ok();
     }
 
@@ -145,16 +149,48 @@ public class NoteInfoController {
         return R.ok().data(map);
     }
 
-    @ApiOperation("分页搜索已公开的笔记,通过 ElasticSearch 实现")
+    @ApiOperation("分页搜索已公开的笔记，通过 ElasticSearch 实现")
     @GetMapping("/searchNoteList")
-    public R searchNoteList(@RequestParam(value = "condition", required = false) String condition,
-                            @RequestParam("sortField") String sortField,
+    public R searchNoteList(@RequestParam(value = "criteria", required = false) String criteria,
+                            @RequestParam(value = "sortField", required = false) String sortField,
                             @RequestParam("page") Integer page,
                             @RequestParam("limit") Integer limit) {
 
-        var result = noteInfoService.searchNoteList(condition, sortField, page, limit);
+        var result = noteInfoService.searchNoteList(criteria, sortField, page, limit);
         return R.ok().data(result);
 
     }
+
+    @ApiOperation("笔记点赞与取消")
+    @PostMapping("/noteLike")
+    public R noteLike(
+            @RequestHeader("token") String token,
+            @RequestParam(value = "noteId") String noteId) {
+        String userId = JwtUtils.getIdByJwtToken(token);
+        noteInfoService.noteLike(userId, noteId);
+        return R.ok();
+    }
+
+    @ApiOperation("判断用户有没有对该笔记进行过点赞")
+    @GetMapping("/userLikeNote")
+    public R userLikeNote(
+            @RequestHeader("token") String token,
+            @RequestParam(value = "noteId") String noteId) {
+        String userId = JwtUtils.getIdByJwtToken(token);
+        Boolean  result=noteInfoService.userLikeNote(userId, noteId);
+        return R.ok().data("data",result);
+    }
+
+    @ApiOperation("查询文章的点赞数（用户点赞或取消点赞后，更新笔记页展示的信息）")
+    @GetMapping("/getNoteLikeCount/{noteId}")
+    public R getNoteLikeCount(@PathVariable("noteId") String noteId){
+        var qw = new QueryWrapper<NoteInfo>();
+        qw.select("likes");
+        qw.eq("id",noteId);
+        var result = noteInfoService.getOne(qw).getLikes();
+        return R.ok().data("data",result);
+    }
+
+
 
 }

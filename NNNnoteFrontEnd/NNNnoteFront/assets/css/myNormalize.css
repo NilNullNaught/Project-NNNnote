@@ -5,3 +5,14 @@ a {
 a:hover{
     text-decoration:underline;
 }
+
+
+.centerVertical{
+    display: flex;
+    align-items: center;
+}
+
+.centerHorizontal{
+    display: flex;
+    justify-content:center;
+}

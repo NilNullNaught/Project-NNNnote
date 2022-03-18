@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <el-main>
+    <el-main style="padding-bottom:0px;">
       <el-card
         v-for="(item) in list"
         :key="item.id"
@@ -9,10 +9,10 @@
       >
         <div style="display:inline-block;width:650px">
           <nuxt-link :to="'/note/'+item.id">
-            <p class="card-title" v-text="item.title ? item.title : '作者未设置标题'" />
+            <p v-dompurify-html="item.title ? item.title : '作者未设置标题'" class="card-title" />
           </nuxt-link>
           <nuxt-link :to="'/note/'+item.id">
-            <p class="card-preview" v-text="item.preview" />
+            <p v-dompurify-html="item.preview" class="card-preview" />
           </nuxt-link>
 
           <div class="centerVertical card-span">
@@ -41,13 +41,16 @@
           </el-image>
         </nuxt-link>
       </el-card>
-      <p v-if="loading" class="centerHorizontal">
-        加载中<i class="el-icon-loading" />
-      </p>
-      <p v-if="noMore" class="centerHorizontal">
-        没有更多了
-      </p>
     </el-main>
+    <el-footer class="centerVertical centerHorizontal">
+      <el-pagination
+        :current-page.sync="data.page"
+        :page-size="data.limit"
+        layout="total, prev, pager, next,jumper"
+        :total="total"
+        @current-change="getList"
+      />
+    </el-footer>
   </el-container>
 </template>
 
@@ -55,7 +58,7 @@
 import noteApi from '@/api/note'
 
 export default {
-  name: 'RecommendIndexPage',
+  name: 'SearchPage',
   layout: 'BaseLayout',
 
   data () {
@@ -63,29 +66,36 @@ export default {
       list: [],
       avatarAndNickName: [],
       data: {
+        criteria: '',
         limit: 5,
-        page: 1,
-        sortField: 'gmt_create'
+        page: 1
+        // sortField: 'gmt_create'
       },
       total: 0,
       loading: false
     }
   },
-  computed: {
-    noMore () {
-      return (this.list.length >= this.total) && (this.total !== 0)
-    }
-  },
   created () {
-    this.getInitialList()
+    this.getList()
   },
-  mounted () {
-    window.addEventListener('scroll', this.handleScroll)
-  },
+
   methods: {
-    getInitialList () {
+    getList (page = 1) {
+      this.data.current = page
+      this.data.criteria = decodeURIComponent(this.$route.params.criteria)
       noteApi.searchNoteList(this.data)
         .then((response) => {
+          const rawlist = response.data.data.data
+          if (rawlist) {
+            rawlist.forEach((element) => {
+              element.title = element.title.replaceAll('<em>', '<span style="color:red;font-weight:bolder;">')
+
+              element.title = element.title.replaceAll('</em>', '</span>')
+              element.preview = element.preview.replaceAll('<em>', '<span style="color:red;font-weight:bolder;">')
+              element.preview = element.preview.replaceAll('</em>', '</span>')
+            })
+          }
+
           this.list = response.data.data.data
           this.total = response.data.data.total
           const temp = response.data.data.avatarAndNickname
@@ -98,31 +108,6 @@ export default {
             }
           }
         })
-    },
-    handleScroll () {
-      if (this.noMore || this.loading) { return }
-
-      // !important 该实现方式兼容性极差
-      if ((document.documentElement.scrollTop + window.innerHeight) * 1.1 >= document.body.offsetHeight) {
-        this.loading = true
-        this.data.page += 1
-
-        noteApi.searchNoteList(this.data)
-          .then((response) => {
-            this.list.push(...response.data.data.data)
-            this.total = response.data.data.total
-            const temp = response.data.data.avatarAndNickname
-            if (temp) {
-              for (let i = 0; i < temp.length; i++) {
-                this.avatarAndNickName[temp[i].id] = {
-                  avatar: temp[i].avatar,
-                  nickname: temp[i].nickname
-                }
-              }
-            }
-            this.loading = false
-          })
-      }
     }
   }
 }
@@ -142,7 +127,7 @@ export default {
     line-height: 18px;
 }
 .card-span{
-      font-size: 10px;
+    font-size: 10px;
     color: #b4b4b4;
 }
 </style>

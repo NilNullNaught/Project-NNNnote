@@ -37,6 +37,12 @@ public class FrontLoginGlobalFilter implements GlobalFilter, Ordered {
         ) {
             return chain.filter(exchange);
         }
+        if (antPathMatcher.match("/note/note-info/searchNoteList", path) ||
+                antPathMatcher.match("/note/note-info/getNoteInfoToRead/**", path) ||
+                antPathMatcher.match("/user/user-info/getUserInfoById/**", path)
+        ) {
+            return chain.filter(exchange);
+        }
 
         if (tokenList == null) {
             //请求体中不包含 token

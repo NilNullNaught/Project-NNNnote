@@ -109,5 +109,28 @@ export default {
       method: 'get',
       params: data
     })
+  },
+  // 判断用户有没有对该笔记进行过点赞
+  userLikeNote (data) {
+    return request({
+      url: `${ApiName}/userLikeNote`,
+      method: 'get',
+      params: data
+    })
+  },
+  // 笔记点赞与取消
+  noteLike (dataform) {
+    return request({
+      url: `${ApiName}/noteLike`,
+      method: 'post',
+      data: dataform
+    })
+  },
+  // 查询文章的点赞数（用户点赞或取消点赞后，更新笔记页展示的信息）
+  getNoteLikeCount (noteId) {
+    return request({
+      url: `${ApiName}/getNoteLikeCount/${noteId}`,
+      method: 'get'
+    })
   }
 }

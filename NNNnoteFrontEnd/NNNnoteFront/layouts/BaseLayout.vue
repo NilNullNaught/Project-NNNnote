@@ -50,9 +50,6 @@
                     <el-menu-item index="/user">
                       我的主页
                     </el-menu-item>
-                    <el-menu-item index="/user/collection">
-                      收藏夹
-                    </el-menu-item>
                     <el-menu-item index="/user/draft">
                       草稿箱（{{ dataCount.draftCount }}）
                     </el-menu-item>

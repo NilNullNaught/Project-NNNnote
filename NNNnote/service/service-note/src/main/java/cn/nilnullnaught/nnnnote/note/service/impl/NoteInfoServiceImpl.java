@@ -21,6 +21,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -28,6 +29,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -59,25 +61,28 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
     @Autowired
     private MyElasticsearchRestTemplate myElasticsearchRestTemplate;
+
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
     // endregion
 
 
     /**
      * 初始化笔记，创建草稿
      *
-     * @param userID
+     * @param userId
      * @param nFolderId
      * @return
      */
     @Override
     @Transactional
-    public String initializeNote(String userID, String nFolderId) {
-        String noteID = IdWorker.get32UUID();
-        noteMultiMapper.initializeNote(noteID, userID, nFolderId, "", "", LocalDateTime.now());
+    public String initializeNote(String userId, String nFolderId) {
+        String noteId = IdWorker.get32UUID();
+        noteMultiMapper.initializeNote(noteId, userId, nFolderId, "", "", LocalDateTime.now());
 
-        if (baseMapper.selectById(noteID) != null) {
+        if (baseMapper.selectById(noteId) != null) {
             this.updateNoteCountInNoteFolder(Arrays.asList(nFolderId));
-            return noteID;
+            return noteId;
         } else {
             throw new MyCustomException(20001, "创建失败");
         }
@@ -88,10 +93,19 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
      * 保存笔记
      *
      * @param saveNoteVo
+     * @param userId
      */
     @Override
     @Transactional
-    public void saveNote(SaveNoteVo saveNoteVo) {
+    public void saveNote(SaveNoteVo saveNoteVo, String userId) {
+        // region <- 用户校验 ->
+        var realUserId = baseMapper.selectById(saveNoteVo.getId()).getUserId();
+
+        if (!realUserId.equals(userId)) {
+            throw new MyCustomException(20001, "违规操作");
+        }
+        // endregion
+
 
         // region <- 更新笔记内的图片信息（如果笔记不包含图片，直接跳过这一步） ->
         if (saveNoteVo.getResourceUrlList() != null) {
@@ -105,7 +119,6 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
             }
         }
         // endregion
-
 
 
         // region <- 更新 note_info 与相关信息 ->
@@ -144,7 +157,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         }
 
         // 6.更新封面状态
-        if (!oldCover.equals(newCover)){
+        if (!oldCover.equals(newCover)) {
             ResourceManagerVo vo = new ResourceManagerVo();
             vo.setType(2);
             vo.setBelongId(saveNoteVo.getId());
@@ -169,7 +182,16 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
      */
     @Override
     @Transactional
-    public void autoSaveNote(SaveNoteVo saveNoteVo) {
+    public void autoSaveNote(SaveNoteVo saveNoteVo, String userId) {
+
+        // region <- 用户校验 ->
+        var realUserId = baseMapper.selectById(saveNoteVo.getId()).getUserId();
+
+        if (!realUserId.equals(userId)) {
+            throw new MyCustomException(20001, "违规操作");
+        }
+        // endregion
+
         // region <- 更新图片信息，如果不包含图片，直接跳过这一步 ->
         if (saveNoteVo.getResourceUrlList() != null) {
             ResourceManagerVo resourceManagerVo = new ResourceManagerVo();
@@ -249,8 +271,8 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         qw.in("id", idList);
         qw.select("id", "note_folder_id");
         List<NoteInfo> noteList = baseMapper.selectList(qw);
+        if (noteList == null || noteList.size() ==0) throw new MyCustomException(20001, "删除失败");
         // endregion
-
 
         // region <- 执行删除 ->
         List<String> _idList = noteList.stream().map(NoteInfo::getId).collect(Collectors.toList());
@@ -303,7 +325,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         // region <- 确认数据属于该用户 ->
         var noteInfoList = baseMapper.getLogicDeletedNoteList(userId, idList);
         var _idList = noteInfoList.stream().map(NoteInfo::getId).collect(Collectors.toList());
-        if (_idList.size() == 0) return;
+        if (_idList == null || _idList.size() ==0) throw new MyCustomException(20001, "删除失败");
         // endregion
 
         // region <- 验证文件夹是否被删除 ->
@@ -359,7 +381,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         // region <- 确认数据属于该用户 ->
         var noteInfoList = baseMapper.getLogicDeletedNoteList(userId, idList);
         var _idList = noteInfoList.stream().map(NoteInfo::getId).collect(Collectors.toList());
-        if (_idList.size() == 0) return;
+        if (_idList == null || _idList.size() ==0) throw new MyCustomException(20001, "删除失败");
         // endregion
 
         // region <- 完成删除 ->
@@ -391,35 +413,86 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
     /**
      * 分页搜索已公开的笔记
-     * @param condition
+     *
+     * @param criteria
      * @param sortField
      * @param page
      * @param limit
      * @return
      */
     @Override
-    public Map<String, Object> searchNoteList(String condition, String sortField, Integer page, Integer limit) {
+    public Map<String, Object> searchNoteList(String criteria, String sortField, Integer page, Integer limit) {
         try {
             // region <- 通过 ElasticSearch 搜索笔记 ->
-            if (condition == null) condition ="";
+            if (criteria == null) criteria = "";
+            if (sortField == null) sortField = "";
             // noteList() 返回的是一个由 Total 和 List 组成的 HashMap
-            var result = myElasticsearchRestTemplate.noteList(condition,sortField,page,limit);
+            var result = myElasticsearchRestTemplate.noteList(criteria, sortField, page, limit);
             // endregion
 
             // region <- 获取笔记对应用户的头像和昵称 ->
-            var list = (List<NoteInfo>)result.get("data");
+            var list = (List<NoteInfo>) result.get("data");
             var idList = list.stream().map(object -> object.getUserId()).collect(Collectors.toSet());
-            var response=userInfoClient.getUserAvatarAndNickNameByIdList(idList);
-            var avatarAndNickname=  response.getData().get("data");
-            result.put("avatarAndNickname",avatarAndNickname);
+            var response = userInfoClient.getUserAvatarAndNickNameByIdList(idList);
+            var avatarAndNickname = response.getData().get("data");
+            result.put("avatarAndNickname", avatarAndNickname);
             // endregion
 
             return result;
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-            throw new MyCustomException(20001,"搜索失败");
+            throw new MyCustomException(20001, "搜索失败");
         }
+    }
+
+    /**
+     * 笔记点赞与取消
+     * @param userId
+     * @param noteId
+     */
+    @Override
+    public void noteLike(String userId, String noteId) {
+        // region <- 判断 redis 中是否存在 noteId 对应的键，如果不存在则创建 ->
+        var keyExist= redisTemplate.hasKey(noteId);
+
+        if (keyExist){
+            Boolean exist = redisTemplate.boundSetOps(noteId).isMember(userId);
+        }else{
+            var setKey = redisTemplate.boundSetOps("setKey");
+            redisTemplate.expire(noteId,1, TimeUnit.DAYS);
+        }
+        // endregion
+
+        // region <- 判断用户是否已经对该笔记点过赞。并执行相应操作 ->
+        Boolean exist = redisTemplate.boundSetOps(noteId).isMember(userId);
+
+        var uw = new UpdateWrapper<NoteInfo>();
+        uw.eq("id",noteId);
+        if (exist){
+            // 用户已经点过赞，取消赞
+            uw.setSql("likes = likes-1");
+            baseMapper.update(uw.getEntity(), uw);
+            redisTemplate.boundSetOps(noteId).remove(userId);
+        }else {
+            // 用户没有点过赞，赞数加一
+            uw.setSql("likes = likes+1");
+            baseMapper.update(uw.getEntity(), uw);
+            redisTemplate.boundSetOps(noteId).add(userId);
+
+        }
+        // endregion
+
+    }
+
+    /**
+     * 判断用户有没有对该笔记进行过点赞
+     * @param userId
+     * @param noteId
+     */
+    @Override
+    public Boolean userLikeNote(String userId, String noteId) {
+        return redisTemplate.boundSetOps(noteId).isMember(userId);
     }
 
     /**
@@ -557,11 +630,6 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         if (result.getCode() != 20000) {
             throw new MyCustomException(20001, "更新笔记数量失败");
         }
-    }
-
-
-    void t(){
-        ;
     }
 
 }

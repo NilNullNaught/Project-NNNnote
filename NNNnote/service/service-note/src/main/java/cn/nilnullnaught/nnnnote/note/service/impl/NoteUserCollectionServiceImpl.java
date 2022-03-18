@@ -17,4 +17,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class NoteUserCollectionServiceImpl extends ServiceImpl<NoteUserCollectionMapper, NoteUserCollection> implements NoteUserCollectionService {
 
+    /**
+     * 笔记收藏与取消
+     * @param noteId
+     * @param userId
+     */
+    @Override
+    public void noteCollect(String noteId, String userId) {
+
+    }
 }

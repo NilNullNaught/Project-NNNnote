@@ -2,27 +2,11 @@
   <div>
     <el-container>
       <el-main>
-        <el-row align="middle" justify="center" type="flex">
-          <el-col :span="12" align="center" justify="center" type="flex">
-            <span style="font-size:20px;font-weight:bold;">{{ folderInfo.folderName }} </span>
-          </el-col>
-        </el-row>
-
-        <div style="padding:5px" />
+        <el-page-header :content="folderInfo.folderName" @back="$router.push({ path: `/user` })" />
 
         <!-- #region 操作栏 -->
-        <el-row align="middle" justify="center" type="flex">
+        <el-row style="margin-top:20px;" align="middle" justify="center" type="flex">
           <el-col :span="16">
-            <nuxt-link to="/user">
-              <el-button
-                size="mini"
-                type="primary"
-                plain
-              >
-                <i class="el-icon-top-left el-icon--left" />
-                返回主页
-              </el-button>
-            </nuxt-link>
             <el-button
               size="mini"
               type="primary"

@@ -101,7 +101,8 @@ export default {
         password: '',
         rememberMe: false
       },
-      activeLoginBtn: false
+      activeLoginBtn: false,
+      prePage: ''
     }
   },
   methods: {
@@ -130,12 +131,6 @@ export default {
       this.activeLoginBtn = true
       loginApi.login(this.user).then((response) => {
         if (response.data.code === 20000) {
-          // 提示登录成功
-          this.$message({
-            type: 'success',
-            message: '登录成功'
-          })
-
           let expiration
           if (this.rememberMe) {
             expiration = 30
@@ -146,7 +141,7 @@ export default {
           // 将返回的token保存在 cookie 中
           jsCookie.set('NNNnote_token', response.data.data.token, { domain: 'localhost' }, { expires: expiration })
 
-          // 跳转至登录页
+          // 跳转至登录前页面
           this.$router.push({ path: '/' })
         } else {
           this.user.password = ''
