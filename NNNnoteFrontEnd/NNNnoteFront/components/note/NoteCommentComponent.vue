@@ -68,9 +68,7 @@
             <el-button type="text" size="small">
               <i class="alibaba_icons_good" />10000000000
             </el-button>
-            <el-button type="text" size="small">
-              <i class="alibaba_icons_bad" />10000000000
-            </el-button>
+
             <el-button type="text" size="small" @click="rely()">
               <i class="alibaba_icons_rely" /> 回复
             </el-button>
@@ -112,9 +110,6 @@
               <el-button type="text" size="small">
                 <i class="alibaba_icons_good" />10000000000
               </el-button>
-              <el-button type="text" size="small">
-                <i class="alibaba_icons_bad" />10000000000
-              </el-button>
               <el-button type="text" size="small" @click="rely()">
                 <i class="alibaba_icons_rely" /> 回复
               </el-button>
@@ -154,7 +149,4 @@ export default {
 </script>
 
 <style scoped>
-.el-button+.el-button {
-    margin-left: 0px;
-}
 </style>

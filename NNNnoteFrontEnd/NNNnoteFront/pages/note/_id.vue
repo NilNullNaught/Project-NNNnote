@@ -37,7 +37,7 @@
         </el-button>
         <span style="display:block;margin:3px 0px;color:#606266;font-size: 12px;text-align:center;" v-text="likeStyle.text" />
 
-        <el-button style="display:block;" :type="collectstyle.color" circle @click="noteCollect">
+        <el-button style="display:block;" :type="collectstyle.color" circle @click="collectDialog.visible = true">
           <i :class="collectstyle.icon" />
         </el-button>
         <span style="display:block;margin:3px 0px;color:#606266;font-size: 12px;text-align:center;" v-text="collectstyle.text" />
@@ -78,6 +78,67 @@
       <NoteCommentComponent />
     </el-footer>
     <!-- #endregion -->
+
+    <!-- #region 收藏对话框 -->
+    <el-dialog
+      title="请选择收藏夹"
+      :visible.sync="collectDialog.visible"
+      width="600px"
+      :lock-scroll="false"
+      center
+    >
+      <el-table :data="collectDialog.cfolders" :show-header="false" height="calc(40vh)">
+        <el-table-column property="folderName" width="450" />
+        <el-table-column width="100">
+          <el-button type="primary" plain>
+            收藏
+          </el-button>
+        </el-table-column>
+      </el-table>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="createCfolderDialog.visible = true">
+          创建收藏夹
+        </el-button>
+      </span>
+
+      <el-dialog
+        width="30%"
+        title="创建收藏夹"
+        :visible.sync="createCfolderDialog.visible"
+        append-to-body
+        :lock-scroll="false"
+      >
+        <el-form :model="createCfolderDialog.form">
+          <el-form-item
+            prop="nfolderName"
+            :rules="[
+              { required: true, trigger: ['blur'], message: '文件夹名不能为空'}]"
+          >
+            <el-input
+              v-model="createCfolderDialog.form.folderName"
+              maxlength="10"
+              show-word-limit
+              placeholder="请输入收藏夹名"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-input
+              v-model="createCfolderDialog.form.description"
+              :autosize="{ minRows: 5, maxRows: 6}"
+              show-word-limit
+              type="textarea"
+              placeholder="请输入描述信息"
+            />
+          </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="createCfolderDialog.visible = false">取 消</el-button>
+          <el-button type="primary" @click="createCfolderDialog.visible = false">确认</el-button>
+        </span>
+      </el-dialog>
+    </el-dialog>
+    <!-- #endregion -->
   </el-container>
 </template>
 
@@ -117,10 +178,24 @@ export default {
         icon: 'el-icon-star-off',
         text: '收藏'
       },
-      collectionList: {
-        visible: false
+      collectDialog: {
+        visible: false,
+        cfolders: [{ id: 1, folderName: '默认收藏夹' },
+          { id: 2, folderName: '一号收藏夹' },
+          { id: 3, folderName: '二号收藏夹' },
+          { id: 4, folderName: '三号收藏夹' },
+          { id: 5, folderName: '一号收藏夹' },
+          { id: 6, folderName: '二号收藏夹' },
+          { id: 7, folderName: '三号收藏夹' }],
+        noteIn: [{ id: 1, folderName: '默认收藏夹' }, { id: 2, folderName: '一号收藏夹' }]
+      },
+      createCfolderDialog: {
+        visible: false,
+        form: {
+          folderName: '',
+          description: ''
+        }
       }
-
     }
   },
   created () {
@@ -211,9 +286,6 @@ export default {
       noteApi.noteLike(qs.stringify(data)).then((response) => {
         this.getStatus()
       })
-    },
-    noteCollect () {
-      this.collectionList.visible = true
     }
 
   }

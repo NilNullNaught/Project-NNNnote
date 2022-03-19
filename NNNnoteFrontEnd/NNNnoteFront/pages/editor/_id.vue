@@ -40,7 +40,7 @@
       center
     >
       <el-row style="height:calc(30vh);overflow-y:scroll" justify="center" :gutter="10" type="flex">
-        <el-radio-group v-model="saveNote.noteFolderId">
+        <el-radio-group v-model="saveNote.noteFolderId" style="width:95%">
           <el-col v-for="folder in folders" :key="folder.id" :span="12">
             <el-radio :label="folder.id" border style="width:100%;margin:5px;">
               {{ folder.folderName }}
@@ -98,7 +98,7 @@
       </el-dialog>
 
       <el-dialog
-        width="20%"
+        width="30%"
         title="新增文件夹"
         :visible.sync="addNfolderDialog.visible"
         append-to-body
