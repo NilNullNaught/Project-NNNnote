@@ -28,11 +28,23 @@ public class NoteUserCollectionController {
     @ApiOperation("笔记收藏与取消")
     @PostMapping("noteCollect")
     public R noteCollect(@RequestHeader("token") String token,
-                         @RequestParam(value = "noteId") String noteId){
+                         @RequestParam(value = "noteId") String noteId,
+                         @RequestParam(value = "cfolderId") String cfolderId){
         String userId = JwtUtils.getIdByJwtToken(token);
 
-        noteUserCollectionService.noteCollect(noteId,userId);
+        noteUserCollectionService.noteCollect(noteId,userId,cfolderId);
         return R.ok();
     }
 
+
+
+    @ApiOperation("获取收藏了指定笔记的用户收藏夹列表（因为笔记可以被多个收藏夹收藏，所以结果返回一个 cfolderId 列表）")
+    @GetMapping("getCfolderIds")
+    public R getCfolderIds(@RequestHeader("token") String token,
+                           @RequestParam(value = "noteId") String noteId){
+        String userId = JwtUtils.getIdByJwtToken(token);
+
+        var  data=noteUserCollectionService.getCfolderIds(userId,noteId);
+        return R.ok().data("data",data);
+    }
 }

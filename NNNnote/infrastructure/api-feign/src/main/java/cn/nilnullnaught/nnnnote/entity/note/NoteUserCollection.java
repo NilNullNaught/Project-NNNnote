@@ -32,6 +32,9 @@ public class NoteUserCollection implements Serializable {
     @ApiModelProperty("笔记ID")
     private String noteId;
 
+    @ApiModelProperty("用户ID")
+    private String userId;
+
     @ApiModelProperty("收藏夹ID")
     private String collectionFolderId;
 

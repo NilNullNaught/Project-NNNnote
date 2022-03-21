@@ -1,6 +1,7 @@
 import request from '@/utils/request'
 
 const ApiName = '/note/note-info'
+const ApiName2 = '/note/note-user-collection'
 export default {
   // 笔记初始化
   initializeNote (nFolderId) {
@@ -131,6 +132,21 @@ export default {
     return request({
       url: `${ApiName}/getNoteLikeCount/${noteId}`,
       method: 'get'
+    })
+  },
+  // 获取收藏了指定笔记的用户收藏夹列表
+  getCfolderIds (param) {
+    return request({
+      url: `${ApiName2}/getCfolderIds`,
+      method: 'get',
+      params: param
+    })
+  },
+  noteCollect (dataform) {
+    return request({
+      url: `${ApiName2}/noteCollect`,
+      method: 'post',
+      data: dataform
     })
   }
 }

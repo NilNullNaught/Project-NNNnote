@@ -3,7 +3,7 @@ import request from '@/utils/request'
 const ApiName = '/user/user-info'
 const ApiName2 = '/user/user-check'
 const ApiName3 = '/user/user-nfolder'
-
+const ApiName4 = '/user/user-cfolder'
 export default {
   // 获取用户信息
   getUserInfo () {
@@ -100,6 +100,21 @@ export default {
       url: `${ApiName3}/getNoteFolderNameByFolderId`,
       method: 'post',
       data: list
+    })
+  },
+  // 通过token获取用户的收藏夹
+  getUserCfolders () {
+    return request({
+      url: `${ApiName4}/getUserCfolders`,
+      method: 'get'
+    })
+  },
+  // 根据用户 id 创建新的收藏夹，文件夹描述可以为空
+  addUserCfolder (dataform) {
+    return request({
+      url: `${ApiName4}/addUserCfolder`,
+      method: 'post',
+      data: dataform
     })
   }
 }

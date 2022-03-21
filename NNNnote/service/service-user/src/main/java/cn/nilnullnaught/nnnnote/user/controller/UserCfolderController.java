@@ -43,7 +43,7 @@ public class UserCfolderController {
 
 
     @ApiOperation("根据用户 id 创建新的收藏夹，文件夹描述可以为空")
-    @PostMapping("/addUserNfolder")
+    @PostMapping("/addUserCfolder")
     public R addUserNfolder(@RequestHeader("token") String token,
                             @RequestParam("cfolderName") String cfolderName,
                             @RequestParam("description") String description) {
@@ -54,7 +54,7 @@ public class UserCfolderController {
         qw.eq("user_id", userId);
         qw.eq("folder_name", cfolderName);
         if (!userCfolderService.list(qw).isEmpty()) {
-            throw new MyCustomException(20001, "文件夹名不可重复");
+            throw new MyCustomException(20001, "收藏夹名不可重复");
         }
 
         var userCfolder = new UserCfolder();

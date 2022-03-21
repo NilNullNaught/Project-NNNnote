@@ -90,9 +90,14 @@
       <el-table :data="collectDialog.cfolders" :show-header="false" height="calc(40vh)">
         <el-table-column property="folderName" width="450" />
         <el-table-column width="100">
-          <el-button type="primary" plain>
-            收藏
-          </el-button>
+          <template slot-scope="scope">
+            <el-button v-if="noteIn.indexOf(scope.row.id) === -1" type="primary" @click="noteCollect(scope.row.id)">
+              收藏
+            </el-button>
+            <el-button v-else type="info" @click="noteCollect(scope.row.id)">
+              取消
+            </el-button>
+          </template>
         </el-table-column>
       </el-table>
 
@@ -111,12 +116,12 @@
       >
         <el-form :model="createCfolderDialog.form">
           <el-form-item
-            prop="nfolderName"
+            prop="cfolderName"
             :rules="[
               { required: true, trigger: ['blur'], message: '文件夹名不能为空'}]"
           >
             <el-input
-              v-model="createCfolderDialog.form.folderName"
+              v-model="createCfolderDialog.form.cfolderName"
               maxlength="10"
               show-word-limit
               placeholder="请输入收藏夹名"
@@ -134,7 +139,7 @@
         </el-form>
         <span slot="footer" class="dialog-footer">
           <el-button @click="createCfolderDialog.visible = false">取 消</el-button>
-          <el-button type="primary" @click="createCfolderDialog.visible = false">确认</el-button>
+          <el-button type="primary" @click="addUserCfolder">确认</el-button>
         </span>
       </el-dialog>
     </el-dialog>
@@ -180,26 +185,28 @@ export default {
       },
       collectDialog: {
         visible: false,
-        cfolders: [{ id: 1, folderName: '默认收藏夹' },
-          { id: 2, folderName: '一号收藏夹' },
-          { id: 3, folderName: '二号收藏夹' },
-          { id: 4, folderName: '三号收藏夹' },
-          { id: 5, folderName: '一号收藏夹' },
-          { id: 6, folderName: '二号收藏夹' },
-          { id: 7, folderName: '三号收藏夹' }],
-        noteIn: [{ id: 1, folderName: '默认收藏夹' }, { id: 2, folderName: '一号收藏夹' }]
+        cfolders: [],
+        noteIn: []
       },
       createCfolderDialog: {
         visible: false,
         form: {
-          folderName: '',
+          cfolderName: '',
           description: ''
         }
       }
     }
   },
+  computed: {
+    noteIn () {
+      return this.collectDialog.noteIn
+    }
+  },
   created () {
     this.getNoteInfo()
+    this.getLikeStatus()
+    this.getUserCfolders()
+    this.getCfolderIds()
   },
   methods: {
     // #region 获取文章信息(包括点赞于收藏)与用户信息
@@ -209,7 +216,6 @@ export default {
           this.noteInfo = response.data.data.noteInfo
           this.noteText = response.data.data.noteText
           this.getUserInfo(this.noteInfo.userId)
-          this.getStatus()
         }
       })
     },
@@ -249,11 +255,13 @@ export default {
 
       return newTime
     },
+    // #endregion
 
-    getStatus () {
+    // #region 点赞相关
+    getLikeStatus () {
       if (this.$store.state.userData.userInfo.id != null) {
         const data = {
-          noteId: this.noteInfo.id
+          noteId: this.$route.params.id
         }
         noteApi.userLikeNote(data)
           .then((response) => {
@@ -284,7 +292,50 @@ export default {
       // 封装数据
       const data = { noteId: this.noteInfo.id }
       noteApi.noteLike(qs.stringify(data)).then((response) => {
-        this.getStatus()
+        this.getLikeStatus()
+      })
+    },
+    // #endregion
+
+    // #region 收藏相关
+    // 获取关于该用户的收藏夹列表
+    getUserCfolders () {
+      userApi.getUserCfolders()
+        .then((response) => {
+          this.collectDialog.cfolders = response.data.data.data
+        })
+    },
+    // 获取收藏了该笔记的收藏夹列表
+    getCfolderIds () {
+      const params = { noteId: this.$route.params.id }
+      noteApi.getCfolderIds(params)
+        .then((response) => {
+          this.collectDialog.noteIn = response.data.data.data
+        })
+    },
+    // 笔记收藏与取消
+    noteCollect (id) {
+      const params = { noteId: this.noteInfo.id, cfolderId: id }
+      noteApi.noteCollect(qs.stringify(params)).then((response) => {
+        if (response.data.code) {
+          this.getCfolderIds()
+        }
+      })
+    },
+    // 根据用户 id 创建新的收藏夹，文件夹描述可以为空
+    addUserCfolder () {
+      userApi.addUserCfolder(qs.stringify(this.createCfolderDialog.form)).then((response) => {
+        this.getUserCfolders()
+        if (response.data.code === 20000) {
+          this.createCfolderDialog.form = {
+            folderName: '',
+            description: ''
+          }
+          this.createCfolderDialog.visible = false
+          this.$message.success('创建收藏夹成功')
+        } else {
+          this.$message.error(response.data.message)
+        }
       })
     }
 
