@@ -5,13 +5,17 @@ import cn.nilnullnaught.nnnnote.common.utils.JwtUtils;
 import cn.nilnullnaught.nnnnote.common.utils.R;
 
 import cn.nilnullnaught.nnnnote.entity.note.NoteInfo;
+import cn.nilnullnaught.nnnnote.entity.note.NoteUserCollection;
 import cn.nilnullnaught.nnnnote.note.service.NoteInfoService;
 
+import cn.nilnullnaught.nnnnote.note.service.NoteUserCollectionService;
 import cn.nilnullnaught.nnnnote.note.vo.SaveNoteVo;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,6 +37,9 @@ public class NoteInfoController {
 
     @Autowired
     private NoteInfoService noteInfoService;
+
+    @Autowired
+    private NoteUserCollectionService noteUserCollectionService;
 
     @ApiOperation("笔记初始化")
     @PostMapping("/initializeNote/{nFolderId}")
@@ -177,20 +184,52 @@ public class NoteInfoController {
             @RequestHeader("token") String token,
             @RequestParam(value = "noteId") String noteId) {
         String userId = JwtUtils.getIdByJwtToken(token);
-        Boolean  result=noteInfoService.userLikeNote(userId, noteId);
-        return R.ok().data("data",result);
+        Boolean result = noteInfoService.userLikeNote(userId, noteId);
+        return R.ok().data("data", result);
     }
 
-    @ApiOperation("查询文章的点赞数（用户点赞或取消点赞后，更新笔记页展示的信息）")
+    @ApiOperation("查询笔记的点赞数（用户点赞或取消点赞后，更新笔记页展示的信息）")
     @GetMapping("/getNoteLikeCount/{noteId}")
-    public R getNoteLikeCount(@PathVariable("noteId") String noteId){
+    public R getNoteLikeCount(@PathVariable("noteId") String noteId) {
         var qw = new QueryWrapper<NoteInfo>();
         qw.select("likes");
-        qw.eq("id",noteId);
+        qw.eq("id", noteId);
         var result = noteInfoService.getOne(qw).getLikes();
-        return R.ok().data("data",result);
+        return R.ok().data("data", result);
     }
 
+    @ApiOperation("查询笔记的收藏数")
+    @GetMapping("/getNoteCollectCount/{noteId}")
+    public R getNoteCollectCount(@PathVariable("noteId") String noteId) {
+        var qw = new QueryWrapper<NoteInfo>();
+        qw.select("collection_count");
+        qw.eq("id", noteId);
+        var result = noteInfoService.getOne(qw).getCollectionCount();
+        return R.ok().data("data", result);
+    }
 
+    @ApiOperation(value = "更新笔记的收藏数",notes = "笔记收藏和取消收藏时触发，一位用户如果在多个收藏夹中收藏了同一篇笔记，则以一次计算")
+    @PostMapping("/updateNoteCollectionCount")
+    @Transactional
+    public R updateNoteCollectionCount(@RequestBody List<String> noteIdList) {
+        // region <- 更新笔记的收藏数量（每个用户只计算一次） ->
+
+        for (var noteId : noteIdList){
+            var qw = new QueryWrapper<NoteUserCollection>();
+            qw.in("note_id", noteIdList);
+            qw.select("DISTINCT user_id");
+
+            var count = noteUserCollectionService.count(qw);
+
+            var uw = new UpdateWrapper<NoteInfo>();
+            uw.eq("id", noteId);
+            uw.set("collection_count", count);
+            noteInfoService.update(uw.getEntity(), uw);
+        }
+
+        // endregion
+        return R.ok();
+
+    }
 
 }

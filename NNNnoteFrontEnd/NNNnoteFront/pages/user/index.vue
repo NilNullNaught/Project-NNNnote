@@ -21,9 +21,11 @@
 
         <el-tabs v-model="activeTab" type="card">
           <el-tab-pane label="笔记" name="first">
-            <NoteFolderComponent />
+            <NoteNfolderComponent />
           </el-tab-pane>
-          <el-tab-pane label="收藏" name="second" />
+          <el-tab-pane label="收藏" name="second">
+            <NoteCfolderComponent />
+          </el-tab-pane>
           <!-- <el-tab-pane label="动态" name="second" /> -->
         </el-tabs>
       </el-main>
@@ -32,11 +34,14 @@
 </template>
 
 <script>
-import NoteFolderComponent from '@/components/user/NoteFolderComponent'
+import NoteNfolderComponent from '@/components/user/NoteNfolderComponent'
+import NoteCfolderComponent from '@/components/user/NoteCfolderComponent'
+
 export default {
   name: 'UserNfolderIndexPage',
   components: {
-    NoteFolderComponent
+    NoteNfolderComponent,
+    NoteCfolderComponent
   },
   layout: 'BaseLayout',
   data () {

@@ -303,7 +303,7 @@ export default {
         this.select.selectSum = '全选'
       } else {
         this.select.isIndeterminate = true
-        this.select.selectSum = '已选中' + this.select.checkedList.length + '个文件夹'
+        this.select.selectSum = '已选中' + this.select.checkedList.length + '篇笔记'
       }
     },
     // 选中后修改样式以及取消选中后去除样式

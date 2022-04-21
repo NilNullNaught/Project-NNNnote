@@ -3,17 +3,17 @@
     <div
       style="min-height: calc(70vh);"
     >
-      <!-- 操作栏 ----------------------------------------------------------------------------------------------------------------------------------------->
+      <!-- #region 操作栏 -->
       <el-row>
         <el-col :span="18">
           <el-button
             size="mini"
             type="primary"
             plain
-            @click="NfolderDialogInitialize('新建文件夹')"
+            @click="CfolderDialogInitialize('创建收藏夹')"
           >
             <i class="el-icon-circle-plus-outline el-icon--left" />
-            新建文件夹
+            创建收藏夹
           </el-button>
           <el-button
             v-show="select.checkedList.length > 0"
@@ -23,7 +23,7 @@
             @click="deleteUserNFolder"
           >
             <i class="el-icon-delete el-icon--left" />
-            删除文件夹
+            删除收藏夹
           </el-button>
           <el-button
             v-show="select.checkedList.length == 1"
@@ -31,10 +31,10 @@
             size="mini"
             type="primary"
             plain
-            @click="NfolderDialogInitialize('编辑文件夹')"
+            @click="CfolderDialogInitialize('编辑收藏夹')"
           >
             <i class="el-icon-edit el-icon--left" />
-            编辑文件夹
+            编辑收藏夹
           </el-button>
         </el-col>
         <el-col :span="6">
@@ -46,9 +46,9 @@
           /> -->
         </el-col>
       </el-row>
-      <!----------------------------------------------------------------------------------------------------------------------------------------->
+      <!-- #endregion -->
 
-      <!-- 全选框 ----------------------------------------------------------------------------------------------------------------------------------------->
+      <!-- #region 全选框 -->
       <div style="margin: 10px;">
         <el-checkbox
           v-model="select.selectAll"
@@ -57,11 +57,11 @@
           @change="handleCheckAll"
         />
       </div>
-      <!----------------------------------------------------------------------------------------------------------------------------------------->
+      <!-- #endregion -->
 
       <el-divider />
 
-      <!-- 用户文件夹列表 ----------------------------------------------------------------------------------------------------------------------------------------->
+      <!-- #region 用户收藏夹列表 -->
       <el-row v-if="!search.isSearching">
         <el-col v-for="(o) in list" :key="o.id" :lg="{span: '4-8'}">
           <el-tooltip class="item" effect="dark" placement="top">
@@ -84,9 +84,9 @@
                 @change="handleChecked(o)"
               >
 
-              <nuxt-link :to="'/user/nfolder/'+o.id">
+              <nuxt-link :to="'/user/collection/'+o.id">
                 <div style="display: flex;justify-content:center;">
-                  <img src="~/assets/img/mine/folder.png" alt>
+                  <img width="56px" height="56px" src="~/assets/img/mine/cfolder.png" alt>
                 </div>
                 <div style="display: flex;justify-content:center;">
                   <span
@@ -105,10 +105,10 @@
           </el-tooltip>
         </el-col>
       </el-row>
-      <!----------------------------------------------------------------------------------------------------------------------------------------->
+      <!-- #endregion -->
 
       <!-- 搜索结果列表 ----------------------------------------------------------------------------------------------------------------------------------------->
-      <el-row v-if="search.isSearching">
+      <!-- <el-row v-if="search.isSearching">
         <el-col v-for="(so) in search.searchResult" :key="so.id" :lg="{span: '4-8'}">
           <el-card
             :ref="'NoteFolder-'+so.id"
@@ -131,7 +131,7 @@
             </div>
           </el-card>
         </el-col>
-      </el-row>
+      </el-row> -->
       <!----------------------------------------------------------------------------------------------------------------------------------------->
     </div>
     <!-- 分页 ----------------------------------------------------------------------------------------------------------------------------------->
@@ -147,33 +147,33 @@
     </el-row>
     <!------------------------------------------------------------------------------------------------------------------------------------------------->
 
-    <!-- 新增与修改文件夹对话框 ----------------------------------------------------------------------------------------------------------------------------------------->
+    <!-- 新增与修改收藏夹对话框 ----------------------------------------------------------------------------------------------------------------------------------------->
     <el-dialog
       width="30%"
-      :title="NfolderDialog.title"
-      :visible.sync="NfolderDialog.visible"
+      :title="CfolderDialog.title"
+      :visible.sync="CfolderDialog.visible"
       append-to-body
     >
       <el-row justify="center" type="flex">
         <el-col :span="20">
-          <el-form :model="NfolderDialog.form">
+          <el-form :model="CfolderDialog.form">
             <el-form-item
-              prop="nfolderName"
+              prop="cfolderName"
               :rules="[
-                { required: true, trigger: ['blur'], message: '文件夹名不能为空'}]"
+                { required: true, trigger: ['blur'], message: '收藏夹名不能为空'}]"
             >
               <el-input
-                v-model="NfolderDialog.form.nfolderName"
+                v-model="CfolderDialog.form.cfolderName"
                 maxlength="10"
                 show-word-limit
-                placeholder="请输入文件夹名"
+                placeholder="请输入收藏夹名"
               />
             </el-form-item>
             <el-form-item>
               <el-input
-                v-model="NfolderDialog.form.description"
-                maxlength="30"
-                show-word-limit
+                v-model="CfolderDialog.form.description"
+                maxlength="90"
+                :autosize="{ minRows: 5, maxRows: 6}"
                 type="textarea"
                 placeholder="请输入描述信息"
               />
@@ -183,7 +183,7 @@
       </el-row>
 
       <span slot="footer" class="dialog-footer">
-        <el-button @click="NfolderDialog.visible = false">取 消</el-button>
+        <el-button @click="CfolderDialog.visible = false">取 消</el-button>
         <el-button type="primary" @click="submitNfolder()">确认</el-button>
       </span>
     </el-dialog>
@@ -195,7 +195,7 @@ import qs from 'qs'
 import userApi from '@/api/user'
 
 export default {
-  name: 'NoteFolderComponent',
+  name: 'NoteCfolderComponent',
   data () {
     return {
       list: [],
@@ -210,11 +210,11 @@ export default {
         limit: 20,
         total: null
       },
-      NfolderDialog: {
+      CfolderDialog: {
         visible: false,
         title: '',
         form: {
-          nfolderName: '',
+          cfolderName: '',
           description: ''
         }
       },
@@ -239,7 +239,11 @@ export default {
         isIndeterminate: false,
         selectSum: '全选'
       }
-      userApi.getUserNfolderPage(this.pagination1.current, this.pagination1.limit).then((response) => {
+      const params = {
+        page: this.pagination1.current,
+        limit: this.pagination1.limit
+      }
+      userApi.getUserCfolderPaging(params).then((response) => {
         this.list = response.data.data.items
         this.pagination1.total = response.data.data.total
 
@@ -315,41 +319,41 @@ export default {
     },
     // ->
 
-    // <- NfolderDialog
+    // <- CfolderDialog
     // 对话框初始化
-    NfolderDialogInitialize (title) {
-      this.NfolderDialog.title = title
-      this.NfolderDialog.visible = true
-      if (title === '编辑文件夹') {
-        this.NfolderDialog.form.nfolderName = this.select.checkedList[0].folderName
-        this.NfolderDialog.form.description = this.select.checkedList[0].folderDescription
+    CfolderDialogInitialize (title) {
+      this.CfolderDialog.title = title
+      this.CfolderDialog.visible = true
+      if (title === '编辑收藏夹') {
+        this.CfolderDialog.form.cfolderName = this.select.checkedList[0].folderName
+        this.CfolderDialog.form.description = this.select.checkedList[0].folderDescription
       } else {
-        this.NfolderDialog.form.nfolderName = ''
-        this.NfolderDialog.form.description = ''
+        this.CfolderDialog.form.cfolderName = ''
+        this.CfolderDialog.form.description = ''
       }
     },
-    // 创建或编辑新的笔记文件夹
+    // 创建或编辑新的笔记收藏夹
     submitNfolder () {
-      if (this.NfolderDialog.title === '编辑文件夹') {
+      if (this.CfolderDialog.title === '编辑收藏夹') {
         const data = {
-          nfolderID: this.select.checkedList[0].id,
-          folderName: this.NfolderDialog.form.nfolderName,
-          description: this.NfolderDialog.form.description
+          cfolderID: this.select.checkedList[0].id,
+          folderName: this.CfolderDialog.form.cfolderName,
+          description: this.CfolderDialog.form.description
         }
-        userApi.alterUserNfolder(qs.stringify((data))).then((response) => {
+        userApi.updateUserCfolder(qs.stringify((data))).then((response) => {
           if (response.data.code === 20000) {
-            this.getList(this.pagination1.current)// 获取新的笔记文件夹列表
+            this.getList(this.pagination1.current)// 获取新的笔记收藏夹列表
             this.select.checkedList = []// 清空 checkedList
-            this.NfolderDialog.visible = false
+            this.CfolderDialog.visible = false
           } else {
             this.$message.error(response.data.message)
           }
         })
       } else {
-        userApi.addUserNfolder(qs.stringify(this.NfolderDialog.form)).then((response) => {
+        userApi.addUserCfolder(qs.stringify(this.CfolderDialog.form)).then((response) => {
           if (response.data.code === 20000) {
-            this.getList(this.pagination1.current)// 获取新的笔记文件夹列表
-            this.NfolderDialog.visible = false
+            this.getList(this.pagination1.current)// 获取新的笔记收藏夹列表
+            this.CfolderDialog.visible = false
           } else {
             this.$message.error(response.data.message)
           }
@@ -370,7 +374,7 @@ export default {
           deleteIdList.push(o.id)
         })
 
-        userApi.deleteUserNFolder(deleteIdList).then((response) => {
+        userApi.deleteCFolders(deleteIdList).then((response) => {
           if (response.data.code === 20000) {
             this.$message('删除成功')
             this.getList()

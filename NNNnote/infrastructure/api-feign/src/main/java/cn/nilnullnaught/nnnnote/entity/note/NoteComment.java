@@ -47,8 +47,11 @@ public class NoteComment implements Serializable {
     @ApiModelProperty("点赞数")
     private Long likes;
 
+    @ApiModelProperty("评论回复数")
+    private Long replyCount;
+
     @ApiModelProperty("所属评论 ID")
-    private String replyId;
+    private String replyCommentId;
 
     @ApiModelProperty("被回复人昵称")
     private String replyNickname;

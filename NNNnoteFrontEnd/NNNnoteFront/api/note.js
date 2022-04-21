@@ -2,6 +2,7 @@ import request from '@/utils/request'
 
 const ApiName = '/note/note-info'
 const ApiName2 = '/note/note-user-collection'
+const ApiName3 = '/note/note-comment'
 export default {
   // 笔记初始化
   initializeNote (nFolderId) {
@@ -142,11 +143,77 @@ export default {
       params: param
     })
   },
+  // 笔记收藏与取消
   noteCollect (dataform) {
     return request({
       url: `${ApiName2}/noteCollect`,
       method: 'post',
       data: dataform
     })
-  }
+  },
+  // 查询笔记的收藏数（用户收藏或取消收藏后，更新笔记页展示的信息）
+  getNoteCollectCount (noteId) {
+    return request({
+      url: `${ApiName}/getNoteCollectCount/${noteId}`,
+      method: 'get'
+    })
+  },
+  // 更新笔记的收藏数
+  updateNoteCollectionCount (dataform) {
+    return request({
+      url: `${ApiName}/updateNoteCollectionCount`,
+      method: 'post',
+      data: dataform
+    })
+  },
+  // 分页查询收藏夹下的笔记
+  getNoteInCfolderPaging (param) {
+    return request({
+      url: `${ApiName2}/getNoteInCfolderPaging`,
+      method: 'get',
+      params: param
+    })
+  },
+  // 批量取消收藏
+  cancelCollectNote (param, list) {
+    return request({
+      url: `${ApiName2}/cancelCollectNote`,
+      method: 'delete',
+      params: param,
+      data: list
+    })
+  },
+  // 发布评论
+  postComment (dataform) {
+    return request({
+      url: `${ApiName3}/postComment`,
+      method: 'post',
+      data: dataform
+    })
+  },
+  // 获取评论
+  getComments (param) {
+    return request({
+      url: `${ApiName3}/getComments`,
+      method: 'get',
+      params: param
+    })
+  },
+  // 获取评论下的所有回复
+  getReplies (param) {
+    return request({
+      url: `${ApiName3}/getReplies`,
+      method: 'get',
+      params: param
+    })
+  },
+  // 评论点赞与取消
+  likeComment (dataform) {
+    return request({
+      url: `${ApiName3}/likeComment`,
+      method: 'post',
+      data: dataform
+    })
+  } // 笔记点赞与取消
+
 }

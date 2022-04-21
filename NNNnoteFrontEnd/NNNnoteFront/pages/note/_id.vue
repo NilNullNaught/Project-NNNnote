@@ -11,19 +11,19 @@
           <p style="font-size:15px;font-weight:bolder">
             {{ userInfo.nickname ? userInfo.nickname : '&nbsp;' }}
           </p>
-          <p>
-            <span style="display:inline-block;width:50px;"><i class="alibaba_icons_good" />  {{ noteInfo.likes }}</span>
+          <div>
+            <span style="display:inline-block;width:50px;"><i class="alibaba_icons_good" />  {{ noteInfo.likes? noteInfo.likes : 0 }}</span>
             <el-divider direction="vertical" />
-            <span style="display:inline-block;width:50px;"><i class="el-icon-chat-line-round" />  {{ noteInfo.commentCount }}</span>
+            <span style="display:inline-block;width:50px;"><i class="el-icon-chat-line-round" />  {{ noteInfo.commentCount? noteInfo.commentCount : 0 }}</span>
             <el-divider direction="vertical" />
-            <span style="display:inline-block;width:50px;"><i class="el-icon-star-off" />  {{ noteInfo.collectionCount }}</span>
+            <span style="display:inline-block;width:50px;"><i class="el-icon-star-off" />  {{ noteInfo.collectionCount? noteInfo.collectionCount : 0 }}</span>
             <el-divider direction="vertical" />
-            <span style="display:inline-block;width:50px;">长度  {{ noteInfo.length }}</span>
+            <span style="display:inline-block;width:50px;">长度  {{ noteInfo.length? noteInfo.length : 0 }}</span>
             <el-divider direction="vertical" />
             <span>创建于    {{ formatDate(noteInfo.gmtCreate) }}</span>
             <el-divider direction="vertical" />
             <span>最后编辑    {{ formatDate(noteInfo.gmtModified) }}</span>
-          </p>
+          </div>
         </div>
       </div>
     </el-header>
@@ -57,7 +57,7 @@
     <div style="position: relative;width: 100%;height:5px;background-color: #dddddd;" />
 
     <!-- #region 笔记主体 -->
-    <el-main style="padding:0px">
+    <el-main style="padding:0px;flex: 0;">
       <mavon-editor
         :value="noteText.text"
         :subfield="false"
@@ -75,7 +75,13 @@
 
     <!-- #region 笔记评论 -->
     <el-footer style="height:100%;">
-      <NoteCommentComponent />
+      <NoteCommentComponent
+        :note-id="$route.params.id"
+        :comment-count="noteInfo.commentCount"
+        :user-id="$store.state.userData.userInfo.id"
+        :avatar="$store.state.userData.userInfo.avatar"
+        :nickname="$store.state.userData.userInfo.nickname"
+      />
     </el-footer>
     <!-- #endregion -->
 
@@ -131,7 +137,7 @@
             <el-input
               v-model="createCfolderDialog.form.description"
               :autosize="{ minRows: 5, maxRows: 6}"
-              show-word-limit
+              maxlength="90"
               type="textarea"
               placeholder="请输入描述信息"
             />
@@ -232,7 +238,7 @@ export default {
       const format = 'YY年MM月DD日 hh:mm'
       // 获取单元格数据
       if (data == null) {
-        return null
+        return ''
       }
       const date = new Date(data)
 
@@ -317,8 +323,22 @@ export default {
     noteCollect (id) {
       const params = { noteId: this.noteInfo.id, cfolderId: id }
       noteApi.noteCollect(qs.stringify(params)).then((response) => {
-        if (response.data.code) {
+        if (response.data.code === 20000) {
           this.getCfolderIds()
+
+          // 更新文章的收藏数
+          const data = []
+          data.push(this.noteInfo.id)
+          noteApi.updateNoteCollectionCount(data)
+            .then((response) => {
+              if (response.data.code === 20000) {
+                // 更新页面显示的文章收藏数
+                noteApi.getNoteCollectCount(this.noteInfo.id)
+                  .then((response) => {
+                    this.noteInfo.collectionCount = response.data.data.data
+                  })
+              }
+            })
         }
       })
     },

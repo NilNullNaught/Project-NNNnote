@@ -39,7 +39,9 @@ public class FrontLoginGlobalFilter implements GlobalFilter, Ordered {
         }
         if (antPathMatcher.match("/note/note-info/searchNoteList", path) ||
                 antPathMatcher.match("/note/note-info/getNoteInfoToRead/**", path) ||
-                antPathMatcher.match("/user/user-info/getUserInfoById/**", path)
+                antPathMatcher.match("/user/user-info/getUserInfoById/**", path) ||
+                antPathMatcher.match("/note/note-comment/getComments", path) ||
+                antPathMatcher.match("/note/note-comment/getReplies", path)
         ) {
             return chain.filter(exchange);
         }

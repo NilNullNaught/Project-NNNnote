@@ -86,7 +86,7 @@ export default {
       method: 'get'
     })
   },
-  // 批量删除
+  // 批量删除笔记文件夹
   deleteUserNFolder (list) {
     return request({
       url: `${ApiName3}/deleteUserNFolder`,
@@ -116,5 +116,38 @@ export default {
       method: 'post',
       data: dataform
     })
+  },
+  // 分页查询笔记收藏夹列表
+  getUserCfolderPaging (param) {
+    return request({
+      url: `${ApiName4}/getUserCfolderPaging`,
+      method: 'get',
+      params: param
+    })
+  },
+  // 删除收藏夹
+  deleteCFolders (list) {
+    return request({
+      url: `${ApiName4}/deleteCFolders`,
+      method: 'delete',
+      data: list
+    })
+  },
+  // 修改收藏夹
+  updateUserCfolder (formdata) {
+    return request({
+      url: `${ApiName4}/updateUserCfolder`,
+      method: 'post',
+      data: formdata
+    })
+  },
+  // 获取收藏夹信息
+  getUserCfolderById (param) {
+    return request({
+      url: `${ApiName4}/getUserCfolderById`,
+      method: 'get',
+      params: param
+    })
   }
+
 }
