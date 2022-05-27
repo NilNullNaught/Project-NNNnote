@@ -10,25 +10,13 @@
             </p>
 
             <p>{{ userInfo.sign ? userInfo.sign : '&nbsp;' }}</p>
-
-            <p>
-              <el-tooltip effect="dark" content="开通会员后将解除保存上限">
-                <i class="el-icon-info" />
-              </el-tooltip>
-              笔记：{{ dataCount.noteCount }}/40
-            </p>
           </div>
         </div>
 
         <div style="height:10px" />
 
         <el-tabs v-model="activeTab" type="card">
-          <el-tab-pane label="笔记" name="first">
-            <NoteNfolderComponent />
-          </el-tab-pane>
-          <el-tab-pane label="收藏" name="second">
-            <NoteCfolderComponent />
-          </el-tab-pane>
+          <el-tab-pane label="发布笔记" name="first" />
           <el-tab-pane label="动态" name="third">
             <!-- TODO -->
             暂未实现
@@ -40,32 +28,33 @@
 </template>
 
 <script>
-import NoteNfolderComponent from '@/components/user/NoteNfolderComponent'
-import NoteCfolderComponent from '@/components/user/NoteCfolderComponent'
+import userApi from '@/api/user'
 
 export default {
-  name: 'UserNfolderIndexPage',
-  components: {
-    NoteNfolderComponent,
-    NoteCfolderComponent
-  },
+  name: 'VisitorIdPage',
   layout: 'BaseLayout',
   data () {
     return {
-      activeTab: 'first'
+      activeTab: 'first',
+      dataCount: {
+        noteCount: 1
+      },
+      userInfo: {
+      }
     }
   },
-  computed: {
-    dataCount () {
-      return this.$store.state.userData.dataCount
-    },
-    userInfo () {
-      return this.$store.state.userData.userInfo
-    }
+  created () {
+    this.getUserInfo()
   },
 
   methods: {
-
+    getUserInfo () {
+      userApi.getUserInfoById(this.$route.params.id).then((response) => {
+        if (response.data.code === 20000) {
+          this.userInfo = response.data.data.data
+        }
+      })
+    }
   }
 }
 </script>

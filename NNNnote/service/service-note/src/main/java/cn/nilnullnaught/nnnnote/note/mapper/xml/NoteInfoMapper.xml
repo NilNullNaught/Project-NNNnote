@@ -55,6 +55,13 @@
     </update>
 
     <select id="getCountOfDeletedNote" resultType="java.lang.Integer">
-        SELECT COUNT(*) FROM `note_info` WHERE user_id = #{userID} AND is_deleted = 1
+        SELECT COUNT(*)
+        FROM `note_info`
+        WHERE user_id = #{userID}
+          AND is_deleted = 1
+    </select>
+
+    <select id="getDeletedNoteIdScheduledTask" resultType="java.lang.String">
+        SELECT id FROM note_info WHERE is_deleted=1 AND gmt_modified <![CDATA[<=]]> #{time}
     </select>
 </mapper>

@@ -67,4 +67,6 @@ public interface NoteInfoMapper extends BaseMapper<NoteInfo> {
      * @return
      */
     Integer getCountOfDeletedNote(@Param("userID") String userID);
+
+    List<String> getDeletedNoteIdScheduledTask(@Param("time")LocalDateTime time);
 }

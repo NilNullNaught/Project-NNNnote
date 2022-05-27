@@ -389,6 +389,24 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         // endregion
     }
 
+    /**
+     * 删除回收站中已经保存超过时间的笔记
+     */
+    @Override
+    @Transactional
+    public void deleteDeletedNotesScheduledTask(){
+        // region <- 查询符合条件的笔记ID ->
+        var time = LocalDateTime.now();
+        time = time.minusDays(7);
+
+        var idList = baseMapper.getDeletedNoteIdScheduledTask(time);
+        // endregion
+
+        // region <- 删除笔记 ->
+        noteMultiMapper.deleteDeletedNotes(idList);
+        // endregion
+    }
+
     @Override
     public Map<String, Object> getCountOfNoteInfo(String userId) {
 

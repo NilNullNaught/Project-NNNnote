@@ -42,6 +42,8 @@ public interface NoteInfoService extends IService<NoteInfo> {
 
     void deleteDeletedNotes(String userId, List<String> idList);
 
+    void deleteDeletedNotesScheduledTask();
+
     Map<String, Object> getCountOfNoteInfo(String userId);
 
     Map<String,Object> searchNoteList(String criteria, String sortField, Integer page, Integer limit);
