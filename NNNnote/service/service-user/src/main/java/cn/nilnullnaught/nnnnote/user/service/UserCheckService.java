@@ -26,4 +26,8 @@ public interface UserCheckService extends IService<UserCheck> {
     void restPassword(ResetPasswordVo resetPasswordVo);
 
     void alterUserEmail(String id, String email,String code);
+
+    String checkByOpenidWx(String openidWx);
+
+    String wechatRegister(String nickname,String headimgURL,String openIdWx);
 }

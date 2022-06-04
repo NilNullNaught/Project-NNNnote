@@ -67,14 +67,9 @@
         <h6>社交帐号登录</h6>
         <ul>
           <li>
-            <a id="weixin" class="weixin" target="_blank" href="http://qy.free.idcfengye.com/api/ucenter/weixinLogin/login">
+            <el-link :underline="false" :href="weChatLoginUrl">
               <i class="alibaba_icons_weixin" style="color: #00bb29;font-size: 36px;" />
-            </a>
-          </li>
-          <li>
-            <a id="qq" class="qq" target="_blank" href="#">
-              <i class="alibaba_icons_QQ" style="color: #498ad5;font-size: 36px;" />
-            </a>
+            </el-link>
           </li>
         </ul>
       </div>
@@ -88,6 +83,7 @@ import '~/assets/css/loginCss/sign.css'
 
 import jsCookie from 'js-cookie'
 import loginApi from '@/api/login'
+import request from '@/utils/request'
 
 export default {
   name: 'LoginIndexPage',
@@ -102,10 +98,12 @@ export default {
         rememberMe: false
       },
       activeLoginBtn: false,
-      prePage: ''
+      prePage: '',
+      weChatLoginUrl: request.defaults.baseURL + '/user/user-wechat/login'
     }
   },
   methods: {
+
     // 验证邮箱的合法性
     checkEmail (rule, value, callback) {
       if (this.user.email === '') {

@@ -59,6 +59,9 @@
                     <el-menu-item index="/setting">
                       设置
                     </el-menu-item>
+                    <el-menu-item index="/member">
+                      开通会员
+                    </el-menu-item>
                     <el-menu-item index="/" @click="signOut">
                       退出
                     </el-menu-item>
@@ -155,7 +158,8 @@ export default {
     // 判断是否通过微信登录
     const token = this.$route.query.token
     if (token) { // 判断路径是否有token值
-      alert('通过微信登录')
+      // 将返回的token保存在 cookie 中
+      jsCookie.set('NNNnote_token', token, { domain: 'localhost' }, { expires: 1 })
       // this.wxLogin()
     }
 
@@ -205,6 +209,7 @@ export default {
         }
       })
     },
+
     // 将笔记相关数据更新到 store
     getCountOfNoteInfo () {
       noteApi.getCountOfNoteInfo().then((response) => {
@@ -214,15 +219,24 @@ export default {
         }
       })
     },
+
     // 获取用户信息
     getUserInfo () {
-      userApi.getUserInfo()
-        .then((response) => {
-          if (response.data.code === 20000) {
-            const data = response.data.data.data
-            this.$store.dispatch('userData/updateUserInfo', { data })
-          }
-        })
+      // 获取用户基本信息
+      userApi.getUserInfo().then((response) => {
+        if (response.data.code === 20000) {
+          const data = response.data.data.data
+          this.$store.dispatch('userData/updateUserInfo', { data })
+        }
+      })
+
+      // 获取用户会员信息
+      userApi.getUserMember().then((response) => {
+        if (response.data.code === 20000) {
+          const data = response.data.data.data
+          this.$store.dispatch('userData/updateUserMember', { data })
+        }
+      })
     }
   }
 

@@ -20,11 +20,17 @@ import java.util.Date;
 @Mapper
 public interface UserCheckMapper extends BaseMapper<UserCheck> {
 
-    void userRegister(@Param("UUID")String UUID,
-                      @Param("nickname")String nickname,
-                      @Param("email")String email,
-                      @Param("password")String password,
-                      @Param("date")LocalDateTime date);
+    void userRegister(@Param("UUID") String UUID,
+                      @Param("nickname") String nickname,
+                      @Param("email") String email,
+                      @Param("password") String password,
+                      @Param("date") LocalDateTime date);
+
+    void thirdPartyRegister(@Param("UUID") String UUID,
+                            @Param("nickname") String nickname,
+                            @Param("avatar") String avatar,
+                            @Param("openidWx") String openidWx,
+                            @Param("date") LocalDateTime date);
 
     Integer countUser();
 }

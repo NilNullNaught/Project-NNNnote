@@ -27,7 +27,10 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
-    '@/plugins/element-ui', { src: '@/plugins/vue-mavon-editor', ssr: false }, '@/plugins/vue-dompurify-html'
+    '@/plugins/element-ui',
+    { src: '@/plugins/vue-mavon-editor', ssr: false },
+    '@/plugins/vue-dompurify-html',
+    '@/plugins/vue-qriously'
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components

@@ -4,6 +4,7 @@ const ApiName = '/user/user-info'
 const ApiName2 = '/user/user-check'
 const ApiName3 = '/user/user-nfolder'
 const ApiName4 = '/user/user-cfolder'
+const ApiName5 = '/user/user-member'
 export default {
   // 获取用户信息
   getUserInfo () {
@@ -148,6 +149,20 @@ export default {
       method: 'get',
       params: param
     })
+  },
+  // 获取用户会员信息
+  getUserMember () {
+    return request({
+      url: `${ApiName5}/getUserMember`,
+      method: 'get'
+    })
+  },
+  // 通过 ID 获取用户会员信息
+  getUserMemberById (userId) {
+    return request({
+      url: `${ApiName5}/getUserMemberById`,
+      method: 'get',
+      params: userId
+    })
   }
-
 }

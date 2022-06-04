@@ -51,4 +51,6 @@ public interface NoteInfoService extends IService<NoteInfo> {
     void noteLike(String userId, String noteId);
 
     Boolean userLikeNote(String userId, String noteId);
+
+    Map<String, Object> getPublicNotes(String userId,String criteria, String sortField,Integer page, Integer limit);
 }

@@ -156,6 +156,13 @@ public class NoteInfoController {
         return R.ok().data(map);
     }
 
+    @ApiOperation(value = "通过 ID 查询笔记数量（只包含笔记总数，不包括回收站数量和草稿数量）")
+    @GetMapping("/getCountOfNoteInfoById")
+    public R getCountOfNoteInfoById(@RequestParam("userId") String userId) {
+        Map<String, Object> map = noteInfoService.getCountOfNoteInfo(userId);
+        return R.ok().data("data",map.get("noteCount"));
+    }
+
     @ApiOperation("分页搜索已公开的笔记，通过 ElasticSearch 实现")
     @GetMapping("/searchNoteList")
     public R searchNoteList(@RequestParam(value = "criteria", required = false) String criteria,
@@ -232,4 +239,16 @@ public class NoteInfoController {
 
     }
 
+    @ApiOperation(value = "查询指定用户公开的所有笔记")
+    @GetMapping("/getPublicNotes")
+    public R getPublicNotes(@RequestParam("userId")String userId,
+                            @RequestParam(value = "criteria", required = false) String criteria,
+                            @RequestParam(value = "sortField", required = false) String sortField,
+                            @RequestParam("page") Integer page,
+                            @RequestParam("limit") Integer limit){
+
+        var result= noteInfoService.getPublicNotes(userId,criteria,sortField,page,limit);
+
+        return R.ok().data(result);
+    }
 }

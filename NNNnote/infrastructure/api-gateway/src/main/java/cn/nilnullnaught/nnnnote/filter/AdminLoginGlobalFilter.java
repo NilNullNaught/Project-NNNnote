@@ -26,13 +26,8 @@ public class AdminLoginGlobalFilter implements GlobalFilter, Ordered {
         //校验用户必须登录
         if(antPathMatcher.match("/api/**/auth/**", path)) {
             List<String> tokenList = request.getHeaders().get("token");
-            if(null == tokenList) {
-                ServerHttpResponse response = exchange.getResponse();
-                return out(response);
-            } else {
-                ServerHttpResponse response = exchange.getResponse();
-                return out(response);
-            }
+            ServerHttpResponse response = exchange.getResponse();
+            return out(response);
         }
         //内部服务接口，不允许外部访问
         if(antPathMatcher.match("/**/inner/**", path)) {

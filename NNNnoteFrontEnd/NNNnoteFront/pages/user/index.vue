@@ -7,6 +7,9 @@
           <div style="display:inline-block;font-size:12px;color:#606266;line-height: 24px;">
             <p style="font-size:20px;font-weight:bolder">
               {{ userInfo.nickname ? userInfo.nickname : '&nbsp;' }}
+              <el-tag v-if="userMember.isMember" size="mini" type="success">
+                会员
+              </el-tag>
             </p>
 
             <p>{{ userInfo.sign ? userInfo.sign : '&nbsp;' }}</p>
@@ -15,7 +18,7 @@
               <el-tooltip effect="dark" content="开通会员后将解除保存上限">
                 <i class="el-icon-info" />
               </el-tooltip>
-              笔记：{{ dataCount.noteCount }}/40
+              笔记数量：{{ dataCount.noteCount }}/<span v-if="userMember.isMember">∞</span><span v-else>40</span>
             </p>
           </div>
         </div>
@@ -61,6 +64,9 @@ export default {
     },
     userInfo () {
       return this.$store.state.userData.userInfo
+    },
+    userMember () {
+      return this.$store.state.userData.userMember
     }
   },
 

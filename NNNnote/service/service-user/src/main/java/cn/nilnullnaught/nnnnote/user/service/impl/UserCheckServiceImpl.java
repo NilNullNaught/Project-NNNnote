@@ -117,6 +117,8 @@ public class UserCheckServiceImpl extends ServiceImpl<UserCheckMapper, UserCheck
         baseMapper.userRegister(IdWorkerID,nickname,email,password, LocalDateTime.now());
     }
 
+
+
     /**
      * 根据用户邮箱和密码进行登录校验，并生成 token
      * @param loginVo
@@ -231,6 +233,37 @@ public class UserCheckServiceImpl extends ServiceImpl<UserCheckMapper, UserCheck
         }
 
         baseMapper.update(null,updateWrapper);
+    }
+
+    /**
+     * 根据 openidWx 验证用户是否曾使用过微信登录
+     * @param openidWx
+     * @return
+     */
+    @Override
+    public String checkByOpenidWx(String openidWx) {
+
+        var qw = new QueryWrapper<UserCheck>();
+        qw.eq("openid_wx",openidWx);
+
+        var result = baseMapper.selectOne(qw);
+        if (result == null) return null;
+        return result.getId();
+    }
+
+    /**
+     * 微信平台注册
+     * @param nickname
+     * @param headimgURL
+     * @return
+     */
+    @Override
+    public String wechatRegister(String nickname, String headimgURL,String openIdWx) {
+        //生成 UUID
+        String IdWorkerID = IdWorker.get32UUID();
+
+        baseMapper.thirdPartyRegister(IdWorkerID,nickname,headimgURL,openIdWx,LocalDateTime.now());
+        return IdWorkerID;
     }
 
 }

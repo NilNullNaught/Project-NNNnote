@@ -10,7 +10,25 @@
         INSERT INTO `user_info` ( id, nickname, gmt_create, gmt_modified )
         VALUES
             (#{UUID},#{nickname},#{date},#{date});
-        INSERT INTO `user_ultra` ( id, gmt_create, gmt_modified )
+        INSERT INTO `user_member` ( id, gmt_create, gmt_modified )
+        VALUES
+            (#{UUID},#{date},#{date});
+        INSERT INTO `user_cfolder` ( id, user_id, folder_name, gmt_create, gmt_modified )
+        VALUES
+            (#{UUID},#{UUID},'默认收藏夹',#{date},#{date});
+        INSERT INTO `user_nfolder` ( id, user_id, folder_name, gmt_create, gmt_modified )
+        VALUES
+            (#{UUID},#{UUID},'默认文件夹',#{date},#{date});
+    </insert>
+
+    <insert id="thirdPartyRegister">
+        INSERT INTO `user_check` ( id, openid_wx,  gmt_create, gmt_modified )
+        VALUES
+            (#{UUID},#{openidWx},#{date},#{date});
+        INSERT INTO `user_info` ( id, nickname,avatar, gmt_create, gmt_modified )
+        VALUES
+            (#{UUID},#{nickname},#{avatar},#{date},#{date});
+        INSERT INTO `user_member` ( id, gmt_create, gmt_modified )
         VALUES
             (#{UUID},#{date},#{date});
         INSERT INTO `user_cfolder` ( id, user_id, folder_name, gmt_create, gmt_modified )

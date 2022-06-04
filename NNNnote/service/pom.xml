@@ -15,9 +15,10 @@
         <module>service-user</module>
         <module>service-sms</module>
         <module>service-oss</module>
-        <module>service-pay</module>
         <module>service-note</module>
         <module>service-vod</module>
+        <module>service-transit</module>
+        <module>service-transaction</module>
     </modules>
 
     <properties>

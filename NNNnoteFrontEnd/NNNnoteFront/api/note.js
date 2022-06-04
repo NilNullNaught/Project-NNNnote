@@ -104,6 +104,14 @@ export default {
       method: 'get'
     })
   },
+  // 查询笔记相关数据（回收站数量，草稿数量，笔记总数）
+  getCountOfNoteInfoById (userId) {
+    return request({
+      url: `${ApiName}/getCountOfNoteInfoById`,
+      method: 'get',
+      params: userId
+    })
+  },
   // 搜索笔记（分页，可以附带条件）
   searchNoteList (data) {
     return request({
@@ -214,6 +222,13 @@ export default {
       method: 'post',
       data: dataform
     })
-  } // 笔记点赞与取消
-
+  },
+  // 查询指定用户公开的所有笔记
+  getPublicNotes (param) {
+    return request({
+      url: `${ApiName}/getPublicNotes`,
+      method: 'get',
+      params: param
+    })
+  }
 }

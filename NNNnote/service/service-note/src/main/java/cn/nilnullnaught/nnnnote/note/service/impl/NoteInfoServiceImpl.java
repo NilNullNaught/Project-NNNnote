@@ -2,11 +2,13 @@ package cn.nilnullnaught.nnnnote.note.service.impl;
 
 import cn.nilnullnaught.nnnnote.client.oss.AliyunOssClient;
 import cn.nilnullnaught.nnnnote.client.user.UserInfoClient;
+import cn.nilnullnaught.nnnnote.client.user.UserMemberClient;
 import cn.nilnullnaught.nnnnote.client.user.UserNfolderClient;
 import cn.nilnullnaught.nnnnote.common.utils.R;
 import cn.nilnullnaught.nnnnote.entity.note.NoteInfo;
 import cn.nilnullnaught.nnnnote.entity.note.NoteText;
 import cn.nilnullnaught.nnnnote.entity.oss.vo.ResourceManagerVo;
+import cn.nilnullnaught.nnnnote.entity.user.UserMember;
 import cn.nilnullnaught.nnnnote.exceptionhandler.MyCustomException;
 import cn.nilnullnaught.nnnnote.note.mapper.NoteInfoMapper;
 import cn.nilnullnaught.nnnnote.note.mapper.NoteMultiMapper;
@@ -64,9 +66,13 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
+
+    @Autowired
+    private UserMemberClient userMemberClient;
     // endregion
 
 
+    // TODO 当前获取当前笔记总数的方法效率低，可以创建一张新的表，专门记录该数据
     /**
      * 初始化笔记，创建草稿
      *
@@ -77,6 +83,29 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
     @Override
     @Transactional
     public String initializeNote(String userId, String nFolderId) {
+
+        // region <- 获取当前笔记总数 ->
+
+        var qw = new QueryWrapper<NoteInfo>();
+        qw.eq("user_id", userId);
+        var noteCount = baseMapper.selectCount(qw);
+
+        // endregion
+
+
+        // region <- 检查用户是否是会员 ->
+        if (noteCount >= 40){
+            var r = userMemberClient.getUserMemberById(userId);
+            var data = r.getData();
+            var map =(Map) data.get("data");
+            var isMember =(Boolean) map.get("isMember");
+
+            if (!isMember){
+                throw new MyCustomException(20001,"笔记数已达上限");
+            }
+        }
+        // endregion
+
         String noteId = IdWorker.get32UUID();
         noteMultiMapper.initializeNote(noteId, userId, nFolderId, "", "", LocalDateTime.now());
 
@@ -407,6 +436,13 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         // endregion
     }
 
+    // TODO 当前获取当前笔记总数，草稿数，以及回收站数的方法效率低，可以创建一张新的表，专门记录这些数据
+
+    /**
+     * 查询笔记相关数据（回收站数量，草稿数量，笔记总数）
+     * @param userId
+     * @return
+     */
     @Override
     public Map<String, Object> getCountOfNoteInfo(String userId) {
 
@@ -514,6 +550,29 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
     }
 
     /**
+     * 查询指定用户公开的所有笔记
+     * @param userId
+     * @param page
+     * @param limit
+     * @return
+     */
+    @Override
+    public Map<String, Object> getPublicNotes(String userId,String criteria, String sortField,Integer page, Integer limit) {
+        try {
+            // region <- 通过 ElasticSearch 搜索笔记 ->
+            // noteList() 返回的是一个由 Total 和 List 组成的 HashMap
+            var result = myElasticsearchRestTemplate.noteListByUserId(userId,"", "", page, limit);
+            // endregion
+
+            return result;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new MyCustomException(20001, "搜索失败");
+        }
+    }
+
+    /**
      * 获取笔记信息（编辑）
      *
      * @param noteId
@@ -555,7 +614,6 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
 
     //TODO 使用 elasticsearch 实现
-
     /**
      * 分页条件查询笔记
      *

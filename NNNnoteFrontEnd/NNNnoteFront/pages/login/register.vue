@@ -84,11 +84,6 @@
               <i class="alibaba_icons_weixin" style="color: #00bb29;font-size: 36px;" />
             </a>
           </li>
-          <li>
-            <a id="qq" class="qq" target="_blank" href="#">
-              <i class="alibaba_icons_QQ" style="color: #498ad5;font-size: 36px;" />
-            </a>
-          </li>
         </ul>
       </div>
       <!-- 结束 -- 更多登录方式 --------------------------------------------------------------------------------------------------------------------------------->

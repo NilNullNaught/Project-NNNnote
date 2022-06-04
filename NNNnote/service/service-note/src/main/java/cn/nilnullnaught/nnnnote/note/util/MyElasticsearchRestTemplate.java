@@ -210,6 +210,108 @@ public class MyElasticsearchRestTemplate {
         boolQuery.must(QueryBuilders.termQuery("status", 2));
 
         request.source().query(boolQuery);
+        // 3.排序 如果有查询条件设置查询条件，否则使用算分查询
+        if (!sortField.isEmpty()) request.source().sort(sortField, SortOrder.ASC);
+        // 4.分页
+        request.source().from(((page - 1) * limit)).size(limit);
+
+
+        // 5.发送请求
+        var response = restHighLevelClient.search(request, RequestOptions.DEFAULT);
+
+        // endregion
+
+        // region <- 解析响应 ->
+
+        // 1.获取文档 source
+        var searchHits = response.getHits();
+
+        // 2.查询结果为 0 直接返回
+        var total = searchHits.getTotalHits().value;
+        if (total == 0) return null;
+        // 3.获取文档数组
+        SearchHit[] hits = searchHits.getHits();
+        // 4.遍历
+        var data = Arrays.stream(hits).map(hit -> {
+            // 获取文档source
+            String json = hit.getSourceAsString();
+
+            // 使用 Gson 解析
+            var noteInfo = this.gson.fromJson(json, NoteInfo.class);
+
+            // 获取高亮结果
+            var highlightFields = hit.getHighlightFields();
+
+            if (!CollectionUtils.isEmpty(highlightFields)) {
+                // 根据字段名获取高亮结果
+                HighlightField highlightField_1 = highlightFields.get("title");
+                HighlightField highlightField_2 = highlightFields.get("preview");
+
+
+                if (highlightField_1 != null) {
+                    // 获取高亮值
+                    String title = highlightField_1.getFragments()[0].string();
+                    // 覆盖非高亮结果
+                    noteInfo.setTitle(title);
+                }
+                if (highlightField_2 != null) {
+                    // 获取高亮值
+                    String preview = highlightField_2.getFragments()[0].string();
+                    // 覆盖非高亮结果
+                    noteInfo.setPreview(preview);
+                }
+            }
+            return noteInfo;
+        }).collect(Collectors.toList());
+
+        // 封装数据
+        var result = new HashMap<String, Object>();
+        result.put("data", data);
+        result.put("total", total);
+        return result;
+        // endregion
+    }
+
+    /**
+     * 分页条件查询指定用户的笔记（笔记状态为公开，且未被逻辑删除）
+     *
+     * @param criteria
+     * @param sortField
+     * @param page
+     * @param limit
+     * @return
+     * @throws IOException
+     */
+    public Map<String, Object> noteListByUserId(
+            String userId,
+            String criteria,
+            String sortField,
+            Integer page,
+            Integer limit) throws IOException {
+
+
+        // region <- 发送请求 ->
+
+        // 1.准备 Request
+        var request = new SearchRequest("nnnnote_note_info");
+        // 2.封装查询条件
+        var boolQuery = QueryBuilders.boolQuery();
+
+        boolQuery.must(QueryBuilders.multiMatchQuery(userId, "user_id"));
+        if (!criteria.isEmpty()) {
+            boolQuery.must(QueryBuilders.multiMatchQuery(criteria, "title", "preview"));
+            // 高亮
+            var highLights = new HighlightBuilder();
+            highLights.field("title").requireFieldMatch(false);
+            highLights.field("preview").requireFieldMatch(false);
+
+            request.source().highlighter(highLights);
+        }
+
+        boolQuery.must(QueryBuilders.termQuery("is_deleted", false));
+        boolQuery.must(QueryBuilders.termQuery("status", 2));
+
+        request.source().query(boolQuery);
         // 3.排序 如果有查询条件设置查询条件，否则使用算风查询
         if (!sortField.isEmpty()) request.source().sort(sortField, SortOrder.ASC);
         // 4.分页

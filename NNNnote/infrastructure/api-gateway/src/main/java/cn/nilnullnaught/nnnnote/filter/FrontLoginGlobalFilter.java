@@ -2,6 +2,7 @@ package cn.nilnullnaught.nnnnote.filter;
 
 import cn.nilnullnaught.nnnnote.common.utils.JwtUtils;
 import com.google.gson.JsonObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -11,6 +12,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.pattern.PathPattern;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
@@ -29,7 +31,8 @@ public class FrontLoginGlobalFilter implements GlobalFilter, Ordered {
         // 获取 token
         List<String> tokenList = request.getHeaders().get("token");
 
-        // 放行不需要登录即可访问的接口
+        // region <- 放行不需要登录即可访问的接口 ->
+
         //user-check 中的多数接口不需要登录即可访问
         if (antPathMatcher.match("/user/user-check/**", path)
                 && !antPathMatcher.match("/user/user-check/alterUserEmail", path)
@@ -37,15 +40,32 @@ public class FrontLoginGlobalFilter implements GlobalFilter, Ordered {
         ) {
             return chain.filter(exchange);
         }
+
         if (antPathMatcher.match("/note/note-info/searchNoteList", path) ||
                 antPathMatcher.match("/note/note-info/getNoteInfoToRead/**", path) ||
-                antPathMatcher.match("/user/user-info/getUserInfoById/**", path) ||
+                antPathMatcher.match("/note/note-info/getPublicNotes", path) ||
+                antPathMatcher.match("/note/note-info/getCountOfNoteInfoById", path) ||
                 antPathMatcher.match("/note/note-comment/getComments", path) ||
-                antPathMatcher.match("/note/note-comment/getReplies", path)
+                antPathMatcher.match("/note/note-comment/getReplies", path) ||
+                antPathMatcher.match("/user/user-info/getUserInfoById/**", path) ||
+                antPathMatcher.match("/user/user-wechat/login", path) ||
+                antPathMatcher.match("/user/user-member/getUserMemberById", path)
         ) {
             return chain.filter(exchange);
         }
 
+        // endregion
+
+        // region <- 拦截不允许外部访问的接口 ->
+        if (antPathMatcher.match("/user/user-member/alterUserMember", path)
+        ) {
+            //请求体中不包含 token
+            ServerHttpResponse response = exchange.getResponse();
+            return MyResponse(response, 28004, "禁止访问");
+        }
+        // endregion
+
+        // region <- 校验token ->
         if (tokenList == null) {
             //请求体中不包含 token
             ServerHttpResponse response = exchange.getResponse();
@@ -55,6 +75,8 @@ public class FrontLoginGlobalFilter implements GlobalFilter, Ordered {
             ServerHttpResponse response = exchange.getResponse();
             return MyResponse(response, 28004, "用户 token 已过期");
         }
+        // endregion
+
 
         return chain.filter(exchange);
     }
