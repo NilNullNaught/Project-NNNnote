@@ -6,11 +6,15 @@
         {{ noteInfo.title ? noteInfo.title:"&nbsp;" }}
       </h1>
       <div class="centerVertical">
-        <el-avatar style="display:inline-block;margin-right:10px;" :src="userInfo.avatar" :size="50" />
+        <nuxt-link :to="'/visitor/'+userInfo.id">
+          <el-avatar style="display:inline-block;margin-right:10px;" :src="userInfo.avatar" :size="50" />
+        </nuxt-link>
         <div style="display:inline-block;font-size:12px;color:#606266;line-height: 20px;">
-          <p style="font-size:15px;font-weight:bolder">
-            {{ userInfo.nickname ? userInfo.nickname : '&nbsp;' }}
-          </p>
+          <nuxt-link :to="'/visitor/'+userInfo.id">
+            <p style="font-size:15px;font-weight:bolder">
+              {{ userInfo.nickname ? userInfo.nickname : '&nbsp;' }}
+            </p>
+          </nuxt-link>
           <div>
             <span style="display:inline-block;width:50px;"><i class="alibaba_icons_good" />  {{ noteInfo.likes? noteInfo.likes : 0 }}</span>
             <el-divider direction="vertical" />

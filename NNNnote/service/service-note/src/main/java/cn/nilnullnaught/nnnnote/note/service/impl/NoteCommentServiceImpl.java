@@ -1,12 +1,15 @@
 package cn.nilnullnaught.nnnnote.note.service.impl;
 
+import cn.nilnullnaught.nnnnote.client.user.UserDynamicClient;
 import cn.nilnullnaught.nnnnote.entity.note.NoteComment;
 import cn.nilnullnaught.nnnnote.entity.note.NoteInfo;
+import cn.nilnullnaught.nnnnote.entity.user.UserDynamic;
 import cn.nilnullnaught.nnnnote.note.mapper.NoteCommentMapper;
 import cn.nilnullnaught.nnnnote.note.mapper.NoteInfoMapper;
 import cn.nilnullnaught.nnnnote.note.service.NoteCommentService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,9 @@ public class NoteCommentServiceImpl extends ServiceImpl<NoteCommentMapper, NoteC
     private NoteInfoMapper noteInfoMapper;
 
     @Autowired
+    private UserDynamicClient userDynamicClient;
+
+    @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
 
@@ -56,7 +62,7 @@ public class NoteCommentServiceImpl extends ServiceImpl<NoteCommentMapper, NoteC
 
         // endregion
 
-        // region <- 如果评论属于回复评论，则被回复评论的的回复数 +1 ->
+        // region <- 如果属于回复评论，则被回复评论的回复数 +1 ->
 
         var replyCommentId = noteComment.getReplyCommentId();
         if (replyCommentId != null) {
@@ -68,8 +74,27 @@ public class NoteCommentServiceImpl extends ServiceImpl<NoteCommentMapper, NoteC
 
         // endregion
 
+
+
         // region <- 新增评论 ->
+
+        noteComment.setId(IdWorker.get32UUID());// 由于添加动态需要评论Id，所以在这里进行设置
         baseMapper.insert(noteComment);
+
+        // endregion
+
+
+
+        // region <- 添加到动态 ->
+
+        var userDynamic = new UserDynamic();
+        userDynamic.setUserId(noteComment.getUserId());
+        userDynamic.setDynamicType(2);
+        userDynamic.setDynamicId(noteComment.getId());
+        userDynamic.setDescription("发表评论");
+
+        userDynamicClient.createDynamic(userDynamic);
+
         // endregion
 
     }

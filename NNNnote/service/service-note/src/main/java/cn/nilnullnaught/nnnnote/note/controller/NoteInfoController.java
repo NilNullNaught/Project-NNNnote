@@ -94,6 +94,16 @@ public class NoteInfoController {
         return R.ok().data(map);
     }
 
+    @ApiOperation(value = "获取指定ID的笔记列表")
+    @PostMapping("/getNotesByNoteIdList")
+    public List<NoteInfo> getNotesByNoteIdList(@RequestBody List<String> noteIdList) {
+
+        var qw = new QueryWrapper<NoteInfo>();
+        qw.in("id", noteIdList);
+        return noteInfoService.list(qw);
+    }
+
+
     @ApiOperation(value = "批量删除笔记", notes = "暂时删除，可以从回收站中找回")
     @DeleteMapping("/deleteNotes")
     public R deleteNotes(@RequestHeader("token") String token, @RequestBody List<String> idList) {
@@ -160,7 +170,7 @@ public class NoteInfoController {
     @GetMapping("/getCountOfNoteInfoById")
     public R getCountOfNoteInfoById(@RequestParam("userId") String userId) {
         Map<String, Object> map = noteInfoService.getCountOfNoteInfo(userId);
-        return R.ok().data("data",map.get("noteCount"));
+        return R.ok().data("data", map.get("noteCount"));
     }
 
     @ApiOperation("分页搜索已公开的笔记，通过 ElasticSearch 实现")
@@ -215,13 +225,13 @@ public class NoteInfoController {
         return R.ok().data("data", result);
     }
 
-    @ApiOperation(value = "更新笔记的收藏数",notes = "笔记收藏和取消收藏时触发，一位用户如果在多个收藏夹中收藏了同一篇笔记，则以一次计算")
+    @ApiOperation(value = "更新笔记的收藏数", notes = "笔记收藏和取消收藏时触发，一位用户如果在多个收藏夹中收藏了同一篇笔记，则以一次计算")
     @PostMapping("/updateNoteCollectionCount")
     @Transactional
     public R updateNoteCollectionCount(@RequestBody List<String> noteIdList) {
         // region <- 更新笔记的收藏数量（每个用户只计算一次） ->
 
-        for (var noteId : noteIdList){
+        for (var noteId : noteIdList) {
             var qw = new QueryWrapper<NoteUserCollection>();
             qw.in("note_id", noteIdList);
             qw.select("DISTINCT user_id");
@@ -241,13 +251,13 @@ public class NoteInfoController {
 
     @ApiOperation(value = "查询指定用户公开的所有笔记")
     @GetMapping("/getPublicNotes")
-    public R getPublicNotes(@RequestParam("userId")String userId,
+    public R getPublicNotes(@RequestParam("userId") String userId,
                             @RequestParam(value = "criteria", required = false) String criteria,
                             @RequestParam(value = "sortField", required = false) String sortField,
                             @RequestParam("page") Integer page,
-                            @RequestParam("limit") Integer limit){
+                            @RequestParam("limit") Integer limit) {
 
-        var result= noteInfoService.getPublicNotes(userId,criteria,sortField,page,limit);
+        var result = noteInfoService.getPublicNotes(userId, criteria, sortField, page, limit);
 
         return R.ok().data(result);
     }

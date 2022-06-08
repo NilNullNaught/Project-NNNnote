@@ -1,6 +1,7 @@
 package cn.nilnullnaught.nnnnote.note.service.impl;
 
 import cn.nilnullnaught.nnnnote.client.oss.AliyunOssClient;
+import cn.nilnullnaught.nnnnote.client.user.UserDynamicClient;
 import cn.nilnullnaught.nnnnote.client.user.UserInfoClient;
 import cn.nilnullnaught.nnnnote.client.user.UserMemberClient;
 import cn.nilnullnaught.nnnnote.client.user.UserNfolderClient;
@@ -8,6 +9,7 @@ import cn.nilnullnaught.nnnnote.common.utils.R;
 import cn.nilnullnaught.nnnnote.entity.note.NoteInfo;
 import cn.nilnullnaught.nnnnote.entity.note.NoteText;
 import cn.nilnullnaught.nnnnote.entity.oss.vo.ResourceManagerVo;
+import cn.nilnullnaught.nnnnote.entity.user.UserDynamic;
 import cn.nilnullnaught.nnnnote.entity.user.UserMember;
 import cn.nilnullnaught.nnnnote.exceptionhandler.MyCustomException;
 import cn.nilnullnaught.nnnnote.note.mapper.NoteInfoMapper;
@@ -69,10 +71,14 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
     @Autowired
     private UserMemberClient userMemberClient;
+
+    @Autowired
+    private UserDynamicClient userDynamicClient;
     // endregion
 
 
     // TODO 当前获取当前笔记总数的方法效率低，可以创建一张新的表，专门记录该数据
+
     /**
      * 初始化笔记，创建草稿
      *
@@ -94,14 +100,14 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
 
         // region <- 检查用户是否是会员 ->
-        if (noteCount >= 40){
+        if (noteCount >= 40) {
             var r = userMemberClient.getUserMemberById(userId);
             var data = r.getData();
-            var map =(Map) data.get("data");
-            var isMember =(Boolean) map.get("isMember");
+            var map = (Map) data.get("data");
+            var isMember = (Boolean) map.get("isMember");
 
-            if (!isMember){
-                throw new MyCustomException(20001,"笔记数已达上限");
+            if (!isMember) {
+                throw new MyCustomException(20001, "笔记数已达上限");
             }
         }
         // endregion
@@ -193,6 +199,26 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
             vo.setResourceUrlList(Arrays.asList(newCover));
             aliyunOssClient.manageResource(vo);
         }
+
+        // 7.添加或删除动态（状态被修改为公开则添加动态，如果被修改为私有则删除动态）
+        if (oldNoteInfo.getStatus() != saveNoteVo.getStatus()
+                && oldNoteInfo.getStatus() != 0) {
+            if (saveNoteVo.getStatus() == 2) {
+
+                var userDynamic = new UserDynamic();
+                userDynamic.setUserId(oldNoteInfo.getUserId());
+                userDynamic.setDynamicType(1);
+                userDynamic.setDynamicId(oldNoteInfo.getId());
+                userDynamic.setDescription("公开笔记");
+
+                userDynamicClient.createDynamic(userDynamic);
+            } else {
+                userDynamicClient.deleteDynamic(oldNoteInfo.getId());
+            }
+
+        }
+
+
         // endregion
 
 
@@ -300,7 +326,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         qw.in("id", idList);
         qw.select("id", "note_folder_id");
         List<NoteInfo> noteList = baseMapper.selectList(qw);
-        if (noteList == null || noteList.size() ==0) throw new MyCustomException(20001, "删除失败");
+        if (noteList == null || noteList.size() == 0) throw new MyCustomException(20001, "删除失败");
         // endregion
 
         // region <- 执行删除 ->
@@ -354,7 +380,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         // region <- 确认数据属于该用户 ->
         var noteInfoList = baseMapper.getLogicDeletedNoteList(userId, idList);
         var _idList = noteInfoList.stream().map(NoteInfo::getId).collect(Collectors.toList());
-        if (_idList == null || _idList.size() ==0) throw new MyCustomException(20001, "删除失败");
+        if (_idList == null || _idList.size() == 0) throw new MyCustomException(20001, "删除失败");
         // endregion
 
         // region <- 验证文件夹是否被删除 ->
@@ -410,7 +436,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         // region <- 确认数据属于该用户 ->
         var noteInfoList = baseMapper.getLogicDeletedNoteList(userId, idList);
         var _idList = noteInfoList.stream().map(NoteInfo::getId).collect(Collectors.toList());
-        if (_idList == null || _idList.size() ==0) throw new MyCustomException(20001, "删除失败");
+        if (_idList == null || _idList.size() == 0) throw new MyCustomException(20001, "删除失败");
         // endregion
 
         // region <- 完成删除 ->
@@ -423,7 +449,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
      */
     @Override
     @Transactional
-    public void deleteDeletedNotesScheduledTask(){
+    public void deleteDeletedNotesScheduledTask() {
         // region <- 查询符合条件的笔记ID ->
         var time = LocalDateTime.now();
         time = time.minusDays(7);
@@ -440,6 +466,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
     /**
      * 查询笔记相关数据（回收站数量，草稿数量，笔记总数）
+     *
      * @param userId
      * @return
      */
@@ -502,19 +529,20 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
     /**
      * 笔记点赞与取消
+     *
      * @param userId
      * @param noteId
      */
     @Override
     public void noteLike(String userId, String noteId) {
         // region <- 判断 redis 中是否存在 noteId 对应的键，如果不存在则创建 ->
-        var keyExist= redisTemplate.hasKey(noteId);
+        var keyExist = redisTemplate.hasKey(noteId);
 
-        if (keyExist){
+        if (keyExist) {
             Boolean exist = redisTemplate.boundSetOps(noteId).isMember(userId);
-        }else{
+        } else {
             var setKey = redisTemplate.boundSetOps("setKey");
-            redisTemplate.expire(noteId,1, TimeUnit.DAYS);
+            redisTemplate.expire(noteId, 1, TimeUnit.DAYS);
         }
         // endregion
 
@@ -522,13 +550,13 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
         Boolean exist = redisTemplate.boundSetOps(noteId).isMember(userId);
 
         var uw = new UpdateWrapper<NoteInfo>();
-        uw.eq("id",noteId);
-        if (exist){
+        uw.eq("id", noteId);
+        if (exist) {
             // 用户已经点过赞，取消赞
             uw.setSql("likes = likes-1");
             baseMapper.update(uw.getEntity(), uw);
             redisTemplate.boundSetOps(noteId).remove(userId);
-        }else {
+        } else {
             // 用户没有点过赞，赞数加一
             uw.setSql("likes = likes+1");
             baseMapper.update(uw.getEntity(), uw);
@@ -541,6 +569,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
     /**
      * 判断用户有没有对该笔记进行过点赞
+     *
      * @param userId
      * @param noteId
      */
@@ -551,17 +580,18 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
     /**
      * 查询指定用户公开的所有笔记
+     *
      * @param userId
      * @param page
      * @param limit
      * @return
      */
     @Override
-    public Map<String, Object> getPublicNotes(String userId,String criteria, String sortField,Integer page, Integer limit) {
+    public Map<String, Object> getPublicNotes(String userId, String criteria, String sortField, Integer page, Integer limit) {
         try {
             // region <- 通过 ElasticSearch 搜索笔记 ->
             // noteList() 返回的是一个由 Total 和 List 组成的 HashMap
-            var result = myElasticsearchRestTemplate.noteListByUserId(userId,"", "", page, limit);
+            var result = myElasticsearchRestTemplate.noteListByUserId(userId, "", "", page, limit);
             // endregion
 
             return result;
@@ -614,6 +644,7 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
 
 
     //TODO 使用 elasticsearch 实现
+
     /**
      * 分页条件查询笔记
      *
@@ -662,22 +693,54 @@ public class NoteInfoServiceImpl extends ServiceImpl<NoteInfoMapper, NoteInfo> i
      * @param idList
      */
     @Override
+    @Transactional
     public void deleteNotes(String userId, List<String> idList) {
-        QueryWrapper<NoteInfo> qw1 = new QueryWrapper();
+
+        // region <- 数据校验 ->
+        var qw1 = new QueryWrapper<NoteInfo>();
         qw1.eq("user_id", userId);
         qw1.in("id", idList);
-        qw1.select("note_folder_id");
-        List<NoteInfo> noteFolderList = baseMapper.selectList(qw1);
+        List<NoteInfo> noteInfoList = baseMapper.selectList(qw1);
+        // endregion
 
-        UpdateWrapper<NoteInfo> qw2 = new UpdateWrapper();
+
+
+        // region <- 将公开状态的笔记取消公开 ->
+        var uw = new UpdateWrapper<NoteInfo>();
+        uw.eq("user_id", userId);
+        uw.eq("status", 2);
+        uw.in("id", idList);
+        uw.set("status", 1);
+        baseMapper.update(null, uw);
+        // endregion
+
+
+
+        // region <- 删除笔记 ->
+        var qw2 = new QueryWrapper<NoteInfo>();
         qw2.eq("user_id", userId);
         qw2.in("id", idList);
         baseMapper.delete(qw2);
+        // endregion
 
-        // <- 更新用户文件夹中的笔记数量
-        List<String> noteFolderIdList = noteFolderList.stream().map(NoteInfo::getNoteFolderId).collect(Collectors.toList());
+
+
+        // region <- 删除动态 ->
+            var publicNoteIdList = noteInfoList.stream()
+                    .filter(noteInfo -> noteInfo.getStatus() == 2)
+                    .map(NoteInfo::getId)
+                    .collect(Collectors.toList());
+
+            if (!publicNoteIdList.isEmpty()) {
+                userDynamicClient.deleteDynamicS(publicNoteIdList);
+            }
+        // endregion
+
+
+        // region <- 更新用户文件夹中的笔记数量 ->
+        List<String> noteFolderIdList = noteInfoList.stream().map(NoteInfo::getNoteFolderId).collect(Collectors.toList());
         this.updateNoteCountInNoteFolder(noteFolderIdList);
-        // ->
+        // endregion
     }
 
     /**

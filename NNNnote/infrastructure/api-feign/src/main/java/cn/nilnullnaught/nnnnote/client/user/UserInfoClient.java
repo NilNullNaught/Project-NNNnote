@@ -11,5 +11,5 @@ import java.util.Set;
 @FeignClient(name = "service-user",contextId = "user-info")
 public interface UserInfoClient {
     @PostMapping("/user/user-info/getUserAvatarAndNickNameByIdList")
-    public R getUserAvatarAndNickNameByIdList(@RequestBody Set<String> idList);
+    R getUserAvatarAndNickNameByIdList(@RequestBody Set<String> idList);
 }

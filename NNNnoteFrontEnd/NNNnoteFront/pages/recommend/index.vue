@@ -16,8 +16,13 @@
           </nuxt-link>
 
           <div class="centerVertical card-span">
-            <el-avatar style="margin-right:5px" :src="avatarAndNickName[item.userId].avatar" :size="20" />
-            <span> {{ avatarAndNickName[item.userId].nickname }}</span>
+            <nuxt-link :to="'/visitor/'+item.userId">
+              <el-avatar style="margin-right:5px" :src="avatarAndNickName[item.userId].avatar" :size="20" />
+            </nuxt-link>
+
+            <nuxt-link :to="'/visitor/'+item.userId">
+              <span> {{ avatarAndNickName[item.userId].nickname }}</span>
+            </nuxt-link>
 
             <el-divider direction="vertical" />
             <span><i class="alibaba_icons_good" /> {{ item.likes }}</span>
@@ -41,11 +46,15 @@
           </el-image>
         </nuxt-link>
       </el-card>
+
       <p v-if="loading" class="centerHorizontal">
         加载中<i class="el-icon-loading" />
       </p>
-      <p v-if="noMore" class="centerHorizontal">
-        没有更多了
+      <p v-if="!noMore && !loading" class="centerHorizontal" @click="getMore()">
+        更多
+      </p>
+      <p v-if="noMore && !loading" class="centerHorizontal">
+        没有了
       </p>
     </el-main>
   </el-container>
@@ -79,9 +88,6 @@ export default {
   created () {
     this.getInitialList()
   },
-  mounted () {
-    window.addEventListener('scroll', this.handleScroll)
-  },
   methods: {
     getInitialList () {
       noteApi.searchNoteList(this.data)
@@ -99,30 +105,25 @@ export default {
           }
         })
     },
-    handleScroll () {
+    getMore () {
       if (this.noMore || this.loading) { return }
+      this.loading = true
+      this.data.page += 1
 
-      // !important 该实现方式兼容性极差
-      if ((document.documentElement.scrollTop + window.innerHeight) * 1.1 >= document.body.offsetHeight) {
-        this.loading = true
-        this.data.page += 1
-
-        noteApi.searchNoteList(this.data)
-          .then((response) => {
-            this.list.push(...response.data.data.data)
-            this.total = response.data.data.total
-            const temp = response.data.data.avatarAndNickname
-            if (temp) {
-              for (let i = 0; i < temp.length; i++) {
-                this.avatarAndNickName[temp[i].id] = {
-                  avatar: temp[i].avatar,
-                  nickname: temp[i].nickname
-                }
-              }
+      noteApi.searchNoteList(this.data).then((response) => {
+        this.list.push(...response.data.data.data)
+        this.total = response.data.data.total
+        const temp = response.data.data.avatarAndNickname
+        if (temp) {
+          for (let i = 0; i < temp.length; i++) {
+            this.avatarAndNickName[temp[i].id] = {
+              avatar: temp[i].avatar,
+              nickname: temp[i].nickname
             }
-            this.loading = false
-          })
-      }
+          }
+        }
+        this.loading = false
+      })
     }
   }
 }

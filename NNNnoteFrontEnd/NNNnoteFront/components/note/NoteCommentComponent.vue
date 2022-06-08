@@ -17,7 +17,7 @@
     </el-row>
     <el-row justify="end" type="flex">
       <el-col :span="2">
-        <el-button size="small" style="margin:5px 0px 5px 5px;" type="primary" @click="postComment">
+        <el-button size="small" style="margin:5px 0px 5px 5px;" type="primary" @click="postComment(null,null,null,null,null)">
           发送
         </el-button>
       </el-col>
@@ -50,10 +50,16 @@
         style="margin:5px;font-size:14px;"
       >
         <div class="centerVertical" style="position:relative;">
-          <el-avatar size="small" :src="item.avatar" />
-          <el-button type="text" style="margin-left:10px;">
-            {{ item.nickname }}
-          </el-button>
+          <nuxt-link :to="'/visitor/'+item.userId">
+            <el-avatar size="small" :src="item.avatar" />
+          </nuxt-link>
+
+          <nuxt-link :to="'/visitor/'+item.userId">
+            <el-button type="text" style="margin-left:10px;">
+              {{ item.nickname }}
+            </el-button>
+          </nuxt-link>
+
           <p style="position:absolute;float:right;right:0px">
             {{ item.gmtCreate }}
           </p>
@@ -81,15 +87,24 @@
 
         <div v-for="(replyItem) in repies[String(item.id)]" :key="replyItem.id" style="margin:10px 0px;">
           <div class="centerVertical" style="margin-left:40px">
-            <el-avatar :src="replyItem.avatar" size="small" />
-            <el-button style="padding:0px;margin-left:5px;" type="text">
-              {{ replyItem.nickname }}
-            </el-button>
+            <nuxt-link :to="'/visitor/'+item.userId">
+              <el-avatar :src="replyItem.avatar" size="small" />
+            </nuxt-link>
+
+            <nuxt-link :to="'/visitor/'+item.userId">
+              <el-button style="padding:0px;margin-left:5px;" type="text">
+                {{ replyItem.nickname }}
+              </el-button>
+            </nuxt-link>
+
             <div v-if="replyItem.replyNickname">
               <span style="margin:0 5px;">回复</span>
-              <el-button style="padding:0px" type="text">
-                {{ replyItem.replyNickname }}
-              </el-button>
+
+              <nuxt-link :to="'/visitor/'+replyItem.replyUserId">
+                <el-button style="padding:0px" type="text">
+                  {{ replyItem.replyNickname }}
+                </el-button>
+              </nuxt-link>
             </div>
           </div>
           <div style="margin-left:80px">
@@ -230,25 +245,26 @@ export default {
       }
     },
     // 发送评论
-    postComment (inputValue = null, replyCommentId = null, closeInputId = null, replyNickname = null, replyUserId = null) {
-      const data = {
+    postComment (inputValue, replyCommentId, closeInputId, replyNickname, replyUserId) {
+      const params = {
         noteId: this.noteId,
         nickname: this.nickname,
         avatar: this.avatar,
         content: this.commentContent
       }
+
       if (inputValue != null) {
-        data.content = inputValue
+        params.content = inputValue
         if (replyCommentId != null) {
-          data.replyCommentId = replyCommentId
+          params.replyCommentId = replyCommentId
         }
         if (replyUserId != null) {
-          data.replyUserId = replyUserId
-          data.replyNickname = replyNickname
+          params.replyUserId = replyUserId
+          params.replyNickname = replyNickname
         }
       }
 
-      noteApi.postComment(qs.stringify(data)).then((response) => {
+      noteApi.postComment(qs.stringify(params)).then((response) => {
         if (inputValue != null) {
           this.getReplies(replyCommentId)
           inputValue = null

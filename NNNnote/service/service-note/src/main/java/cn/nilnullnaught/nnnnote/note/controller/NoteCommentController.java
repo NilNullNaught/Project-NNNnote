@@ -5,10 +5,14 @@ import cn.nilnullnaught.nnnnote.common.utils.JwtUtils;
 import cn.nilnullnaught.nnnnote.common.utils.R;
 import cn.nilnullnaught.nnnnote.entity.note.NoteComment;
 import cn.nilnullnaught.nnnnote.note.service.NoteCommentService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Id;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * <p>
@@ -76,6 +80,15 @@ public class NoteCommentController {
                          @RequestParam("sortCondition") String sortCondition) {
         var result = noteCommentService.getComments(noteId, current, limit, sortCondition);
         return R.ok().data(result);
+    }
+
+    @ApiOperation(value = "根据评论ID获取评论")
+    @PostMapping("getCommentListById")
+    public List<NoteComment> getCommentListById(@RequestBody List<String> idList){
+
+        var qw = new QueryWrapper<NoteComment>();
+        qw.in("id",idList);
+        return noteCommentService.list(qw);
     }
 
     @ApiOperation(value = "获取评论下的所有回复")

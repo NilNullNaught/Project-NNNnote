@@ -5,6 +5,9 @@ const ApiName2 = '/user/user-check'
 const ApiName3 = '/user/user-nfolder'
 const ApiName4 = '/user/user-cfolder'
 const ApiName5 = '/user/user-member'
+const ApiName6 = '/user/user-follow'
+const ApiName7 = '/user/user-dynamic'
+
 export default {
   // 获取用户信息
   getUserInfo () {
@@ -163,6 +166,45 @@ export default {
       url: `${ApiName5}/getUserMemberById`,
       method: 'get',
       params: userId
+    })
+  },
+  // 关注与取消关注
+  followAndCancel (followUserID) {
+    return request({
+      url: `${ApiName6}/followAndCancel`,
+      method: 'post',
+      data: followUserID
+    })
+  },
+  // 查询是否关注该用户
+  isFollowed (followUserID) {
+    return request({
+      url: `${ApiName6}/isFollowed`,
+      method: 'get',
+      params: followUserID
+    })
+  },
+  // 查询关注列表
+  getFollowList () {
+    return request({
+      url: `${ApiName6}/getFollowList`,
+      method: 'get'
+    })
+  },
+  // 查询当前用户关注用户的动态（包括自己）
+  getFollowUserDynamic (param) {
+    return request({
+      url: `${ApiName7}/getFollowUserDynamic`,
+      method: 'get',
+      params: param
+    })
+  },
+  // 查询指定用户的所有动态
+  getDynamicByUserId (param) {
+    return request({
+      url: `${ApiName7}/getDynamicByUserId`,
+      method: 'get',
+      params: param
     })
   }
 }

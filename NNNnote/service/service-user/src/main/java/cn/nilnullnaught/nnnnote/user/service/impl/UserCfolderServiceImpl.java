@@ -1,7 +1,7 @@
 package cn.nilnullnaught.nnnnote.user.service.impl;
 
 import cn.nilnullnaught.nnnnote.entity.user.UserCfolder;
-import cn.nilnullnaught.nnnnote.entity.user.UserNfolder;
+
 import cn.nilnullnaught.nnnnote.user.mapper.UserCfolderMapper;
 import cn.nilnullnaught.nnnnote.user.service.UserCfolderService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;

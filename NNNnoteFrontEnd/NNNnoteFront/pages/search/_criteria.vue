@@ -16,8 +16,13 @@
           </nuxt-link>
 
           <div class="centerVertical card-span">
-            <el-avatar style="margin-right:5px" :src="avatarAndNickName[item.userId].avatar" :size="20" />
-            <span> {{ avatarAndNickName[item.userId].nickname }}</span>
+            <nuxt-link :to="'/visitor/'+item.userId">
+              <el-avatar style="margin-right:5px" :src="avatarAndNickName[item.userId].avatar" :size="20" />
+            </nuxt-link>
+
+            <nuxt-link :to="'/visitor/'+item.userId">
+              <span> {{ avatarAndNickName[item.userId].nickname }}</span>
+            </nuxt-link>
 
             <el-divider direction="vertical" />
             <span><i class="alibaba_icons_good" /> {{ item.likes }}</span>

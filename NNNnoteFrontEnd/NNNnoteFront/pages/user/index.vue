@@ -33,8 +33,7 @@
             <NoteCfolderComponent />
           </el-tab-pane>
           <el-tab-pane label="动态" name="third">
-            <!-- TODO -->
-            暂未实现
+            <UserDynamicComponent />
           </el-tab-pane>
         </el-tabs>
       </el-main>
@@ -45,12 +44,14 @@
 <script>
 import NoteNfolderComponent from '@/components/user/NoteNfolderComponent'
 import NoteCfolderComponent from '@/components/user/NoteCfolderComponent'
+import UserDynamicComponent from '@/components/user/UserDynamicComponent'
 
 export default {
   name: 'UserNfolderIndexPage',
   components: {
     NoteNfolderComponent,
-    NoteCfolderComponent
+    NoteCfolderComponent,
+    UserDynamicComponent
   },
   layout: 'BaseLayout',
   data () {
